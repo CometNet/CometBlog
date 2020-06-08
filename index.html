@@ -205,7 +205,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-08 17:48:31" itemprop="dateModified" datetime="2020-06-08T17:48:31+08:00">2020-06-08</time>
+                <time title="修改时间：2020-06-08 18:47:22" itemprop="dateModified" datetime="2020-06-08T18:47:22+08:00">2020-06-08</time>
               </span>
 
           
@@ -470,22 +470,37 @@
 <li>停止Slave <code>stop slave;</code></li>
 <li>删除所有的binlog日志文件,并将日志索引文件清空,重新开始所有新的日志文件.<code>reset master;</code></li>
 <li>删除master.info文件和relay-log.info文件以及所有的relay log文件,并重新启用一个新的relay log文件.<code>reset slave;</code></li>
-<li>相对于RESET SLAVE, RESET SLAVE ALL还会删除内存中的连接信息 <code>reset slave all;</code></li>
+<li>相对于RESET SLAVE, RESET SLAVE ALL还会删除内存中的连接信息,包括slave账号信息 <code>reset slave all;</code></li>
 </ul>
 </li>
-<li>查看Slave是否是只读模式:<code>show variables like &#39;read only&#39;;</code><ul>
+<li>查看Slave是否是只读模式:<code>show variables like &#39;read_only&#39;;</code><ul>
 <li>只读模式需要修改my.cnf文件,注释read-only=1并重启mysql服务.</li>
 <li>或者不重启使用命令关闭只读,但下次重启后失效:<code>set global read_only=off;</code></li>
 </ul>
 </li>
 <li>将原来Master变为Slave<ul>
-<li>在新的Master上创建同步用户<code>CREATE USER &#39;slave&#39;@&#39;%&#39; IDENTIFIED BY &#39;root&#39;;GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;slave&#39;@&#39;%&#39;;</code></li>
+<li>在新的Master上创建同步用户<code>CREATE USER &#39;slave&#39;@&#39;%&#39; IDENTIFIED BY &#39;root&#39;;GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;slave&#39;@&#39;%&#39;; flush privileges;</code></li>
 <li>将新的Slave设置为只读模式<code>set global read_only=on;</code></li>
 <li>将新的Slave上释放全局锁<code>unlock tables;</code></li>
+<li>在新的Slave上重置binlog<code>reset master;</code></li>
+<li>在新的Slave上配置连接信息<code>change master to master_host=&#39;172.17.0.2&#39;, master_user=&#39;slave&#39;, master_password=&#39;root&#39;, master_port=3306, master_log_file=&#39;mysql-bin.000003&#39;, master_log_pos= 804, master_connect_retry=30;</code></li>
+<li>在新的Slave上开启<code>start slave;</code></li>
 </ul>
 </li>
 </ol>
-<h3 id="主机宕机切换"><a href="#主机宕机切换" class="headerlink" title="主机宕机切换"></a>主机宕机切换</h3><h2 id="主从延时分析及解决"><a href="#主从延时分析及解决" class="headerlink" title="主从延时分析及解决"></a>主从延时分析及解决</h2><p>参考资料<br><a href="http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html" target="_blank" rel="noopener">http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html</a></p>
+<h3 id="主机宕机切换"><a href="#主机宕机切换" class="headerlink" title="主机宕机切换"></a>主机宕机切换</h3><ol>
+<li>停止slave<code>stop slave;</code></li>
+<li>删除所有的binlog日志文件,并将日志索引文件清空,重新开始所有新的日志文件.<code>reset master;</code></li>
+<li>删除内存中的连接信息,包括slave账号信息 <code>reset slave all;</code></li>
+<li>查看Slave是否是只读模式:<code>show variables like &#39;read_only&#39;;</code><ul>
+<li>只读模式需要修改my.cnf文件,注释read-only=1并重启mysql服务.</li>
+<li>或者不重启使用命令关闭只读,但下次重启后失效:<code>set global read_only=off;</code></li>
+</ul>
+</li>
+<li>查看新主机状态<code>show master status;</code></li>
+<li>修改中间件的IP</li>
+</ol>
+<h2 id="主从延时分析及解决"><a href="#主从延时分析及解决" class="headerlink" title="主从延时分析及解决"></a>主从延时分析及解决</h2><p>参考资料<br><a href="http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html" target="_blank" rel="noopener">http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html</a></p>
 
       
     </div>
