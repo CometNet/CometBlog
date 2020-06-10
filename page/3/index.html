@@ -387,277 +387,14 @@
 </tr>
 </tbody>
 </table>
-<h3 id="多用户操作系统的安全"><a href="#多用户操作系统的安全" class="headerlink" title="多用户操作系统的安全"></a>多用户操作系统的安全</h3><p>多用户系统从实际来说使得系统管理更为方便了。从安全角度来说，多用户也更为安全，比如普通用户<code>huixing</code>下的某个文件不想让其他用户看到，只是设置一下该文件的权限为普通用户<code>huixing</code>一个用户可读可写可执行的权限就行了，这样以来只有普通用户<code>huixing</code>一个用户可以对其私有文件进行操作，从而达到了保护每个用户的私有数据安全。</p>
-<h2 id="账户-user-和账户组（group）"><a href="#账户-user-和账户组（group）" class="headerlink" title="账户(user)和账户组（group）"></a>账户(user)和账户组（group）</h2><h3 id="用户-user-介绍"><a href="#用户-user-介绍" class="headerlink" title="用户(user)介绍"></a>用户(user)介绍</h3><p>如果要使用系统资源，就必须向系统管理员申请一个账号，然后通过这个账号进入系统。这个账号和用户是同一个账号，通过建立不同属性的用户，一方面，可以合理的利用和控制系统资源，另一方面也可以帮助用户组织文件，提供对用户文件的安全性保护。</p>
-<p>每一个用户都有一个唯一的用户名和用户口令，在登录系统后，只有正确输入了用户名和密码，才能登录系统和相应的目录。</p>
-<p>在生产环境中，一般会为每一个有权限管理服务器的运维人员分配一个独立的普通用户账号及8位以上(包含数字、字母)以上的密码。</p>
-<p>如<code>huixing</code>普通用户，该人员只能通过建立的这个账号登录到系统中进行维护，当需要超级用户权限时，可以通过”<code>sudo 命令名</code>“方式来执行仅有<code>root</code>权限才允许执行的权限。当然，<code>sudo</code>权限要尽量的小。还有，当运维人数不多时(如2-3个)，也可以直接<code>su -</code>切换到超级用户<code>root</code>下，再执行相应的维护工作。特别提醒，维护时，如果不需要<code>root</code>权限，就不要进入<code>root</code>用户下操作，以减少误操作对系统带来的损失。</p>
-<h3 id="用户组（group）介绍"><a href="#用户组（group）介绍" class="headerlink" title="用户组（group）介绍"></a>用户组（group）介绍</h3><p>简单的说，linux系统中的用户组(group)就是具有相同特性的用户(user)集合；</p>
-<p>有时我们需要让多个用户具有相同的权限，比如查看、修改某一个文件或目录，如果不用用户组，这种需求在授权时就很难实现。如果使用用户组就方便多了，只需要把授权的用户都加入到同一个用户组里，然后通过修改该文件或目录的对应的用户组的权限，让用户组具有符合需求的操作权限，这样用户组下的所有用户对该文件或目录就会具有相同的权限，这就是用户组的用途。</p>
-<p>将用户分组是linux系统中对用户进行管理及控制访问权限的一种手段，通过定义用户组，在很大程度上简化了运维管理工作。</p>
-<p>实际上，在日常生活中，对人类的分组也是无处不在的，达到国家，小到公司，家庭，学校，班级等等都类似linux中用户组的概念，而其中的成员就类似linux用户组中用户的概念。</p>
-<h3 id="用户和用户组的对应关系"><a href="#用户和用户组的对应关系" class="headerlink" title="用户和用户组的对应关系"></a>用户和用户组的对应关系</h3><p><strong>用户和用户组的对应关系有：一对一、一对多、多对一和多对多.</strong></p>
-<table>
-<thead>
-<tr>
-<th>关系</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>一对一</td>
-<td>即一个用户可以存在一个组中，也可以是组中的唯一成员。比如，root。</td>
-</tr>
-<tr>
-<td>一对多</td>
-<td>即一个用户可以存在多个组中，这个用户就具有这些组。</td>
-</tr>
-<tr>
-<td>多对一</td>
-<td>即多个用户可以存在一个组中，这些用户这些组的共同权限。</td>
-</tr>
-<tr>
-<td>多对多</td>
-<td>即多用户可以存在于多个组中。并且几个用户可以归属相同的组；其实多对多的关系是前面三条的扩展。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>组类别</strong></p>
-<table>
-<thead>
-<tr>
-<th>类别</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>基本组</td>
-<td>优先使用基本组，由系统分配给系统进程使用</td>
-</tr>
-<tr>
-<td>附加组</td>
-<td>基本组不能满足授权要求，创建附加组，用户可以属于多个附加组</td>
-</tr>
-<tr>
-<td>私有组</td>
-<td>创建用户时如果没有指定属组，系统会创建同名的组</td>
-</tr>
-</tbody>
-</table>
-<h3 id="用户及用户组配置文件介绍"><a href="#用户及用户组配置文件介绍" class="headerlink" title="用户及用户组配置文件介绍"></a>用户及用户组配置文件介绍</h3><p>Linux系统中下的账户文件主要有<code>/etc/passwd</code>、<code>/etc/shadow、/etc/group</code>、<code>/etc/gshadow</code>四个文件。</p>
-<p><strong>与用户相关的配置文件</strong></p>
-<table>
-<thead>
-<tr>
-<th>文件</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/etc/passwd</td>
-<td>用户的配置文件， 保存用户账户的基本信息</td>
-</tr>
-<tr>
-<td>/etc/shadow</td>
-<td>用户影子口令文件</td>
-</tr>
-</tbody>
-</table>
-<p><strong>用户的配置文件/etc/passwd</strong></p>
-<p>/etc/passwd文件中每行定义一个用户账号，有多少行就表示多少个账号，在一行中可以清晰的看出，各内容之间又通过”:”号划分了7个字段，这7个字段分别定义了账号的不同属性，passwd文件实际内容如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br></pre></td></tr></table></figure></p>
-<p>在passwd文件中，第一行内容就是超级用户root行，可以看到它的uid和gid都为0.为了方便理解，下面是各字段的描述：</p>
-<table>
-<thead>
-<tr>
-<th>位置</th>
-<th>名称</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>帐号名</td>
-<td>这是用户登陆时使用的账户名称，在系统中是唯一的，不能重名</td>
-</tr>
-<tr>
-<td>2</td>
-<td>密码占位符x</td>
-<td>早期的unix系统中，该字段是存放账户和密码的，由于安全原因，后来把这个密码字段内容移到/etc/shadow中了。这里可以看到一个字母x，表示该用户的密码是/etc/shadow文件中保护的。</td>
-</tr>
-<tr>
-<td>3</td>
-<td>UID</td>
-<td>范围是0-65535</td>
-</tr>
-<tr>
-<td>4</td>
-<td>GID</td>
-<td>范围是0-65535；当添加用户时，默认情况下会同时建立一个与用户同名且UID和GID相同的组。</td>
-</tr>
-<tr>
-<td>5</td>
-<td>用户说明</td>
-<td>这个字段是对这个账户的说明</td>
-</tr>
-<tr>
-<td>6</td>
-<td>宿主目录</td>
-<td>用户登陆后首先进入的目录，一般与”/home/用户名”这样的目录</td>
-</tr>
-<tr>
-<td>7</td>
-<td>登录Shell</td>
-<td>当前用户登陆后所使用的shell，在centos/rhel系统中，默认的shell是bash；如果不希望用户登陆系统，可以通过usermod或者手动修改passwd设置，将该字段设置为/sbin/nologin 即可。大多数内置系统账户都是/sbin/nologin,这表示禁止登陆系统。这是出于安全考虑的。</td>
-</tr>
-</tbody>
-</table>
-<h3 id="passwd中有关UID的限制说明"><a href="#passwd中有关UID的限制说明" class="headerlink" title="passwd中有关UID的限制说明"></a>passwd中有关UID的限制说明</h3><ul>
-<li>0：当用户的UID为0时，表示这个账户为超级用户；如果要增加一个系统管理员账户的话，只需将该账户的UID改为0即可。不建议</li>
-<li>1~499：这个范围是保留给系统用户使用的UID</li>
-<li>500~65535：普通账户UID</li>
-</ul>
-<p>最后，来看一下/etc/passwd的权限：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/passwd</span><br><span class="line">-rw-r--r--. 1 root root 846 May 10 18:39 /etc/passwd</span><br></pre></td></tr></table></figure></p>
-<p>因为每个用户登录时都需要取得UID和GID来判断权限问题，所以/etc/passwd的权限为644，这样一来就会带来安全问题，即所有的用户都可以都/etc/passwd文件，即使文件内的密码是加密的，但还是存在一定的被攻击破解的安全隐患。因此，就有了/etc/shadow文件。</p>
-<h3 id="用户的影子口令文件-etc-shadow"><a href="#用户的影子口令文件-etc-shadow" class="headerlink" title="用户的影子口令文件/etc/shadow"></a>用户的影子口令文件/etc/shadow</h3><p>由于passwd文件必须要被所有的用户读，所以会带来安全隐患。而shadow文件就是为了解决这个安全隐患而增加的。</p>
-<p>来看一下/etc/shadow的权限：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/shadow</span><br><span class="line">----------. 1 root root 585 May 10 18:39 /etc/shadow</span><br></pre></td></tr></table></figure>
-<p>来看一下/etc/shadow前五条:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/shadow</span><br><span class="line">root:$6$KGag3mEJyVyHhgS6$GsDcutUX/ga8cE29NeRlthw8QtK/2JleUjYD93JxbvuIONiR8KLpmQhxjFJ1AMD5XAGkQasOAEU0ZQN7oSXes0::0:99999:7:::</span><br><span class="line">bin:*:17834:0:99999:7:::</span><br><span class="line">daemon:*:17834:0:99999:7:::</span><br><span class="line">adm:*:17834:0:99999:7:::</span><br><span class="line">lp:*:17834:0:99999:7:::</span><br></pre></td></tr></table></figure></p>
-<p>和/etc/passwd一样，shadow文件的每一行内容，也是以冒号(:)作为分隔符，共9个字段，其各个字段的意义如下表：</p>
-<table>
-<thead>
-<tr>
-<th>位置</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>登录名称</td>
-</tr>
-<tr>
-<td>2</td>
-<td>加密的密码</td>
-</tr>
-<tr>
-<td>3</td>
-<td>最近更改密码的时间；从1970/1/1到上次修改密码的天数</td>
-</tr>
-<tr>
-<td>4</td>
-<td>禁止修改密码的天数；从1970/1/1开始，多少天之内不能修改密码，默认值为0</td>
-</tr>
-<tr>
-<td>5</td>
-<td>用户必须更改口令的天数；密码的最长有效天数，默认值为99999</td>
-</tr>
-<tr>
-<td>6</td>
-<td>警告更改密码的期限；密码过期之前警告天数，默认值为7；在用户密码过期前多少天提醒用户更改密码</td>
-</tr>
-<tr>
-<td>7</td>
-<td>不活动时间；密码过期之后账户宽限时间 3+5；在用户密码过期之后到禁用账户的天数</td>
-</tr>
-<tr>
-<td>8</td>
-<td>帐号失效时间，默认值为空；从1970/1/1日起，到用户被禁用的天数</td>
-</tr>
-<tr>
-<td>9</td>
-<td>保留字段（未使用），标志</td>
-</tr>
-</tbody>
-</table>
-<p>与用户组相关的配置文件</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/etc/group  #用户组配置文件</span><br><span class="line">/etc/gshadow  #用户组的影子文件</span><br></pre></td></tr></table></figure>
-<h3 id="用户组配置文件-etc-group"><a href="#用户组配置文件-etc-group" class="headerlink" title="用户组配置文件/etc/group"></a>用户组配置文件/etc/group</h3><p>/etc/group 文件是用户组的配置文件，内容包括用户与用户组，并且能显示用户归属哪个用户组，因为一个用户可以归属一个或多个不同的用户组；同一用户组的用户之间具有相似的特性。如果某个用户下有对系统管理有最重要的内容，最好让用户拥有独立的用户组，或者是把用户下的文件的权限设置为完全私有；另外root用户组一般不要轻易把普通用户加入进入。</p>
-<p>/etc/group文件就是记录GID与用户组的文件。/etc/group文件同/etc/passwd类似，其文件权限也是644：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/group</span><br><span class="line">-rw-r--r--. 1 root root 476 May 14 20:12 /etc/group</span><br></pre></td></tr></table></figure>
-<p>/etc/group的文件内容为：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/group</span><br><span class="line">root:x:0:</span><br><span class="line">bin:x:1:</span><br><span class="line">daemon:x:2:</span><br><span class="line">sys:x:3:</span><br><span class="line">adm:x:4:</span><br></pre></td></tr></table></figure>
-<p>group文件各个字段的详细说明：</p>
-<table>
-<thead>
-<tr>
-<th>位置</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>组账户名称</td>
-</tr>
-<tr>
-<td>2</td>
-<td>密码占位符x；通常不需要设置该密码，由于安全原因，该密码被记录在/etc/gshadow中，因此显示为’x’。这类似/etc/shadow</td>
-</tr>
-<tr>
-<td>3</td>
-<td>组账户GID号,用户组ID</td>
-</tr>
-<tr>
-<td>4</td>
-<td>本组的成员用户列表；加入这个组的所有用户账号</td>
-</tr>
-</tbody>
-</table>
-<h3 id="用户组的影子文件-etc-gshadow"><a href="#用户组的影子文件-etc-gshadow" class="headerlink" title="用户组的影子文件/etc/gshadow"></a>用户组的影子文件/etc/gshadow</h3><p>/etc/gshaow是/etc/group的加密文件，比如用户组的管理密码就是存放在这个文件。/etc/group和/etc/gshadow是互补的两个文件；比如大型服务器，针对很多用户和用户组，定制一些关系结构比较复杂的额权限模型，设置用户组密码是极有必要的。比如不想让一些非用户组成员永久拥有用户组的权限和特性，这时就可以通过密码验证的方式来让某些用户临时拥有一些用户组特性，这时就要用到用户组密码；/etc/gshadow格式如下，每个用户组独占一行；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/gshadow</span><br><span class="line">----------. 1 root root 378 May 14 20:12 /etc/gshadow</span><br><span class="line">[root@base-centos-linux ~]# head -5 /etc/gshadow</span><br><span class="line">root:::</span><br><span class="line">bin:::</span><br><span class="line">daemon:::</span><br><span class="line">sys:::</span><br><span class="line">adm:::</span><br></pre></td></tr></table></figure></p>
-<p>gshadow文件中各个字段详细说明：</p>
-<table>
-<thead>
-<tr>
-<th>位置</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>组账号的名称</td>
-</tr>
-<tr>
-<td>2</td>
-<td>加密后的密码字符串，这个字段可以空的或者!；如果是空的或有！，表示没有密码</td>
-</tr>
-<tr>
-<td>3</td>
-<td>本组的管理员列表；这个字段也可为空；如果有多个用户组管理员，用,号分隔</td>
-</tr>
-<tr>
-<td>4</td>
-<td>本组的成员列表；加入这个组的所有用户账户；列表中多个用户通过”,”分隔</td>
-</tr>
-</tbody>
-</table>
-<h2 id="账号管理"><a href="#账号管理" class="headerlink" title="账号管理"></a>账号管理</h2><h3 id="与账户相关的文件和目录"><a href="#与账户相关的文件和目录" class="headerlink" title="与账户相关的文件和目录"></a>与账户相关的文件和目录</h3><ul>
-<li>/etc/default/useradd    </li>
-<li>/etc/login.defs</li>
-<li>/etc/skel/<h4 id="etc-skel目录"><a href="#etc-skel目录" class="headerlink" title="/etc/skel目录"></a>/etc/skel目录</h4></li>
-</ul>
-<p>/etc/skel目录是用来存放新用户配置文件的目录，当我们添加新用户时，这个目录下的所有文件都会自动被复制到新添加的用户的家目录下；默认情况下，/etc/skel目录下的所有文件都是隐藏文件(以.点开头)；通过修改、添加、删除/etc/skel目录下的文件，我们可为新创建的用户提供统一、标准的、初始化用户环境。</p>
-<p>下面我们就看下/etc/skel目录的内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# ls -al</span><br><span class="line">total 24</span><br><span class="line">drwxr-xr-x.  2 root root   62 Apr 11  2018 .</span><br><span class="line">drwxr-xr-x. 74 root root 8192 May 30 09:20 ..</span><br><span class="line">-rw-r--r--.  1 root root   18 Oct 31  2018 .bash_logout</span><br><span class="line">-rw-r--r--.  1 root root  193 Oct 31  2018 .bash_profile</span><br><span class="line">-rw-r--r--.  1 root root  231 Oct 31  2018 .bashrc</span><br></pre></td></tr></table></figure></p>
-<p>当我们用useradd 或adduser命令添加新用户时，linux系统会自动复制/etc/skel下的所有文件(包括隐藏文件)到新添加用户的家目录</p>
-<h4 id="etc-login-defs配置文件"><a href="#etc-login-defs配置文件" class="headerlink" title="/etc/login.defs配置文件"></a>/etc/login.defs配置文件</h4><p>/etc/login.defs文件是用来定义创建用户时需要的一些用户的配置文件。如创建用户时，是否需要家目录，UID和GID的范围，用户及密码的有效期限等等。</p>
-<p>下面是Centos 7的/etc/login.defs文件内容:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# cat /etc/login.defs</span><br><span class="line">#</span><br><span class="line"># Please note that the parameters in this configuration file control the</span><br><span class="line"># behavior of the tools from the shadow-utils component. None of these</span><br><span class="line"># tools uses the PAM mechanism, and the utilities that use PAM (such as the</span><br><span class="line"># passwd command) should therefore be configured elsewhere. Refer to</span><br><span class="line"># /etc/pam.d/system-auth for more information.</span><br><span class="line">#</span><br><span class="line"></span><br><span class="line"># *REQUIRED*</span><br><span class="line">#   Directory where mailboxes reside, _or_ name of file, relative to the</span><br><span class="line">#   home directory.  If you _do_ define both, MAIL_DIR takes precedence.</span><br><span class="line">#   QMAIL_DIR is for Qmail</span><br><span class="line">#</span><br><span class="line">#QMAIL_DIR      Maildir</span><br><span class="line">MAIL_DIR        /var/spool/mail	#创建用户时，要在目录/var/spool/mail中创建一个用户mail文件；</span><br><span class="line">#MAIL_FILE      .mail</span><br><span class="line"></span><br><span class="line"># Password aging controls:</span><br><span class="line">#</span><br><span class="line">#       PASS_MAX_DAYS   Maximum number of days a password may be used.</span><br><span class="line">#       PASS_MIN_DAYS   Minimum number of days allowed between password changes.</span><br><span class="line">#       PASS_MIN_LEN    Minimum acceptable password length.</span><br><span class="line">#       PASS_WARN_AGE   Number of days warning given before a password expires.</span><br><span class="line">#</span><br><span class="line">PASS_MAX_DAYS   99999	#一个密码最长可以使用的天数</span><br><span class="line">PASS_MIN_DAYS   0		#更改密码的最小天数</span><br><span class="line">PASS_MIN_LEN    5		#密码的最小长度；</span><br><span class="line">PASS_WARN_AGE   7		#密码失效提前多少天开始警告</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Min/max values for automatic uid selection in useradd</span><br><span class="line">#</span><br><span class="line">UID_MIN                  1000	#最小UID为500，也就是说添加用户时，UID是从500开始的；</span><br><span class="line">UID_MAX                 60000	#最大UID为60000；</span><br><span class="line"># System accounts</span><br><span class="line">SYS_UID_MIN               201</span><br><span class="line">SYS_UID_MAX               999</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Min/max values for automatic gid selection in groupadd</span><br><span class="line">#</span><br><span class="line">GID_MIN                  1000	#GID依然是从1000开始；同上面用户的情况；</span><br><span class="line">GID_MAX                 60000	#最大GID为60000；</span><br><span class="line"># System accounts</span><br><span class="line">SYS_GID_MIN               201</span><br><span class="line">SYS_GID_MAX               999</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># If defined, this command is run when removing a user.</span><br><span class="line"># It should remove any at/cron/print jobs etc. owned by</span><br><span class="line"># the user to be removed (passed as the first argument).</span><br><span class="line">#</span><br><span class="line">#USERDEL_CMD    /usr/sbin/userdel_local</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># If useradd should create home directories for users by default</span><br><span class="line"># On RH systems, we do. This option is overridden with the -m flag on</span><br><span class="line"># useradd command line.</span><br><span class="line">#</span><br><span class="line">CREATE_HOME     yes		#是否创建用户家目录，默认要求创建；可用-m参数来控制；</span><br><span class="line"></span><br><span class="line"># The permission mask is initialized to this value. If not specified, </span><br><span class="line"># the permission mask will be initialized to 022.</span><br><span class="line">UMASK           077</span><br><span class="line"></span><br><span class="line"># This enables userdel to remove user groups if no members exist.</span><br><span class="line">#</span><br><span class="line">USERGROUPS_ENAB yes		#删除用户同时删除用户组</span><br><span class="line"></span><br><span class="line"># Use SHA512 to encrypt password.</span><br><span class="line">ENCRYPT_METHOD SHA512 	#密码加密方式</span><br></pre></td></tr></table></figure></p>
-<h4 id="etc-default-useradd文件"><a href="#etc-default-useradd文件" class="headerlink" title="/etc/default/useradd文件"></a>/etc/default/useradd文件</h4><p>/etc/default/useradd文件是在使用useradd添加用户时需要调用的一个默认的配置文件，可以使用useradd -D参数，这样的命令格式来修改文件里面的内容，当然也可以直接编辑修改。我们先来看看它的内容<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# cat /etc/default/useradd </span><br><span class="line"># useradd defaults file</span><br><span class="line">GROUP=100</span><br><span class="line">HOME=/home		#把用户的家目录建在/home中</span><br><span class="line">INACTIVE=-1		#是否启动账号过期停权，-1表示不启用</span><br><span class="line">EXPIRE=			#账号终止日期，不设置表示不启用</span><br><span class="line">SHELL=/bin/bash	#新用户默认所用的shell类型</span><br><span class="line">SKEL=/etc/skel	#配置新用户家目录的默认文件存放路径。前文提到的/etc/skell，就是配在这里生效的，即当我们用useradd添加时，用户家目录的文件，都是从这里配置的目录中复制过去的。</span><br><span class="line">CREATE_MAIL_SPOOL=yes	#创建mail文件</span><br></pre></td></tr></table></figure></p>
-<h2 id="Linux用户管理命令"><a href="#Linux用户管理命令" class="headerlink" title="Linux用户管理命令"></a>Linux用户管理命令</h2><p>Linux是一个多用户多任务的操作系统，有着很丰富的用户管理工具，这些工具包括用户的查询。添加、修改、以及不同用户之间相互切换等；通过这些工具，我们可以简单、方便、安全的进行用户管理工作。</p>
-<p>添加用户的命令useradd和adduser，这两个命令所能达到的效果是一样的。当然除了useradd和adduser命令意外，我们还能通过修改用户配置文件/etc/passwd和/etc/group及手动创建的办法来直接添加用户，不过不推荐这个方法。这里推荐大家统一使用useradd命令。</p>
-<h3 id="useradd-添加账户"><a href="#useradd-添加账户" class="headerlink" title="useradd  添加账户"></a>useradd  添加账户</h3><p>当使用useradd命令不加参数选项，后面直接跟所添加的用户名时，系统首先会读取配置文件/etc/login.defs和/etc/default/useradd文件中所配置的信息建立用户的家目录，并复制/etc/skel中的所有文件（包括隐藏的环境配置文件）到新用户的家目录中。</p>
-<p>新建用户加入组：<br><code>useradd –g sales jack –G company,employees    //-g：加入主要组、-G：加入次要组</code></p>
-<p>建立一个新用户账户，并设置ID：<code>useradd caojh -u 544</code></p>
-<p>其他参数:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-c&lt;备注&gt;：加上备注文字。备注文字会保存在passwd的备注栏位中；</span><br><span class="line">-d&lt;登入目录&gt;：指定用户登入时的启始目录；</span><br><span class="line">-D：变更预设值；</span><br><span class="line">-e&lt;有效期限&gt;：指定帐号的有效期限；</span><br><span class="line">-f&lt;缓冲天数&gt;：指定在密码过期后多少天即关闭该帐号；</span><br><span class="line">-g&lt;群组&gt;：指定用户所属的群组；</span><br><span class="line">-G&lt;群组&gt;：指定用户所属的附加群组；</span><br><span class="line">-m：自动建立用户的登入目录；</span><br><span class="line">-M：不要自动建立用户的登入目录；</span><br><span class="line">-n：取消建立以用户名称为名的群组；</span><br><span class="line">-r：建立系统帐号；</span><br><span class="line">-s&lt;shell&gt;：指定用户登入后所使用的shell；</span><br><span class="line">-u&lt;uid&gt;：指定用户id。</span><br></pre></td></tr></table></figure>
-<p><strong>需要说明的是，设定ID值时尽量要大于500，以免冲突。因为Linux安装后会建立一些特殊用户，一般0到499之间的值留给bin、mail这样的系统账号。</strong></p>
-<p>新账号建立当不加-D参数时，useradd指令使用命令列来指定新账号的设定值和使用系统上的预设值（指前文提到的/etc/login.defs和/etc/default/useradd等配置文件）。新用户账号将产生一些系统档案，如用户目录的建立，拷贝起始档案等，这些均可以利用命令列选项指定。</p>
-<p>当使用useradd命令不加参数选项，后面直接跟所添加的用户名时，系统首先会读取配置文件/etc/login.defs和/etc/default/useradd中所定义的参数或规则，根据设置的规则添加用户，同时会向/etc/passwd和/etc/group文件内添加新建用户和用户组记录。</p>
-<p>当然/etc/passwd和/etc/group的加密资讯文件/etc/shadows和/etc/gshadow也会同步生成记录，同时系统还会根据/etc/default/useradd文件中所配置的信息建立用户的家目录，并复制/etc/skel中的所有文件（包括隐藏的环境配置文件）到新用户的家目录中。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux_system_file_users_and_user_groups/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -762,25 +499,15 @@
 <p>在Linux系统中，多个文件名指向同一索引节点(Inode)是正常且允许的。一般这种连接就称为硬链接。硬链接的左右之一是允许一个文件拥有多个有效的路径名，这样用户就可以就爱能力硬链接到重要的文件，以防止“误删”源数据,那么为什么给文件建立了硬链接就会防止数据误删除呢?</p>
 <p>因为文件系统的原理是只要文件的索引节点(Inode Index)还有一个以上的链接(仅仅删除了该文件指向)只删除其中一个链接并不影响索引节点本身和其他的链接（即数据文件实体并未删除），只有当最后一个连接被删除后，此时如果有新数据要存储到硬盘时，被删除文件的数据块及目录的链接才会被释放，空间被新数据占用覆盖。此时，数据就再也无法找回了</p>
 <p>也就是说，在linux中，删除文件的条件是与之相关的所有硬链接文件均被删除。</p>
-<h3 id="软连接"><a href="#软连接" class="headerlink" title="软连接"></a>软连接</h3><p>软连接又是也被称为符号连接（Symbolic Link）软连接文件就类似与Windows系统中的快捷方式，它实际上是一个特殊的文件，在软连接中，软连接文件实际上就是一个文本文件，这个文件中包含有软链接指向另一个文件的文职信息内容，因此，通过访问这个“快捷方式”就可以迅速定位到软链接所指向的源文件实体。</p>
-<h2 id="实操-软、硬链接"><a href="#实操-软、硬链接" class="headerlink" title="实操(软、硬链接)"></a>实操(软、硬链接)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux home]# touch huixing	// 创建文件</span><br><span class="line">[root@base-centos-linux home]# ln huixing huixing_hard_link	// 创建硬链接</span><br><span class="line">[root@base-centos-linux home]# ls -li</span><br><span class="line"># 第一列 inode,第二列 类型与权限(二列第一个字符是类型 l是link类型)</span><br><span class="line">total 0</span><br><span class="line"> 99 -rw-r--r-- 2 root root 0 May 28 20:54 huixing</span><br><span class="line"> 99 -rw-r--r-- 2 root root 0 May 28 20:54 huixing_hard_link # 硬链接的inode信息和源文件一致</span><br><span class="line">100 lrwxrwxrwx 1 root root 7 May 29 20:33 huixing_soft_link -&gt; huixing</span><br><span class="line">[root@base-centos-linux home]#</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux home]# mkdir huixingdir</span><br><span class="line">[root@base-centos-linux home]# ln huixingdir huixingdir_hard_link</span><br><span class="line">ln: ‘huixingdir’: hard link not allowed for directory</span><br><span class="line"># 上线报错信息可以看出来 不允许将硬链接指向目录</span><br><span class="line">[root@base-centos-linux home]# ln -s huixingdir huixingdir_soft_link</span><br><span class="line"># 软连接可以支持指向目录 </span><br><span class="line">[root@base-centos-linux home]# ls -li</span><br><span class="line">total 0</span><br><span class="line"> 99 -rw-r--r-- 2 root root  0 May 28 20:54 huixing</span><br><span class="line">101 drwxr-xr-x 2 root root  6 May 29 20:49 huixingdir</span><br><span class="line">102 lrwxrwxrwx 1 root root 10 May 29 20:51 huixingdir_soft_link -&gt; huixingdir</span><br><span class="line"> 99 -rw-r--r-- 2 root root  0 May 28 20:54 huixing_hard_link</span><br><span class="line">100 lrwxrwxrwx 1 root root  7 May 29 20:33 huixing_soft_link -&gt; huixing</span><br></pre></td></tr></table></figure>
-<p><strong>ln 命令不能对目录创建硬链接，但可以对目录创建软连接，对于目录的软连接也是生产场景常用的功能。</strong></p>
-<h2 id="删除-软、硬链接"><a href="#删除-软、硬链接" class="headerlink" title="删除(软、硬链接)"></a>删除(软、硬链接)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux home]# echo &quot;this is a file&quot; &gt; huixing	#源文件写字符串</span><br><span class="line">[root@base-centos-linux home]# cat huixing	# 查看源文件</span><br><span class="line">this is a file</span><br><span class="line">[root@base-centos-linux home]# cat huixing_hard_link # 查看硬链接</span><br><span class="line">this is a file</span><br><span class="line">[root@base-centos-linux home]# cat huixing_soft_link # 查看软连接</span><br><span class="line">this is a file</span><br><span class="line"></span><br><span class="line">[root@base-centos-linux home]# rm -f huixing # 删除源文件</span><br><span class="line"></span><br><span class="line">[root@base-centos-linux home]# ls -li # 查看列表</span><br><span class="line">total 4</span><br><span class="line">101 drwxr-xr-x 2 root root  6 May 29 20:49 huixingdir</span><br><span class="line">102 lrwxrwxrwx 1 root root 10 May 29 20:51 huixingdir_soft_link -&gt; huixingdir</span><br><span class="line"> 99 -rw-r--r-- 1 root root 15 May 29 20:59 huixing_hard_link # 硬链接还在 inode还是原指向</span><br><span class="line">100 lrwxrwxrwx 1 root root  7 May 29 20:33 huixing_soft_link -&gt; huixing # ssh工具上 huixing 会红色背景闪烁 表示不存在</span><br><span class="line"></span><br><span class="line">[root@base-centos-linux home]# cat huixing_soft_link # 查看软连接</span><br><span class="line">cat: huixing_soft_link: No such file or directory # 提示:没有那个文件或目录</span><br><span class="line"></span><br><span class="line">[root@base-centos-linux home]# cat huixing_hard_link # 查看硬链接 </span><br><span class="line">this is a file</span><br></pre></td></tr></table></figure>
-<h2 id="软、硬链接总结"><a href="#软、硬链接总结" class="headerlink" title="软、硬链接总结"></a>软、硬链接总结</h2><p>通过上面的测试可以看出：</p>
-<ol>
-<li>当源文件的软连接和硬链接同时存在时，删除软连接对源文件和硬链接无影响；</li>
-<li>当源文件的软连接和硬链接同时存在时，删除硬连接对源文件和硬链接无影响；</li>
-<li>当源文件的软连接和硬链接同时存在时删除原始文件huixing后，硬链接huixing_hard_link不受影响，但软连接文件huixing_soft_link失效(红底，白色文字闪烁状)。</li>
-</ol>
-<p>关于目录的链接:</p>
-<p>对于目录。不可以创建硬链接，但可以创建软连接</p>
-<p>对于目录的软链接是生产场景运维中常用的技巧。</p>
-<p>软连接的使用案例</p>
-<p>在编译apache软件时，编译路径呆着版本号<code>/usr/local/apache2.2.26</code>（为了区分版本号，因此路径比较长），而在访问目录时有希望简便，此时就可以通过建立一个简单的软链接路径文件 <code>ln -s /usr/local/apache2.2.26 /usr/local/apache</code>来达到简便的目的。</p>
-<p>硬链接的使用案例</p>
-<p>硬件存储的快照功能或者为备份数据创建多个硬链接，防止误删除数据。</p>
-
+<h3 id="软连接"><a href="#软连接" class="headerlink" title="软连接"></a>软连接</h3>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux_system_hard_link_and_soft_link/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1303,102 +1030,14 @@
 <h3 id="指针所指向的类型"><a href="#指针所指向的类型" class="headerlink" title="指针所指向的类型"></a>指针所指向的类型</h3><p>当你通过指针来访问指针所指向的内存区时，指针所指向的类型决定了编译器将把那片内存区里的内容当做什么来看待。</p>
 <p>从语法上看，你只须把指针声明语句中的指针名字和名字左边的指针声明符*去掉，剩下的就是指针所指向的类型。</p>
 <p>在指针的算术运算中，指针所指向的类型有很大的作用。</p>
-<p>指针的类型(即指针本身的类型)和指针所指向的类型是两个概念。</p>
-<p>当你对C 越来越熟悉时，你会发现，把与指针搅和在一起的”类型”这个概念分成”指针的类型”和”指针所指向的类型”两个概念，是精通指针的关键点之一。</p>
-<h3 id="指针所指向的内存区或地址"><a href="#指针所指向的内存区或地址" class="headerlink" title="指针所指向的内存区或地址"></a>指针所指向的内存区或地址</h3><p>指针的值是指针本身存储的数值，这个值将被编译器当作一个地址，而不是一个一般的数值。</p>
-<p>在32 位程序里，所有类型的指针的值都是一个32 位整数，因为32 位程序里内存地址全都是32 位长。</p>
-<p>指针所指向的内存区就是从指针的值所代表的那个内存地址开始，长度为<code>sizeof</code>(指针所指向的类型)的一片内存区。</p>
-<p>以后，我们说一个指针的值是XX，就相当于说该指针指向了以XX 为首地址的一片内存区域；我们说一个指针指向了某块内存区域，就相当于说该指针的值是这块内存区域的首地址。</p>
-<p>指针所指向的内存区和指针所指向的类型是两个完全不同的概念。在上面代码中可以看出，指针所指向的类型已经有了，但由于指针还未初始化，所以它所指向的内存区是不存在的，或者说是无意义的。</p>
-<p><strong>以后，每遇到一个指针，都应该问问：这个指针的类型是什么？指针指的类型是什么？该指针指向了哪里？（重点注意）</strong></p>
-<h3 id="指针本身所占据的内存区"><a href="#指针本身所占据的内存区" class="headerlink" title="指针本身所占据的内存区"></a>指针本身所占据的内存区</h3><p>指针本身占了多大的内存？</p>
-<p>你只要用函数<code>sizeof</code>(指针的类型)测一下就知道了。</p>
-<p>在32 位平台里，指针本身占据了4 个字节的长度。指针本身占据的内存这个概念在判断一个指针表达式（后面会解释）是否是左值时很有用。</p>
-<h2 id="运算符-amp-和"><a href="#运算符-amp-和" class="headerlink" title="运算符&amp;和*"></a>运算符&amp;和*</h2><p>这里&amp;是取地址运算符，*是间接运算符也可以叫做指针运算符。</p>
-<p>&amp;a 的运算结果是一个指针，指针的类型是a 的类型加个*，指针所指向的类型是a 的类型，指针所指向的地址嘛，那就是a 的地址。</p>
-<p>*p 的运算结果就五花八门了。总之*p 的结果是p 所指向的东西，这个东西有这些特点：它的类型是p 指向的类型，它所占用的地址是p所指向的地址。</p>
-<p>例二:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">int a=12;</span><br><span class="line">int b;</span><br><span class="line">int *p;</span><br><span class="line">int **ptr;</span><br><span class="line"></span><br><span class="line">p=&amp;a; //&amp;a 的结果是一个指针，类型是int*，指向的类型是int，p指向的地址是a 的地址。</span><br><span class="line"></span><br><span class="line">*p=24; //*p 的结果，在这里它的类型是int，它所占用的地址是p 所指向的地址，显然，*p 就是变量a。</span><br><span class="line"></span><br><span class="line">ptr=&amp;p; //&amp;p 的结果是个指针，该指针的类型是p 的类型加个*，在这里是int **。该指针所指向的类型是p 的类型，这里是int*。该指针所指向的地址就是指针p 自己的地址。</span><br><span class="line"></span><br><span class="line">*ptr=&amp;b; //*ptr 是个指针，&amp;b 的结果也是个指针，且这两个指针的类型和所指向的类型是一样的，所以用&amp;b 来给*ptr 赋值就是毫无问题的了。</span><br><span class="line"></span><br><span class="line">**ptr=34; //*ptr 的结果是ptr 所指向的东西，在这里是一个指针，对这个指针再做一次*运算，结果是一个int 类型的变量。</span><br></pre></td></tr></table></figure>
-<h2 id="指针算术运算"><a href="#指针算术运算" class="headerlink" title="指针算术运算"></a>指针算术运算</h2><p>指针变量不能相加,不能相乘,不能相除.</p>
-<p>指针可以加上或减去一个整数。指针的这种运算的意义和通常的数值的加减运算的意义是不一样的，以单元为单位。</p>
-<p>举例来说,如果两个指针变量指向的是同一块连续空间中的不同存储单元,则这两个指正变量才可以相减.</p>
-<p>例三:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">char a[10];			//定义一个a的字符串数组长度为10</span><br><span class="line">int *p=(int *)a; 	//强制类型转换并不会改变a 的类型</span><br><span class="line">p++;</span><br></pre></td></tr></table></figure>
-<p>在上例中，指针p 的类型是int*,它指向的类型是int，它被初始化为指向整型变量a。</p>
-<p>接下来的第3句中，指针p被加了1，编译器是这样处理的：它把指针p 的值加上了sizeof(int)，在32 位程序中，是被加上了4，因为在32 位程序中，int 占4 个字节。</p>
-<p>由于地址是用字节做单位的，故p 所指向的地址由原来的变量a 的地址向高地址方向增加了4 个字节。由于char 类型的长度是一个字节，所以，原来p 是指向数组a 的第0 号单元开始的四个字节，此时指向了数组a 中从第4 号单元开始的四个字节。</p>
-<p>我们可以用一个指针和一个循环来遍历一个数组.</p>
-<p>例四:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int array[10]=&#123;0,1,2,3,4,5,6,7,8,9&#125;;</span><br><span class="line">int *p = array;</span><br><span class="line">for(int i=0;i&lt;10;i++)</span><br><span class="line">&#123;</span><br><span class="line">   printf(&quot;%d&quot;,*p);</span><br><span class="line">   (*p)++;</span><br><span class="line">   p++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>结果:<code>0123456789</code></p>
-<p>这个例子将整型数组中各个单元的值加1。由于每次循环都将指针p加1 个单元，所以每次循环都能访问数组的下一个单元。</p>
-<p>例五:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">char a[20]=&quot;You_are_a_girl&quot;;</span><br><span class="line">int *p=(int *)a;</span><br><span class="line">p+=5;</span><br></pre></td></tr></table></figure>
-<p>编译器是这样处理的：</p>
-<p>将指针p 的值加上5 乘<code>sizeof(int)</code>，在32 位程序中就是加上了5 乘4=20。由于地址的单位是字节，故现在的p 所指向的地址比起加5 后的p 所指向的地址来说，向高地址方向移动了20 个字节。</p>
-<p>在这个例子中，没加5 前的p 指向数组a 的第0 号单元开始的四个字节，加5 后，p 已经指向了数组a 的合法范围之外了。</p>
-<p>虽然这种情况在应用上会出问题，但在语法上却是可以的。这也体现出了指针的灵活性。如果上例中，p 是被减去5，那么处理过程大同小异，只不过p 的值是被减去5 乘<code>sizeof(int)</code>，新的p 指向的地址将比原来的p 所指向的地址向低地址方向移动了20 个字节。</p>
-<h2 id="指针表达式"><a href="#指针表达式" class="headerlink" title="指针表达式"></a>指针表达式</h2><p>一个表达式的结果如果是一个指针，那么这个表达式就叫指针表式。<br>下面是一些指针表达式的例子：</p>
-<p>例六:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">int a,b;</span><br><span class="line">int array[10];</span><br><span class="line">int *pa;</span><br><span class="line">pa=&amp;a; //&amp;a 是一个指针表达式。</span><br><span class="line">Int **ptr=&amp;pa; //&amp;pa 也是一个指针表达式。</span><br><span class="line">*ptr=&amp;b; //*ptr 和&amp;b 都是指针表达式。</span><br><span class="line">pa=array;</span><br><span class="line">pa++; //这也是指针表达式。</span><br></pre></td></tr></table></figure></p>
-<p>例七：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">char *arr[20];</span><br><span class="line">char **parr=arr; //如果把arr 看作指针的话，arr 也是指针表达式</span><br><span class="line">char *str;</span><br><span class="line">str=*parr; //*parr 是指针表达式</span><br><span class="line">str=*(parr+1); //*(parr+1)是指针表达式</span><br><span class="line">str=*(parr+2); //*(parr+2)是指针表达式</span><br></pre></td></tr></table></figure></p>
-<p>由于指针表达式的结果是一个指针，所以指针表达式也具有指针所具有的四个要素：指针的类型，指针所指向的类型，指针指向的内存区，指针自身占据的内存。</p>
-<p>好了，当一个指针表达式的结果指针已经明确地具有了指针自身占据的内存的话，这个指针表达式就是一个左值，否则就不是一个左值。在例七中，&amp;a 不是一个左值，因为它还没有占据明确的内存。<em>ptr 是一个左值，因为</em>ptr 这个指针已经占据了内存，其实<em>ptr 就是指针pa，既然pa 已经在内存中有了自己的位置，那么</em>ptr 当然也有了自己的位置。</p>
-<h2 id="数组和指针的关系"><a href="#数组和指针的关系" class="headerlink" title="数组和指针的关系"></a>数组和指针的关系</h2><p>数组的数组名其实可以看作一个指针。看下例：<br>例八：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">int array[10]=&#123;0,1,2,3,4,5,6,7,8,9&#125;,value;</span><br><span class="line">value=array[0]; //也可写成：value=*array;</span><br><span class="line">value=array[3]; //也可写成：value=*(array+3);</span><br><span class="line">value=array[4]; //也可写成：value=*(array+4);</span><br></pre></td></tr></table></figure></p>
-<p>上例中，一般而言数组名array 代表数组本身，类型是int[10]，但如果把array 看做指针的话，它指向数组的第0 个单元，类型是int<em> 所指向的类型是数组单元的类型即int。因此</em>array 等于0 就一点也不奇怪了。同理，array+3 是一个指向数组第3 个单元的指针，所以*(array+3)等于3。其它依此类推。</p>
-<p>例九：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">char *str[3]=&#123;</span><br><span class="line">    &quot;Hello,thisisasample!&quot;,</span><br><span class="line">    &quot;Hi,goodmorning.&quot;,</span><br><span class="line">    &quot;Helloworld&quot;</span><br><span class="line">&#125;;</span><br><span class="line">char s[80]；</span><br><span class="line">strcpy(s,str[0]); //也可写成strcpy(s,*str);</span><br><span class="line">strcpy(s,str[1]); //也可写成strcpy(s,*(str+1));</span><br><span class="line">strcpy(s,str[2]); //也可写成strcpy(s,*(str+2));</span><br></pre></td></tr></table></figure></p>
-<p>上例中，str 是一个三单元的数组，该数组的每个单元都是一个指针，这些指针各指向一个字符串。把指针数组名str 当作一个指针的话，它指向数组的第0 号单元，它的类型是char *<em>，它指向的类型是char </em>。</p>
-<p><em>str 也是一个指针，它的类型是char </em>，它所指向的类型是char，它指向的地址是字符串”Hello,thisisasample!”的第一个字符的地址，即’H’的地址。注意:字符串相当于是一个数组,在内存中以数组的形式储存,只不过字符串是一个数组常量,内容不可改变,且只能是右值.如果看成指针的话,他即是常量指针,也是指针常量.</p>
-<p>str+1 也是一个指针，它指向数组的第1 号单元，它的类型是char*<em>，它指向的类型是char</em>。<br><em>(str+1)也是一个指针，它的类型是char</em>，它所指向的类型是char，它指向”Hi,goodmorning.”的第一个字符’H’</p>
-<p><strong>下面总结一下数组的数组名(数组中储存的也是数组)的问题:</strong></p>
-<p>声明了一个数组TYPE array[n]，则数组名称array 就有了两重含义：<br>第一，它代表整个数组，它的类型是TYPE[n]；</p>
-<p>第二，它是一个常量指针，该指针的类型是TYPE*，该指针指向的类型是TYPE，也就是数组单元的类型，该指针指向的内存区就是数组第0 号单元，该指针自己占有单独的内存区，注意它和数组第0 号单元占据的内存区是不同的。该指针的值是不能修改的，即类似array++的表达式是错误的。在不同的表达式中数组名array 可以扮演不同的角色。在表达式sizeof(array)中，数组名array 代表数组本身，故这时sizeof 函数测出的是整个数组的大小。</p>
-<p>在表达式<em>array 中，array 扮演的是指针，因此这个表达式的结果就是数组第0 号单元的值。sizeof(</em>array)测出的是数组单元的大小。</p>
-<p>表达式array+n（其中n=0，1，2，…..）中，array 扮演的是指针，故array+n 的结果是一个指针，它的类型是TYPE *，它指向的类型是TYPE，它指向数组第n号单元。故sizeof(array+n)测出的是指针类型的大小。在32 位程序中结果是4</p>
-<p>例十:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int array[10];  </span><br><span class="line">int (*ptr)[10];  </span><br><span class="line">ptr=&amp;array;</span><br></pre></td></tr></table></figure></p>
-<p>上例中ptr 是一个指针，它的类型是int(*)[10]，他指向的类型是int[10] ，我们用整个数组的首地址来初始化它。在语句ptr=&amp;array中，array 代表数组本身。<br>本节中提到了函数sizeof()，那么我来问一问，sizeof(指针名称)测出的究竟是指针自身类型的大小呢还是指针所指向的类型的大小？<br>答案是前者。例如：</p>
-<p><code>int(*ptr)[10];</code></p>
-<p>则在32 位程序中，有：</p>
-<p><code>sizeof(int(*)[10])==4</code><br><code>sizeof(int[10])==40</code><br><code>sizeof(ptr)==4</code></p>
-<h2 id="指针和结构类型的关系"><a href="#指针和结构类型的关系" class="headerlink" title="指针和结构类型的关系"></a>指针和结构类型的关系</h2><p>可以声明一个指向结构类型对象的指针。</p>
-<p>例十一:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">struct MyStruct  </span><br><span class="line">&#123;  </span><br><span class="line">   int a;  </span><br><span class="line">   int b;  </span><br><span class="line">   int c;  </span><br><span class="line">&#125;;  </span><br><span class="line">struct MyStruct ss=&#123;20,30,40&#125;;  </span><br><span class="line">//声明了结构对象ss，并把ss 的成员初始化为20，30 和40。  </span><br><span class="line">struct MyStruct *ptr=&amp;ss;  </span><br><span class="line">//声明了一个指向结构对象ss 的指针。它的类型是  </span><br><span class="line">//MyStruct *,它指向的类型是MyStruct。  </span><br><span class="line">int *pstr=(int*)&amp;ss;  </span><br><span class="line">//声明了一个指向结构对象ss 的指针。但是pstr 和  </span><br><span class="line">//它被指向的类型ptr 是不同的</span><br></pre></td></tr></table></figure></p>
-<p>请问怎样通过指针ptr 来访问ss 的三个成员变量？<br>答案：<br>ptr-&gt;a; //指向运算符，或者可以这们(*ptr).a,建议使用前者<br>ptr-&gt;b;<br>ptr-&gt;c;</p>
-<p>又请问怎样通过指针pstr 来访问ss 的三个成员变量？<br>答案：<br><em>pstr； //访问了ss 的成员a。
-</em>(pstr+1); //访问了ss 的成员b。<br>*(pstr+2) //访问了ss 的成员c。</p>
-<p>例十二:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">int array[3]=&#123;35,56,37&#125;;  </span><br><span class="line">int *pa=array;  </span><br><span class="line">//通过指针pa 访问数组array 的三个单元的方法是：  </span><br><span class="line">*pa; //访问了第0 号单元  </span><br><span class="line">*(pa+1); //访问了第1 号单元  </span><br><span class="line">*(pa+2); //访问了第2 号单元</span><br></pre></td></tr></table></figure></p>
-<p>从格式上看倒是与通过指针访问结构成员的不正规方法的格式一样。<br>所有的C/C++编译器在排列数组的单元时，总是把各个数组单元存放在连续的存储区里，单元和单元之间没有空隙。但在存放结构对象的各个成员时，在某种编译环境下，可能会需要字对齐或双字对齐或者是别的什么对齐，需要在相邻两个成员之间加若干个”填充字节”，这就导致各个成员之间可能会有若干个字节的空隙。</p>
-<p>所以，在例十二中，即使<em>pstr 访问到了结构对象ss 的第一个成员变量a，也不能保证</em>(pstr+1)就一定能访问到结构成员b。因为成员a 和成员b 之间可能会有若干填充字节，说不定*(pstr+1)就正好访问到了这些填充字节呢。这也证明了指针的灵活性。要是你的目的就是想看看各个结构成员之间到底有没有填充字节，嘿，这倒是个不错的方法。<br>不过指针访问结构成员的正确方法应该是象例十二中使用指针ptr 的方法。</p>
-<h2 id="指针和函数的关系"><a href="#指针和函数的关系" class="headerlink" title="指针和函数的关系"></a>指针和函数的关系</h2><p>可以把一个指针声明成为一个指向函数的指针。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">int fun1(char *,int);</span><br><span class="line">int (*pfun1)(char *,int);</span><br><span class="line">pfun1=fun1;</span><br><span class="line">int a=(*pfun1)(&quot;abcdefg&quot;,7); //通过函数指针调用函数。</span><br></pre></td></tr></table></figure></p>
-<p>可以把指针作为函数的形参。在函数调用语句中，可以用指针表达式来作为实参。</p>
-<p>例十三:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">int fun(char *);  </span><br><span class="line">inta;  </span><br><span class="line">char str[]=&quot;abcdefghijklmn&quot;;  </span><br><span class="line">a=fun(str);  </span><br><span class="line">int fun(char *s)  </span><br><span class="line">&#123;  </span><br><span class="line">   int num=0;  </span><br><span class="line">   for(int i=0;;)  </span><br><span class="line">   &#123;  </span><br><span class="line">      num+=*s;s++;  </span><br><span class="line">   &#125;  </span><br><span class="line">   return num;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个例子中的函数fun 统计一个字符串中各个字符的ASCII 码值之和。前面说了，数组的名字也是一个指针。在函数调用中，当把str作为实参传递给形参s 后，实际是把str 的值传递给了s，s 所指向的地址就和str 所指向的地址一致，但是str 和s 各自占用各自的存储空间。在函数体内对s 进行自加1 运算，并不意味着同时对str 进行了自加1 运算。</p>
-<h2 id="指针类型转换"><a href="#指针类型转换" class="headerlink" title="指针类型转换"></a>指针类型转换</h2><p>当我们初始化一个指针或给一个指针赋值时，赋值号的左边是一个指针，赋值号的右边是一个指针表达式。在我们前面所举的例子中，绝大多数情况下，指针的类型和指针表达式的类型是一样的，指针所指向的类型和指针表达式所指向的类型是一样的。</p>
-<p>例十四：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">float f=12.3;  </span><br><span class="line">float *fptr=&amp;f;  </span><br><span class="line">int *p;</span><br></pre></td></tr></table></figure></p>
-<p>在上面的例子中，假如我们想让指针p 指向实数f，应该怎么办？<br>是用下面的语句吗？<br><code>p=&amp;f;</code></p>
-<p>不对。因为指针p 的类型是int <em>，它指向的类型是int。表达式&amp;f 的结果是一个指针，指针的类型是float </em>,它指向的类型是float。<br>两者不一致，直接赋值的方法是不行的。至少在我的MSVC++6.0 上，对指针的赋值语句要求赋值号两边的类型一致，所指向的类型也一致，其它的编译器上我没试过，大家可以试试。为了实现我们的目的，需要进行”强制类型转换”：</p>
-<p><code>p=(int*)&amp;f;</code></p>
-<p>如果有一个指针p，我们需要把它的类型和所指向的类型改为TYEP *TYPE， 那么语法格式是：</p>
-<p><code>(TYPE *)p；</code></p>
-<p>这样强制类型转换的结果是一个新指针，该新指针的类型是TYPE *，它指向的类型是TYPE，它指向的地址就是原指针指向的地址。</p>
-<p>而原来的指针p 的一切属性都没有被修改。（切记）</p>
-<p>一个函数如果使用了指针作为形参，那么在函数调用语句的实参和形参的结合过程中，必须保证类型一致，否则需要强制转换</p>
-<p>例十五：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">void fun(char*);  </span><br><span class="line">int a=125,b;  </span><br><span class="line">fun((char*)&amp;a);  </span><br><span class="line">void fun(char*s)  </span><br><span class="line">&#123;  </span><br><span class="line">  char c;  </span><br><span class="line">  c=*(s+3);*(s+3)=*(s+0);*(s+0)=c;  </span><br><span class="line">  c=*(s+2);*(s+2)=*(s+1);*(s+1)=c;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>注意这是一个32 位程序，故int 类型占了四个字节，char 类型占一个字节。函数fun 的作用是把一个整数的四个字节的顺序来个颠倒。注意到了吗？</p>
-<p>在函数调用语句中，实参&amp;a 的结果是一个指针，它的类型是int <em>，它指向的类型是int。形参这个指针的类型是char </em>，它指向的类型是char。这样，在实参和形参的结合过程中，我们必须进行一次从int <em>类型到char </em>类型的转换。<br>结合这个例子，我们可以这样来<br>想象编译器进行转换的过程：编译器先构造一个临时指针char <em>temp，然后执行temp=(char </em>)&amp;a，最后再把temp 的值传递给s。所以最后的结果是：s 的类型是char *,它指向的类型是char，它指向的地址就是a 的首地址。</p>
-<p>我们已经知道，指针的值就是指针指向的地址，在32 位程序中，指针的值其实是一个32 位整数。<br>那可不可以把一个整数当作指针的值直接赋给指针呢？就象下面的语句：</p>
-<p>例十六:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">unsigned int a;  </span><br><span class="line">TYPE *ptr; //TYPE 是int，char 或结构类型等等类型。  </span><br><span class="line">a=20345686;  </span><br><span class="line">ptr=20345686; //我们的目的是要使指针ptr 指向地址20345686  </span><br><span class="line">      </span><br><span class="line">ptr=a; //我们的目的是要使指针ptr 指向地址20345686  </span><br><span class="line">//编译一下吧。结果发现后面两条语句全是错的。那么我们的目的就不能达到了吗？不，还有办法：  </span><br><span class="line">unsigned int a;  </span><br><span class="line">TYPE *ptr; //TYPE 是int，char 或结构类型等等类型。  </span><br><span class="line">a=N //N 必须代表一个合法的地址；  </span><br><span class="line">ptr=(TYPE*)a； //呵呵，这就可以了。</span><br></pre></td></tr></table></figure></p>
-<p>严格说来这里的(TYPE <em>)和指针类型转换中的(TYPE </em>)还不一样。这里的(TYPE*)的意思是把无符号整数a 的值当作一个地址来看待。上面强调了a 的值必须代表一个合法的地址，否则的话，在你使用ptr 的时候，就会出现非法操作错误。想想能不能反过来，把指针指向的地址即指针的值当作一个整数取出来。完全可以。下面的例子演示了把一个指针的值当作一个整数取出来，然后再把这个整数当作一个地址赋给一个指针：</p>
-<p>例十七：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">int a=123,b;  </span><br><span class="line">int *ptr=&amp;a;  </span><br><span class="line">char *str;  </span><br><span class="line">b=(int)ptr; //把指针ptr 的值当作一个整数取出来。  </span><br><span class="line">str=(char*)b; //把这个整数的值当作一个地址赋给指针str</span><br></pre></td></tr></table></figure>
-<p>现在我们已经知道了，可以把指针的值当作一个整数取出来，也可以把一个整数值当作地址赋给一个指针。</p>
-<h2 id="指针的安全问题"><a href="#指针的安全问题" class="headerlink" title="指针的安全问题"></a>指针的安全问题</h2><p>例十八：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">char s=&apos;a&apos;;  </span><br><span class="line">int *ptr;  </span><br><span class="line">ptr=(int *)&amp;s;  </span><br><span class="line">*ptr=1298；</span><br></pre></td></tr></table></figure></p>
-<p>指针ptr 是一个int *类型的指针，它指向的类型是int。它指向的地址就是s 的首地址。在32 位程序中，s 占一个字节，int 类型占四个字节。最后一条语句不但改变了s 所占的一个字节，还把和s 相临的高地址方向的三个字节也改变了。这三个字节是干什么的？只有编译程序知道，而写程序的人是不太可能知道的。也许这三个字节里存储了非常重要的数据，也许这三个字节里正好是程序的一条代码，而由于你对指针的马虎应用，这三个字节的值被改变了！这会造成崩溃性的错误。<br>让我们再来看一例：</p>
-<p>例十九：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">char a;  </span><br><span class="line">int *ptr=&amp;a;  </span><br><span class="line">ptr++;  </span><br><span class="line">*ptr=115;</span><br></pre></td></tr></table></figure></p>
-<p>该例子完全可以通过编译，并能执行。但是看到没有？第3 句对指针ptr 进行自加1 运算后，ptr 指向了和整形变量a 相邻的高地址方向的一块存储区。这块存储区里是什么？我们不知道。有可能它是一个非常重要的数据，甚至可能是一条代码。</p>
-<p>而第4 句竟然往这片存储区里写入一个数据！这是严重的错误。所以在使用指针时，程序员心里必须非常清楚：我的指针究竟指向了哪里。在用指针访问数组的时候，也要注意不要超出数组的低端和高端界限，否则也会造成类似的错误。</p>
-<p>在指针的强制类型转换：<code>ptr1=(TYPE *)ptr2</code> 中，如果<code>sizeof(ptr2的类型)</code>大于<code>sizeof(ptr1 的类型)</code>，那么在使用指针ptr1 来访问ptr2所指向的存储区时是安全的。如果<code>sizeof(ptr2 的类型)</code> 小于<code>sizeof(ptr1 的类型)</code>，那么在使用指针ptr1 来访问ptr2 所指向的存储区时是不安全的。至于为什么，读者结合例十八来想一想，应该会明白的。</p>
-<h2 id="图解"><a href="#图解" class="headerlink" title="图解"></a>图解</h2><p><img src="https://ww1.sinaimg.cn/large/a3eed545gy1g339jo8f1zj20zv2m119l.jpg" alt="指针图解"></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/c-language-pointer-explanation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1666,17 +1305,14 @@
 <h2 id="IoC能做什么"><a href="#IoC能做什么" class="headerlink" title="IoC能做什么"></a>IoC能做什么</h2><p>IoC不是一种技术，只是一种思想，一个重要的面向对象编程的法则，它能指导我们如何设计出松耦合、更优良的程序。传统应用程序都是由我们在类内部主动创建依赖对象，从而导致类与类之间高耦合，难于测试；有了IoC容器后，把创建和查找依赖对象的控制权交给了容器，由容器进行注入组合对象，所以对象与对象之间是松散耦合，这样也方便测试，利于功能复用，更重要的是使得程序的整个体系结构变得非常灵活。</p>
 <p>其实IoC对编程带来的最大改变不是从代码上，而是从思想上，发生了“主从换位”的变化。应用程序原本是老大，要获取什么资源都是主动出击，但是在IoC/DI思想中，应用程序就变成被动的了，被动的等待IoC容器来创建并注入它所需要的资源了。</p>
 <p>IoC很好的体现了面向对象设计法则之一—— 好莱坞法则：“别找我们，我们找你”；即由IoC容器帮对象找相应的依赖对象并注入，而不是由对象主动去找。</p>
-<h2 id="IoC和DI"><a href="#IoC和DI" class="headerlink" title="IoC和DI"></a>IoC和DI</h2><p> DI—Dependency Injection，即“依赖注入”：是组件之间依赖关系由容器在运行期决定，形象的说，即由容器动态的将某个依赖关系注入到组件之中。依赖注入的目的并非为软件系统带来更多功能，而是为了提升组件重用的频率，并为系统搭建一个灵活、可扩展的平台。通过依赖注入机制，我们只需要通过简单的配置，而无需任何代码就可指定目标需要的资源，完成自身的业务逻辑，而不需要关心具体的资源来自何处，由谁实现。</p>
-<p>理解DI的关键是：“谁依赖谁，为什么需要依赖，谁注入谁，注入了什么”，那我们来深入分析一下：</p>
-<ul>
-<li><strong>谁依赖于谁：</strong> 当然是应用程序依赖于IoC容器；</li>
-<li><strong>为什么需要依赖：</strong> 应用程序需要IoC容器来提供对象需要的外部资源；</li>
-<li><strong>谁注入谁：</strong> 很明显是IoC容器注入应用程序某个对象，应用程序依赖的对象；</li>
-<li><strong>注入了什么：</strong> 就是注入某个对象所需要的外部资源（包括对象、资源、常量数据）。</li>
-</ul>
-<p>IoC和DI由什么关系呢？其实它们是同一个概念的不同角度描述，由于控制反转概念比较含糊（可能只是理解为容器控制对象这一个层面，很难让人想到谁来维护对象关系），所以2004年大师级人物Martin Fowler又给出了一个新的名字：<strong>“依赖注入”，相对IoC 而言，“依赖注入”明确描述了“被注入对象依赖IoC容器配置依赖对象”。</strong></p>
-<p>注：如果想要更加深入的了解IoC和DI，请参考大师级人物Martin Fowler的一篇经典文章《Inversion of Control Containers and the Dependency Injection pattern》，原文地址：<a href="http://www.martinfowler.com/articles/injection.html。" target="_blank" rel="noopener">http://www.martinfowler.com/articles/injection.html。</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/understanding-dependency-injection-and-inversion-of-control/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1775,257 +1411,14 @@
 <p>进程：操作系统中执行的程序</p>
 <p>程序是静态的概念，进程是动态的概念。</p>
 <p>一个进程可以包含一个或多个线程。</p>
-<p>一个进程至少要包含一个线程。</p>
-<h3 id="单线程"><a href="#单线程" class="headerlink" title="单线程"></a>单线程</h3><p>单个程序中只有一个执行路径就是单线程。　　</p>
-<p>当程序启动运行时，就自动产生一个线程，主方法main就在这个主线程上运行。我们的程序都是由线程来执行的。</p>
-<h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><p>多线程指在单个程序中可以同时运行多个不同的线程执行不同的任务。</p>
-<p>多线程编程的目的，就是“最大限度地利用CPU资源”，当某一线程的处理不需要占用CPU而只和IO等资源打交道时，让需要占用CPU的其他线程有机会获得CPU资源。从根本上说，这就是多线程编程的最终目的。</p>
-<p>一个程序实现多个代码同时交替运行就需要产生多个线程。</p>
-<p>CPU随机地抽出时间，让我们的程序一会做这件事情，一会做另外的事情。</p>
-<p>从宏观角度来看，多个线程在同时执行（宏观并行），但是微观上来看，处理器的个数决定了某一个时刻可以同时运行的最大线程数，</p>
-<p>如单核CPU某一时刻只能有一个线程在执行（微观串行），双核的CPU在某一个时刻，最多可以运行两个线程，可以做到微观并行。</p>
-<h2 id="java中实现多线程的方式"><a href="#java中实现多线程的方式" class="headerlink" title="java中实现多线程的方式"></a>java中实现多线程的方式</h2><ol>
-<li><p>继承Thread类并重写它的run方法。之后创建这个子类的对象并调用start()方法。</p>
-</li>
-<li><p>通过定义实现Runnable接口的类进而实现run方法。这个类的对象在创建Thread的时候作为参数被传入，然后调用start()方法。</p>
-</li>
-</ol>
-<p>Thread类是专门用来创建线程和对线程进行操作的类。当某个类继承了Thread类之后，该类就叫做一个线程类。</p>
-<p>两种方法均需执行线程的start()方法为线程分配必须的系统资源、调度线程运行并执行线程的run()方法。</p>
-<p>注意：start()方法是启动线程的唯一的方法。start()方法首先为线程的执行准备好系统资源，然后再去调用run()方法。</p>
-<p>run()方法中放入了线程的工作，即我们要这个线程去做的所有事情。缺省状况下run()方法什么也不做。</p>
-<p>1.通过继承Thread类实现多线程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* 通过Thread实现线程</span><br><span class="line">*/</span><br><span class="line">Thread thread1 = new Thread() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        while (true) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(5000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(&quot;thread1:&quot;</span><br><span class="line">                    + Thread.currentThread().getName());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">thread1.start();</span><br></pre></td></tr></table></figure></p>
-<p>2.通过实现runnable接口实现多线程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* 通过Runnable接口实现线程</span><br><span class="line">*/</span><br><span class="line">Thread thread2 = new Thread(new Runnable() &#123;</span><br><span class="line">    public void run() &#123;</span><br><span class="line">        while (true) &#123;</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(5000);</span><br><span class="line">            &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(&quot;thread2:&quot;</span><br><span class="line">                    + Thread.currentThread().getName());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">thread2.start();</span><br></pre></td></tr></table></figure></p>
-<h3 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h3><p>Thread类也实现了Runnable接口，因此实现了接口中的run()方法。</p>
-<p>当生成一个线程对象时，如果没有为其指定名字，那么线程对象的名字将使用如下形式：Thread-number，该number是自动增加的数字，并被所有的Thread对象所共享，因为它是一个static的成员变量。</p>
-<p><strong>当使用第一种方式（继承Thread的方式）来生成线程对象时</strong> ，我们需要重写run()方法，因为Thread类的run()方法此时什么事情也不做。</p>
-<p><strong>当使用第二种方式（实现Runnable接口的方式）来生成线程对象时</strong> ，我们需要实现Runnable接口的run()方法</p>
-<h3 id="停止线程"><a href="#停止线程" class="headerlink" title="停止线程"></a>停止线程</h3><p>线程的消亡不能通过调用stop()命令，而是让run()方法自然结束。stop()方法是不安全的，已经废弃。</p>
-<p>停止线程推荐的方式：设定一个标志变量，在run()方法中是一个循环，由该标志变量控制循环是继续执行还是跳出；循环跳出，则线程结束。</p>
-<h2 id="线程的生命周期"><a href="#线程的生命周期" class="headerlink" title="线程的生命周期"></a>线程的生命周期</h2><h3 id="创建状态："><a href="#创建状态：" class="headerlink" title="创建状态："></a>创建状态：</h3><p>　　当用new操作符创建一个新的线程对象时，该线程处于创建状态。</p>
-<p>　　处于创建状态的线程只是一个空的线程对象，系统不为它分配资源。</p>
-<p>　　</p>
-<h3 id="可运行状态："><a href="#可运行状态：" class="headerlink" title="可运行状态："></a>可运行状态：</h3><p>　　执行线程的start()方法将为线程分配必须的系统资源，安排其运行，并调用线程体——run()方法，这样就使得该线程处于可运行状态（Runnable）。</p>
-<p>　　这一状态并不是运行中状态（Running），因为线程也许实际上并未真正运行。</p>
-<p>　　</p>
-<h3 id="不可运行状态："><a href="#不可运行状态：" class="headerlink" title="不可运行状态："></a>不可运行状态：</h3><p>　　当发生下列事件时，处于运行状态的线程会转入到不可运行状态：</p>
-<p>　　调用了sleep()方法；</p>
-<p>　　线程调用wait()方法等待特定条件的满足；</p>
-<p>　　线程输入/输出阻塞。</p>
-<p>　　返回可运行状态：</p>
-<p>　　处于睡眠状态的线程在指定的时间过去后；</p>
-<p>　　如果线程在等待某一条件，另一个对象必须通过notify()或notifyAll()方法通知等待线程条件的改变；</p>
-<p>　　如果线程是因为输入输出阻塞，等待输入输出完成。</p>
-<h3 id="sleep与wait区别"><a href="#sleep与wait区别" class="headerlink" title="sleep与wait区别"></a>sleep与wait区别</h3><ol>
-<li><p>对于sleep()方法，我们首先要知道该方法是属于Thread类中的。而wait()方法，则是属于Object类中的。</p>
-</li>
-<li><p>sleep()方法导致了程序暂停执行指定的时间，让出cpu该其他线程，但是他的监控状态依然保持者，当指定的时间到了又会自动恢复运行状态。</p>
-</li>
-</ol>
-<p>在调用sleep()方法的过程中，线程不会释放对象锁。</p>
-<p>而当调用wait()方法的时候，线程会放弃对象锁，进入等待此对象的等待锁定池，只有针对此对象调用notify()方法后本线程才进入对象锁定池准备</p>
-<h3 id="notify与notifyall区别"><a href="#notify与notifyall区别" class="headerlink" title="notify与notifyall区别"></a>notify与notifyall区别</h3><p>notify()和notifyAll()都是Object对象用于通知处在等待该对象的线程的方法。</p>
-<p>void notify(): 唤醒一个正在等待该对象的线程。</p>
-<p>void notifyAll(): 唤醒所有正在等待该对象的线程。</p>
-<p>两者的最大区别在于：</p>
-<p>notifyAll使所有原来在该对象上等待被notify的线程统统退出wait的状态，变成等待该对象上的锁，一旦该对象被解锁，他们就会去竞争。<br>notify他只是选择一个wait状态线程进行通知，并使它获得该对象上的锁，但不惊动其他同样在等待被该对象notify的线程们，<br>当第一个线程运行完毕以后释放对象上的锁，此时如果该对象没有再次使用notify语句，即便该对象已经空闲，其他wait状态等待的线程由于没有得到该对象的通知，<br>继续处在wait状态，直到这个对象发出一个notify或notifyAll，它们等待的是被notify或notifyAll，而不是锁。</p>
-<h3 id="消亡状态："><a href="#消亡状态：" class="headerlink" title="消亡状态："></a>消亡状态：</h3><p>　　当线程的run()方法执行结束后，该线程自然消亡。</p>
-<h2 id="线程的优先级"><a href="#线程的优先级" class="headerlink" title="线程的优先级"></a>线程的优先级</h2><ol>
-<li>线程的优先级及设置</li>
-</ol>
-<p>线程的优先级是为了在多线程环境中便于系统对线程的调度，优先级高的线程将优先执行。</p>
-<p>一个线程的优先级设置遵从以下原则：</p>
-<p>线程创建时，子继承父的优先级。</p>
-<p>线程创建后，可通过调用setPriority()方法改变优先级。</p>
-<p>线程的优先级是1-10之间的正整数。</p>
-<ul>
-<li><p>1- MIN_PRIORITY</p>
-</li>
-<li><p>10-MAX_PRIORITY</p>
-</li>
-<li><p>5-NORM_PRIORITY</p>
-</li>
-</ul>
-<p>如果什么都没有设置，默认值是5。</p>
-<p>但是不能依靠线程的优先级来决定线程的执行顺序。</p>
-<ol start="2">
-<li>线程的调度策略</li>
-</ol>
-<p>线程调度器选择优先级最高的线程运行。但是，如果发生以下情况，就会终止线程的运行：</p>
-<p>线程体中调用了yield()方法，让出了对CPU的占用权。</p>
-<p>线程体中调用了sleep()方法，使线程进入睡眠状态。</p>
-<p>线程由于I/O操作而受阻塞。</p>
-<p>另一个更高优先级的线程出现。</p>
-<p>在支持时间片的系统中，该线程的时间片用完。</p>
-<h1 id="成员变量与局部变量访问"><a href="#成员变量与局部变量访问" class="headerlink" title="成员变量与局部变量访问"></a>成员变量与局部变量访问</h1><p>请看下面两段代码</p>
-<ol>
-<li>线程访问成员变量<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">public class FirstThreadTest</span><br><span class="line">&#123;</span><br><span class="line">    public static void main(String[] args)&#123;</span><br><span class="line">        FirstThread r = new FirstThread();</span><br><span class="line"></span><br><span class="line">        Thread t1 = new Thread(r);</span><br><span class="line">        Thread t2 = new Thread(r);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 第一个线程程序</span><br><span class="line">*/</span><br><span class="line">class FirstThread implements Runnable</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run()</span><br><span class="line">    &#123;</span><br><span class="line">        while (true)</span><br><span class="line">        &#123;</span><br><span class="line">            System.out.println(&quot;number of: &quot; + i++);</span><br><span class="line"></span><br><span class="line">            try</span><br><span class="line">            &#123;</span><br><span class="line">                Thread.sleep((long) Math.random() * 1000);</span><br><span class="line">            &#125;</span><br><span class="line">            catch (InterruptedException e)&#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (50 == i)&#123;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>代码中，FirstThread类实现了Runnable接口，其中run()方法的主要工作是输出”number: “字符串加数字i，并且同时递增i，当i到达50时，退出循环。</p>
-<p>main()方法中生成了一个FirstThread类的对象r，并且利用这个一个对象生成了两个线程。</p>
-<p>程序的执行结果是：顺次打印了0到49的数字，共50个数字。</p>
-<p>这是因为， <strong>i是成员变量，则FirstThread的对象r只包含这一个i，两个Thread对象因为由r构造，所以共享了同一个i。</strong></p>
-<p>当我们改变代码如下时（原先的成员变量i被注释掉，增加了方法中的局部变量i）：</p>
-<ol start="2">
-<li>线程访问局部变量</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">public class FirstThreadTest</span><br><span class="line">&#123;</span><br><span class="line"> public static void main(String[] args)&#123;</span><br><span class="line">        HelloThread r = new HelloThread();</span><br><span class="line"></span><br><span class="line">        Thread t1 = new Thread(r);</span><br><span class="line">        Thread t2 = new Thread(r);</span><br><span class="line"></span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">* 通过Runnable接口实现线程</span><br><span class="line">*/</span><br><span class="line">class FirstThread implements Runnable</span><br><span class="line">&#123;</span><br><span class="line">    // int i;</span><br><span class="line">    // 若i是成员变量，则FirstThread共享了同一个i</span><br><span class="line">    // 打印结果是0到49的数字</span><br><span class="line">    @Override</span><br><span class="line">    public void run()</span><br><span class="line">    &#123;</span><br><span class="line">        int i = 0;</span><br><span class="line">        // 每一个线程都会拥有自己的一份局部变量的拷贝</span><br><span class="line">        // 线程之间互不影响</span><br><span class="line">        // 所以会打印100个数字，0到49每个数字都是两遍</span><br><span class="line">        while (true)</span><br><span class="line">        &#123;</span><br><span class="line">            System.out.println(&quot;Hello number: &quot; + i++);</span><br><span class="line"></span><br><span class="line">            try</span><br><span class="line">            &#123;</span><br><span class="line">                Thread.sleep((long) Math.random() * 1000);</span><br><span class="line">            &#125;</span><br><span class="line">            catch (InterruptedException e)&#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            if (50 == i)&#123;</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>如果一个变量是成员变量，那么多个线程对同一个对象的成员变量进行操作时，它们对该成员变量是彼此影响的，也就是说一个线程对成员变量的改变会影响到另一个线程。</p>
-<p>如果一个变量是局部变量，那么每个线程都会有一个该局部变量的拷贝（即便是同一个对象中的方法的局部变量，也会对每一个线程有一个拷贝），一个线程对该局部变量的改变不会影响到其他线程。</p>
-<h1 id="线程的互斥与同步"><a href="#线程的互斥与同步" class="headerlink" title="线程的互斥与同步"></a>线程的互斥与同步</h1><p>前言：前一篇文章主要描述了多线程中访成员变量与局部变量问题，我们知道访成员变量有线程安全问题，在多线程程序中</p>
-<p>我们可以通过使用synchronized关键字完成线程的同步，能够解决部分线程安全问题</p>
-<p>在java中synchronized同步关键字可以使用在静态方法和实例方法中使用，两者的区别在于：</p>
-<h2 id="对象锁与类锁"><a href="#对象锁与类锁" class="headerlink" title="对象锁与类锁"></a>对象锁与类锁</h2><h3 id="对象锁"><a href="#对象锁" class="headerlink" title="对象锁"></a>对象锁</h3><p>当一个对象中有synchronized method或synchronized block的时候调用此对象的同步方法或进入其同步区域时，就必须先获得对象锁。</p>
-<p>如果此对象的对象锁已被其他调用者占用，则需要等待此锁被释放</p>
-<h3 id="类锁"><a href="#类锁" class="headerlink" title="类锁"></a>类锁</h3><p>由上述同步静态方法引申出一个概念，那就是类锁。其实系统中并不存在什么类锁。当一个同步静态方法被调用时，系统获取的其实就是代表该类的类对象的对象锁<br>在程序中获取类锁<br>可以尝试用以下方式获取类锁</p>
-<p><code>synchronized (xxx.class) {...}</code></p>
-<p><code>synchronized (Class.forName(&quot;xxx&quot;)) {...}</code></p>
-<h3 id="同时获取2类锁"><a href="#同时获取2类锁" class="headerlink" title="同时获取2类锁"></a>同时获取2类锁</h3><p>同时获取类锁和对象锁是允许的，并不会产生任何问题，但使用类锁时一定要注意，一旦产生类锁的嵌套获取的话，就会产生死锁，因为每个class在内存中都只能生成一个Class实例对象。</p>
-<h3 id="同步静态方法-静态变量互斥体"><a href="#同步静态方法-静态变量互斥体" class="headerlink" title="同步静态方法/静态变量互斥体"></a>同步静态方法/静态变量互斥体</h3><p>由于一个class不论被实例化多少次，其中的静态方法和静态变量在内存中都只由一份。所以，一旦一个静态的方法被申明为synchronized。此类所有的实例化对象在调用此方法，共用同一把锁，我们称之为类锁。一旦一个静态变量被作为synchronized block的mutex。进入此同步区域时，都要先获得此静态变量的对象锁</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 同步代码块与同步实例方法的互斥</span><br><span class="line"> * </span><br><span class="line"> * @author cary</span><br><span class="line"> */</span><br><span class="line">public class TestSynchronized &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 同步代码块</span><br><span class="line">     */</span><br><span class="line">    public void testBlock() &#123;</span><br><span class="line">        synchronized (this) &#123;</span><br><span class="line">            int i = 5;</span><br><span class="line">            while (i-- &gt; 0) &#123;</span><br><span class="line">                System.out</span><br><span class="line">                        .println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">                try &#123;</span><br><span class="line">                    Thread.sleep(500);</span><br><span class="line">                &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 非同步普通方法</span><br><span class="line">     */</span><br><span class="line">    public void testNormal() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 同步实例方法</span><br><span class="line">     */</span><br><span class="line">    public synchronized void testMethod() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 主方法分别调用三个方法</span><br><span class="line">     * </span><br><span class="line">     * @param args</span><br><span class="line">     */</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final TestSynchronized test = new TestSynchronized();</span><br><span class="line">        Thread test1 = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.testBlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testBlock&quot;);</span><br><span class="line">        Thread test2 = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.testMethod();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testMethod&quot;);</span><br><span class="line">        test1.start();</span><br><span class="line">        ;</span><br><span class="line">        test2.start();</span><br><span class="line">        test.testNormal();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>执行结果</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">testBlock : 4</span><br><span class="line">main : 4</span><br><span class="line">testBlock : 3</span><br><span class="line">main : 3</span><br><span class="line">testBlock : 2</span><br><span class="line">main : 2</span><br><span class="line">testBlock : 1</span><br><span class="line">main : 1</span><br><span class="line">testBlock : 0</span><br><span class="line">main : 0</span><br><span class="line">testMethod : 4</span><br><span class="line">testMethod : 3</span><br><span class="line">testMethod : 2</span><br><span class="line">testMethod : 1</span><br><span class="line">testMethod : 0</span><br></pre></td></tr></table></figure></p>
-<p>上述的代码，第一个方法时用了同步代码块的方式进行同步，传入的对象实例是this，表明是当前对象，</p>
-<p>当然，如果需要同步其他对象实例，也不可传入其他对象的实例；第二个方法是修饰方法的方式进行同步。</p>
-<p>因为第一个同步代码块传入的this，所以两个同步代码所需要获得的对象锁都是同一个对象锁，</p>
-<p>下面main方法时分别开启两个线程，分别调用testBlock()和testMethod()方法，那么两个线程都需要获得该对象锁，</p>
-<p>另一个线程必须等待。上面也给出了运行的结果可以看到：直到testBlock()线程执行完毕，释放掉锁testMethod线程才开始执行</p>
-<p>(两个线程没有穿插执行，证明是互斥的）</p>
-<p><strong>对于普通方法</strong></p>
-<p>结果输出是交替着进行输出的，这是因为，某个线程得到了对象锁，但是另一个线程还是可以访问没有进行同步的方法或者代码。</p>
-<p>进行了同步的方法（加锁方法）和没有进行同步的方法（普通方法）是互不影响的，一个线程进入了同步方法，得到了对象锁，</p>
-<p>其他线程还是可以访问那些没有同步的方法（普通方法）</p>
-<p><strong>结论</strong> ：synchronized只是一个内置锁的加锁机制，当某个方法加上synchronized关键字后，就表明要获得该内置锁才能执行，</p>
-<p>并不能阻止其他线程访问不需要获得该内置锁的方法</p>
-<p><strong>类锁的修饰（静态）方法和代码块：</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * </span><br><span class="line"> * 类锁与静态方法锁</span><br><span class="line"> * </span><br><span class="line"> * @author cary</span><br><span class="line"> */</span><br><span class="line">public class TestSynchronized2 &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 类锁</span><br><span class="line">     */</span><br><span class="line">    public void testClassLock() &#123;</span><br><span class="line">        synchronized (TestSynchronized2.class) &#123;</span><br><span class="line">            int i = 5;</span><br><span class="line">            while (i-- &gt; 0) &#123;</span><br><span class="line">                System.out</span><br><span class="line">                        .println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">                try &#123;</span><br><span class="line">                    Thread.sleep(500);</span><br><span class="line">                &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static synchronized void testStaticLock() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 普通方法</span><br><span class="line">     */</span><br><span class="line">    public void testNormal() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(&quot;normal-&quot; + Thread.currentThread().getName()</span><br><span class="line">                    + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 静态方法</span><br><span class="line">     */</span><br><span class="line">    public void testStaticNormal() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(&quot;static-&quot; + Thread.currentThread().getName()</span><br><span class="line">                    + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 测试synchronized锁的互斥效果</span><br><span class="line">     * </span><br><span class="line">     * @param args</span><br><span class="line">     */</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final TestSynchronized2 test = new TestSynchronized2();</span><br><span class="line">        Thread testClass = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.testClassLock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testClassLock&quot;);</span><br><span class="line">        Thread testStatic = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                TestSynchronized2.testStaticLock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testStaticLock&quot;);</span><br><span class="line">        /**</span><br><span class="line">         * 线程1</span><br><span class="line">         */</span><br><span class="line">        testClass.start();</span><br><span class="line">        /**</span><br><span class="line">         * 线程2</span><br><span class="line">         */</span><br><span class="line">        testStatic.start();</span><br><span class="line">        /**</span><br><span class="line">         * 成员方法</span><br><span class="line">         */</span><br><span class="line">        test.testNormal();</span><br><span class="line">        /**</span><br><span class="line">         * 静态方法</span><br><span class="line">         */</span><br><span class="line">        TestSynchronized2.testStaticLock();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>执行结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">testClassLock : 4</span><br><span class="line">normal-main : 4</span><br><span class="line">normal-main : 3</span><br><span class="line">testClassLock : 3</span><br><span class="line">normal-main : 2</span><br><span class="line">testClassLock : 2</span><br><span class="line">testClassLock : 1</span><br><span class="line">normal-main : 1</span><br><span class="line">testClassLock : 0</span><br><span class="line">normal-main : 0</span><br><span class="line">testStaticLock : 4</span><br><span class="line">testStaticLock : 3</span><br><span class="line">testStaticLock : 2</span><br><span class="line">testStaticLock : 1</span><br><span class="line">testStaticLock : 0</span><br><span class="line">main : 4</span><br><span class="line">main : 3</span><br><span class="line">main : 2</span><br><span class="line">main : 1</span><br><span class="line">main : 0</span><br></pre></td></tr></table></figure>
-<p>类锁和静态方法锁线程是分先后执行的，没有相互交叉，类锁和静态方法锁是互斥的</p>
-<p>其实，类锁修饰方法和代码块的效果和对象锁是一样的，因为类锁只是一个抽象出来的概念，</p>
-<p>只是为了区别静态方法的特点，因为静态方法是所有对象实例共用的，</p>
-<p>所以对应着synchronized修饰的静态方法的锁也是唯一的，所以抽象出来个类锁。</p>
-<p><strong>结论：类锁和静态方法锁是互斥的</strong></p>
-<p><strong>锁静态方法和普通方法</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 锁普通方法和静态方法。</span><br><span class="line"> * </span><br><span class="line"> * @author cary</span><br><span class="line"> */</span><br><span class="line">public class TestSynchronized3 &#123;</span><br><span class="line">    /**</span><br><span class="line">     * 锁普通方法</span><br><span class="line">     */</span><br><span class="line">    public synchronized void testNormal() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 锁静态方法</span><br><span class="line">     */</span><br><span class="line">    public static synchronized void testStatic() &#123;</span><br><span class="line">        int i = 5;</span><br><span class="line">        while (i-- &gt; 0) &#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName() + &quot; : &quot; + i);</span><br><span class="line">            try &#123;</span><br><span class="line">                Thread.sleep(500);</span><br><span class="line">            &#125; catch (InterruptedException ie) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 普通方法和静态方法</span><br><span class="line">     * </span><br><span class="line">     * @param args</span><br><span class="line">     */</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final TestSynchronized test = new TestSynchronized();</span><br><span class="line">        Thread test1 = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.testNormal();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testNormal&quot;);</span><br><span class="line">        Thread test2 = new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                TestSynchronized3.testStatic();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, &quot;testStatic&quot;);</span><br><span class="line">        /**</span><br><span class="line">         * 启动普通方法线程</span><br><span class="line">         */</span><br><span class="line">        test1.start();</span><br><span class="line">        /**</span><br><span class="line">         * 启动静态方法线程</span><br><span class="line">         */</span><br><span class="line">        test2.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>执行结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">testNormal : 4</span><br><span class="line">testStatic : 4</span><br><span class="line">testNormal : 3</span><br><span class="line">testStatic : 3</span><br><span class="line">testNormal : 2</span><br><span class="line">testStatic : 2</span><br><span class="line">testStatic : 1</span><br><span class="line">testNormal : 1</span><br><span class="line">testNormal : 0</span><br><span class="line">testStatic : 0</span><br></pre></td></tr></table></figure>
-<p>上面代码synchronized同时修饰静态方法和实例方法，但是运行结果是交替进行的，</p>
-<p>这证明了类锁和对象锁是两个不一样的锁，控制着不同的区域，它们是互不干扰的。</p>
-<p>同样，线程获得对象锁的同时，也可以获得该类锁，即同时获得两个锁，这是允许的。</p>
-<p>到这里，对synchronized的用法已经有了一定的了解。这时有一个疑问，既然有了synchronized修饰方法的同步方式，</p>
-<p>为什么还需要synchronized修饰同步代码块的方式呢？而这个问题也是synchronized的缺陷所在</p>
-<p><strong>synchronized的缺陷</strong> ：当某个线程进入同步方法获得对象锁，那么其他线程访问这里对象的同步方法时，</p>
-<p>必须等待或者阻塞，这对高并发的系统是致命的，这很容易导致系统的崩溃。如果某个线程在同步方法里面发生了死循环，</p>
-<p>那么它就永远不会释放这个对象锁，那么其他线程就要永远的等待。这是一个致命的问题。</p>
-<h1 id="多线程同步技术与lock"><a href="#多线程同步技术与lock" class="headerlink" title="多线程同步技术与lock"></a>多线程同步技术与lock</h1><h2 id="lock与synchronized比较"><a href="#lock与synchronized比较" class="headerlink" title="lock与synchronized比较"></a>lock与synchronized比较</h2><blockquote>
-<p>主要相同点：Lock能完成Synchronized所实现的所有功能。<br><br>主要不同点：Lock有比Synchronized更精确的线程予以和更好的性能。<br>Synchronized会自动释放锁，</p>
-</blockquote>
-<p>但是Lock一定要求程序员手工释放，并且必须在finally从句中释放。<br>synchronized 修饰方法时 表示同一个对象在不同的线程中 表现为同步队列<br>如果实例化不同的对象 那么synchronized就不会出现同步效果了。</p>
-<h2 id="对象的锁"><a href="#对象的锁" class="headerlink" title="对象的锁"></a>对象的锁</h2><p>所有对象都自动含有单一的锁。<br>JVM负责跟踪对象被加锁的次数。如果一个对象被解锁，其计数变为0。在任务（线程）第一次给对象加锁的时候，计数变为1。</p>
-<p>每当这个相同的任务（线程）在此对象上获得锁时，计数会递增。<br>只有首先获得锁的任务（线程）才能继续获取该对象上的多个锁。<br>每当任务离开一个synchronized方法，计数递减，当计数为0的时候，锁被完全释放，此时别的任务就可以使用此资源。 </p>
-<p><strong>为了讲清楚Synchronized与lock的区别，请看下面一段伪代码</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//内部类</span><br><span class="line">Class UserServiceTest</span><br><span class="line">&#123;</span><br><span class="line">    public static User user=null;</span><br><span class="line">　　</span><br><span class="line"></span><br><span class="line">　　//synchronized修饰的成员方法</span><br><span class="line">    public synchronized void save(User u)</span><br><span class="line">　　&#123;</span><br><span class="line">     user=u;</span><br><span class="line">     Dao.saveUser(user)</span><br><span class="line">　　&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果第一个线程执行如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UserServiceTest test=new UserServiceTest();</span><br><span class="line">User user=new User();</span><br><span class="line">user.setUsername(&quot;zhangsan&quot;);</span><br><span class="line">user.setPassword(&quot;123456&quot;);</span><br><span class="line">test.save(user);</span><br></pre></td></tr></table></figure></p>
-<p>此时如果第二个线程执行如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">UserServiceTest test2=new UserServiceTest();</span><br><span class="line">User user=new User();</span><br><span class="line">user.setUsername(&quot;lisi&quot;);</span><br><span class="line">user.setPassword(&quot;000000&quot;);</span><br><span class="line">test2.save(user);</span><br></pre></td></tr></table></figure></p>
-<p> 那么 现在线程1 和线程2同时启动 如果对象new的不是同一个Test<br>那么出现线程交叉的话 那么插入数据库中的数据就是相同的<br>因为你的user变量时静态的   你给他赋值第一次 假如还没有save的时候<br>另外一个线程改变了user的值 那么第一个线程插入时也就是第二次赋予的值了</p>
-<p><strong>所以要实现同步 那么可以改方法为静态的就能达到同步的效果了</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public static synchronized void save(User u)</span><br><span class="line">&#123;</span><br><span class="line">  user=u;</span><br><span class="line">  Dao.saveUser(user)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>修改为static的方法是存在于堆中<br>是全局方法 针对于所有实例化与未 实例化的对象只存在一个 所以会出现同步队列<br>当然不用static 也可以 那就用lock<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line">* 使用lock锁</span><br><span class="line">*/</span><br><span class="line">Class UserServiceTest1</span><br><span class="line">&#123;</span><br><span class="line">public static User user=null;</span><br><span class="line">Lock lock=new ReentrantLock();</span><br><span class="line"></span><br><span class="line">//使用lock对象锁</span><br><span class="line">public void save(User u)</span><br><span class="line">&#123;</span><br><span class="line">    try&#123;</span><br><span class="line">     lock.lock();</span><br><span class="line">     user=u;</span><br><span class="line">     Dao.save(user);</span><br><span class="line">     catch(Exception e)&#123;</span><br><span class="line">        </span><br><span class="line">     &#125;</span><br><span class="line">     //一定要调用lock.unlock()释放锁</span><br><span class="line">     finally&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>这样无论你new多少个对象都会是线程同步的，同事lock性能高于synchronized，</p>
-<p>但是使用时一定要手动关闭锁</p>
-<h2 id="代码解析-1"><a href="#代码解析-1" class="headerlink" title="代码解析"></a>代码解析</h2><h3 id="Lock接口"><a href="#Lock接口" class="headerlink" title="Lock接口"></a>Lock接口</h3><p>首先要说明的就是Lock，通过查看Lock的源码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public interface Lock &#123;</span><br><span class="line">    void lock();</span><br><span class="line">    void lockInterruptibly() throws InterruptedException;</span><br><span class="line">    boolean tryLock();</span><br><span class="line">    boolean tryLock(long time, TimeUnit unit) throws InterruptedException;</span><br><span class="line">    void unlock();</span><br><span class="line">    Condition newCondition();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>Lock接口中每个方法的使用，lock()、tryLock()、tryLock(long time, TimeUnit unit)和lockInterruptibly()是用来获取锁的。</p>
-<p>unLock()方法是用来释放锁的。</p>
-<p>在Lock中声明了四个方法来获取锁，有什么区别?</p>
-<p>首先lock()方法是平常使用得最多的一个方法，就是用来获取锁。如果锁已被其他线程获取，则进行等待。</p>
-<p>由于在前面讲到如果采用Lock，必须主动去释放锁，并且在发生异常时，不会自动释放锁。因此一般来说，</p>
-<p>使用Lock必须在try{}catch{}块中进行，并在finally块释放锁，以保证锁一定被被释放，防止死锁的发生。</p>
-<p>通常使用Lock来进行同步的话，是以下面这种形式去使用的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Lock lock = new ReentrantLock();</span><br><span class="line">lock.lock();</span><br><span class="line">try&#123;</span><br><span class="line">    //处理任务</span><br><span class="line">&#125;catch(Exception ex)&#123;</span><br><span class="line">     </span><br><span class="line">&#125;finally&#123;</span><br><span class="line">    lock.unlock();   //释放锁</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>tryLock()方法是有返回值的，它表示用来尝试获取锁，如果获取成功，则返回true，如果获取失败（即锁已被其他线程获取）</p>
-<p>则返回false，也就说这个方法无论如何都会立即返回。在拿不到锁时不会一直在那等待。</p>
-<p>tryLock(long time, TimeUnit unit)方法和tryLock()方法是类似的，只不过区别在于这个方法在拿不到锁时会等待一定的时间，</p>
-<p>在时间期限之内如果还拿不到锁，就返回false。如果如果一开始拿到锁或者在等待期间内拿到了锁，则返回true。</p>
-<p>所以，一般情况下通过tryLock需要多加一层判断<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Lock lock = new ReentrantLock();</span><br><span class="line">if(lock.tryLock()) &#123;</span><br><span class="line">     try&#123;</span><br><span class="line">         //处理任务</span><br><span class="line">     &#125;catch(Exception ex)&#123;</span><br><span class="line">         </span><br><span class="line">     &#125;finally&#123;</span><br><span class="line">         lock.unlock();   //释放锁</span><br><span class="line">     &#125; </span><br><span class="line">&#125;else &#123;</span><br><span class="line">    //如果不能获取锁，则直接做其他事情    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h3 id="ReentrantLock"><a href="#ReentrantLock" class="headerlink" title="ReentrantLock"></a>ReentrantLock</h3><p>ReentrantLock，意思是“可重入锁”，关于可重入锁的概念在下一节讲述。ReentrantLock是唯一实现了Lock接口的类，</p>
-<p>并且ReentrantLock提供了更多的方法。下面通过一些实例看具体看一下如何使用ReentrantLock。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">package com.cary.base.thread;</span><br><span class="line"></span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.concurrent.locks.Lock;</span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line">/**</span><br><span class="line"> * lock锁的应用</span><br><span class="line"> * @version 1.0.0</span><br><span class="line"> */</span><br><span class="line">public class LockTest &#123;</span><br><span class="line">    private ArrayList&lt;Integer&gt; arrayList = new ArrayList&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final LockTest test = new LockTest();</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * 创建第一个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread(new Runnable() &#123;</span><br><span class="line"></span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.getLock(Thread.currentThread());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * 创建第二个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.getLock(Thread.currentThread());</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获得锁</span><br><span class="line">     * </span><br><span class="line">     * @param thread</span><br><span class="line">     */</span><br><span class="line">    public void getLock(Thread thread) &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 实例化锁对象</span><br><span class="line">         */</span><br><span class="line">        Lock lock = new ReentrantLock();</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            System.out.println(thread.getName() + &quot;得到了锁&quot;);</span><br><span class="line">            for (int i = 0; i &lt; 5; i++) &#123;</span><br><span class="line">                arrayList.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            System.out.println(thread.getName() + &quot;释放了锁&quot;);</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread-0得到了锁</span><br><span class="line">Thread-1得到了锁</span><br><span class="line">Thread-1释放了锁</span><br><span class="line">Thread-0释放了锁</span><br></pre></td></tr></table></figure>
-<p>怎么会输出这个结果？第二个线程怎么会在第一个线程释放锁之前得到了锁？原因在于，在getLock()方法中的lock变量是局部变量，</p>
-<p>每个线程执行该方法时都会保存一个副本，那么理所当然每个线程执行到lock.lock()处获取的是不同的锁，所以就不会发生冲突。</p>
-<p>知道了原因改起来就比较容易了，只需要将lock声明为类的属性即可。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">package com.cary.base.thread;</span><br><span class="line"></span><br><span class="line">import java.util.ArrayList;</span><br><span class="line">import java.util.concurrent.locks.Lock;</span><br><span class="line">import java.util.concurrent.locks.ReentrantLock;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * lock锁的应用</span><br><span class="line"> * </span><br><span class="line"> * @author cary</span><br><span class="line"> * @date 2015-8-24-下午5:01:45</span><br><span class="line"> * @version 1.0.0</span><br><span class="line"> */</span><br><span class="line">public class LockTest2 &#123;</span><br><span class="line">    private Lock lock = new ReentrantLock();</span><br><span class="line">    private ArrayList&lt;Integer&gt; arrayList = new ArrayList&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final LockTest2 test = new LockTest2();</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * 创建第一个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread(new Runnable() &#123;</span><br><span class="line"></span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.getLock(Thread.currentThread());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">         * 创建第二个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.getLock(Thread.currentThread());</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获得锁</span><br><span class="line">     * </span><br><span class="line">     * @param thread</span><br><span class="line">     */</span><br><span class="line">    public void getLock(Thread thread) &#123;</span><br><span class="line">        /**</span><br><span class="line">         * 实例化锁对象</span><br><span class="line">         */</span><br><span class="line">        lock.lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            System.out.println(thread.getName() + &quot;得到了锁&quot;);</span><br><span class="line">            for (int i = 0; i &lt; 5; i++) &#123;</span><br><span class="line">                arrayList.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            System.out.println(thread.getName() + &quot;释放了锁&quot;);</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>输出结果</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread-1得到了锁</span><br><span class="line">Thread-1释放了锁</span><br><span class="line">Thread-0得到了锁</span><br><span class="line">Thread-0释放了锁</span><br></pre></td></tr></table></figure>
-<p>由输出可知：同一时刻只有一个线程可以获得锁。</p>
-<h3 id="ReadWriteLock"><a href="#ReadWriteLock" class="headerlink" title="ReadWriteLock"></a>ReadWriteLock</h3><p>ReadWriteLock也是一个接口，在它里面只定义了两个方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public interface ReadWriteLock &#123;</span><br><span class="line">    /**</span><br><span class="line">     * Returns the lock used for reading.</span><br><span class="line">     *</span><br><span class="line">     * @return the lock used for reading.</span><br><span class="line">     */</span><br><span class="line">    Lock readLock();</span><br><span class="line"> </span><br><span class="line">    /**</span><br><span class="line">     * Returns the lock used for writing.</span><br><span class="line">     *</span><br><span class="line">     * @return the lock used for writing.</span><br><span class="line">     */</span><br><span class="line">    Lock writeLock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>readLock()获取读锁，writeLock()用来获取写锁。也就是说将文件的读写操作分开，分成2个锁来分配给线程，从而使得多个线程可以同时进行读操作。</p>
-<p>下面的ReentrantReadWriteLock实现了ReadWriteLock接口。</p>
-<h3 id="ReentrantReadWriteLock"><a href="#ReentrantReadWriteLock" class="headerlink" title="ReentrantReadWriteLock"></a>ReentrantReadWriteLock</h3><p>ReentrantReadWriteLock里面提供了很多丰富的方法，不过最主要的有两个方法：readLock()和writeLock()用来获取读锁和写锁。</p>
-<p>下面通过几个例子来看一下ReentrantReadWriteLock具体用法:<br><strong>假如有多个线程要同时进行读操作的话，先看一下synchronized达到的效果：</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * synchronized读写锁效果</span><br><span class="line"> * @version 1.0.0</span><br><span class="line"> */</span><br><span class="line">public class SynchronizedLock &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final SynchronizedLock test = new SynchronizedLock();</span><br><span class="line">        /**</span><br><span class="line">         * 第一个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread(new Runnable() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.get(Thread.currentThread());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">        /**</span><br><span class="line">         * 第二个线程</span><br><span class="line">         */</span><br><span class="line">        new Thread(new Runnable() &#123;</span><br><span class="line"></span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.get(Thread.currentThread());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * synchronized成员方法锁成</span><br><span class="line">     * </span><br><span class="line">     * @param thread</span><br><span class="line">     */</span><br><span class="line">    public synchronized void get(Thread thread) &#123;</span><br><span class="line">        long start = System.currentTimeMillis();</span><br><span class="line">        while (System.currentTimeMillis() - start &lt;= 1) &#123;</span><br><span class="line">            System.out.println(thread.getName() + &quot;正在进行读操作&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(thread.getName() + &quot;读操作完毕&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0读操作完毕</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1读操作完毕</span><br></pre></td></tr></table></figure></p>
-<p>这段程序的输出结果会是，直到thread0执行完读操作之后，才会打印thread1执行读操作的信息</p>
-<p>总之一个线程执行完之后另一个线程才开始执行。<br><strong>而改成用读写锁的话</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">package com.cary.base.thread;</span><br><span class="line"></span><br><span class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 读写锁测试。</span><br><span class="line"> * @version 1.0.0</span><br><span class="line"> */</span><br><span class="line">public class ReadWriteLockTest &#123;</span><br><span class="line">    private ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        final ReadWriteLockTest test = new ReadWriteLockTest();</span><br><span class="line">        /**</span><br><span class="line">         * 线程1</span><br><span class="line">         */</span><br><span class="line">        new Thread(new Runnable() &#123;</span><br><span class="line"></span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.get(Thread.currentThread());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).start();</span><br><span class="line">        /**</span><br><span class="line">         * 线程2</span><br><span class="line">         */</span><br><span class="line">        new Thread() &#123;</span><br><span class="line">            public void run() &#123;</span><br><span class="line">                test.get(Thread.currentThread());</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 使用读写锁使用 *</span><br><span class="line">     * </span><br><span class="line">     * @param thread</span><br><span class="line">     */</span><br><span class="line">    public void get(Thread thread) &#123;</span><br><span class="line">        rwl.readLock().lock();</span><br><span class="line">        try &#123;</span><br><span class="line">            long start = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">            while (System.currentTimeMillis() - start &lt;= 0.5) &#123;</span><br><span class="line">                System.out.println(thread.getName() + &quot;正在进行读操作&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(thread.getName() + &quot;读操作完毕&quot;);</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            rwl.readLock().unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>执行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-1正在进行读操作</span><br><span class="line">Thread-1读操作完毕</span><br><span class="line">Thread-0正在进行读操作</span><br><span class="line">Thread-0读操作完毕</span><br></pre></td></tr></table></figure></p>
-<p>说明thread1和thread2在同时进行读操作。</p>
-<p>这样就大大提升了读操作的效率。</p>
-<p>不过要注意的是，如果有一个线程已经占用了读锁，则此时其他线程如果要申请写锁，则申请写锁的线程会一直等待释放读锁。</p>
-<p>如果有一个线程已经占用了写锁，则此时其他线程如果申请写锁或者读锁，则申请的线程会一直等待释放写锁。</p>
-<p>关于ReentrantReadWriteLock类中的其他方法感兴趣的朋友可以自行查阅API文档。</p>
-<h3 id="Lock和synchronized的选择"><a href="#Lock和synchronized的选择" class="headerlink" title="Lock和synchronized的选择"></a>Lock和synchronized的选择</h3><p>总结来说，Lock和synchronized有以下几点不同：</p>
-<p>(1).Lock是一个接口，而synchronized是Java中的关键字，synchronized是内置的语言实现；</p>
-<p>(2).synchronized在发生异常时，会自动释放线程占有的锁，因此不会导致死锁现象发生；而Lock在发生异常时，如果没有主动通过unLock()去释放锁，则很可能造成死锁现象，      因此使用Lock时需要在finally块中释放锁；</p>
-<p>(3).Lock可以让等待锁的线程响应中断，而synchronized却不行，使用synchronized时，等待的线程会一直等待下去，不能够响应中断；</p>
-<p>(4).通过Lock可以知道有没有成功获取锁，而synchronized却无法办到。</p>
-<p>(5).Lock可以提高多个线程进行读操作的效率。</p>
-<p>总结：</p>
-<p>在性能上来说，如果竞争资源不激烈，两者的性能是差不多的，而当竞争资源非常激烈时（即有大量线程同时竞争），</p>
-<p>此时Lock的性能要远远优于synchronized。所以说，在具体使用时要根据适当情况选择。</p>
-<h2 id="锁的相关概念介绍"><a href="#锁的相关概念介绍" class="headerlink" title="锁的相关概念介绍"></a>锁的相关概念介绍</h2><h3 id="可重入锁"><a href="#可重入锁" class="headerlink" title="可重入锁"></a>可重入锁</h3><p>如果锁具备可重入性，则称作为可重入锁。像synchronized和ReentrantLock都是可重入锁，可重入性在我看来实际上表明了锁的分配机制：基于线程的分配，而不是基于方法调用的分配。举个简单的例子，当一个线程执行到某个synchronized方法时，比如说method1，而在method1中会调用另外一个synchronized方法method2，此时线程不必重新去申请锁，而是可以直接执行方法method2。</p>
-<p>看下面这段代码就明白了：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class MyClass &#123;</span><br><span class="line">    public synchronized void method1() &#123;</span><br><span class="line">        method2();</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    public synchronized void method2() &#123;</span><br><span class="line">         </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上述代码中的两个方法method1和method2都用synchronized修饰了，假如某一时刻，线程A执行到了method1，此时线程A获取了这个对象的锁，而由于method2也是synchronized方法，假如synchronized不具备可重入性，此时线程A需要重新申请锁。但是这就会造成一个问题，因为线程A已经持有了该对象的锁，而又在申请获取该对象的锁，这样就会线程A一直等待永远不会获取到的锁。</p>
-<p>而由于synchronized和Lock都具备可重入性，所以不会发生上述现象。</p>
-<h3 id="可中断锁"><a href="#可中断锁" class="headerlink" title="可中断锁"></a>可中断锁</h3><p>可中断锁：顾名思义，就是可以相应中断的锁。</p>
-<p>在Java中，synchronized就不是可中断锁，而Lock是可中断锁。</p>
-<p>如果某一线程A正在执行锁中的代码，另一线程B正在等待获取该锁，可能由于等待时间过长，线程B不想等待了，</p>
-<p>想先处理其他事情，我们可以让它中断自己或者在别的线程中中断它，这种就是可中断锁。</p>
-<p>在前面演示lockInterruptibly()的用法时已经体现了Lock的可中断性。</p>
-<h3 id="公平锁"><a href="#公平锁" class="headerlink" title="公平锁"></a>公平锁</h3><p>公平锁即尽量以请求锁的顺序来获取锁。比如同是有多个线程在等待一个锁，当这个锁被释放时，</p>
-<p>等待时间最久的线程（最先请求的线程）会获得该所，这种就是公平锁。</p>
-<p>非公平锁即无法保证锁的获取是按照请求锁的顺序进行的。这样就可能导致某个或者一些线程永远获取不到锁。</p>
-<p>在Java中，synchronized就是非公平锁，它无法保证等待的线程获取锁的顺序。</p>
-<p>而对于ReentrantLock和ReentrantReadWriteLock，它默认情况下是非公平锁，但是可以设置为公平锁。</p>
-<p>看一下这2个类的源代码就清楚了：</p>
-<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p>读写锁将对一个资源（比如文件）的访问分成了2个锁，一个读锁和一个写锁。</p>
-<p>正因为有了读写锁，才使得多个线程之间的读操作不会发生冲突。</p>
-<p>ReadWriteLock就是读写锁，它是一个接口，ReentrantReadWriteLock实现了这个接口。</p>
-<p>可以通过readLock()获取读锁，通过writeLock()获取写锁。</p>
-<p>本文参考：<a href="http://www.cnblogs.com/dolphin0520/p/3923167.html" target="_blank" rel="noopener">http://www.cnblogs.com/dolphin0520/p/3923167.html</a></p>
-<h1 id="Threadlocal用法"><a href="#Threadlocal用法" class="headerlink" title="Threadlocal用法"></a>Threadlocal用法</h1><h2 id="ThreadLocal是什么"><a href="#ThreadLocal是什么" class="headerlink" title="ThreadLocal是什么"></a>ThreadLocal是什么</h2><p> 早在JDK 1.2的版本中就提供java.lang.ThreadLocal，ThreadLocal为解决多线程程序的并发问题提供了一种新的思路。</p>
-<p>使用这个工具类可以很简洁地编写出优美的多线程程序。</p>
-<p>当使用ThreadLocal维护变量时，ThreadLocal为每个使用该变量的线程提供独立的变量副本，</p>
-<p>所以每一个线程都可以独立地改变自己的副本，而不会影响其它线程所对应的副本。</p>
-<p>从线程的角度看，目标变量就象是线程的本地变量，这也是类名中“Local”所要表达的意思。</p>
-<p>所以，在Java中编写线程局部变量的代码相对来说要笨拙一些，因此造成线程局部变量没有在Java开发者中得到很好的普及。</p>
-<p>ThreadLocal的接口方法</p>
-<p>ThreadLocal类接口很简单，只有4个方法，我们先来了解一下：</p>
-<ul>
-<li>void set(Object value)设置当前线程的线程局部变量的值。</li>
-<li>public Object get()该方法返回当前线程所对应的线程局部变量。</li>
-<li>public void remove()将当前线程局部变量的值删除，目的是为了减少内存的占用，该方法是JDK 5.0新增的方法。需要指出的是，当线程结束后，对应该线程的局部变量将自动被垃圾回收，所以显式调用该方法清除线程的局部变量并不是必须的操作，但它可以加快内存回收的速度。</li>
-<li>protected Object initialValue()返回该线程局部变量的初始值，该方法是一个protected的方法，显然是为了让子类覆盖而设计的。这个方法是一个延迟调用方法，在线程第1次调用get()或set(Object)时才执行，并且仅执行1次。ThreadLocal中的缺省实现直接返回一个null。</li>
-</ul>
-<p>在JDK5.0中，ThreadLocal已经支持泛型，该类的类名已经变为ThreadLocal<t>。API方法也相应进行了调整，</t></p>
-<p>新版本的API方法分别是void set(T value)、T get()以及T initialValue()。</p>
-<p>下面将用一段代码展示ThreadLocal类的功能</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">package com.huixing.base.thread;</span><br><span class="line"></span><br><span class="line">import java.util.Random;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * ThreadLocal测试</span><br><span class="line"> * @version 1.0.0</span><br><span class="line"> */</span><br><span class="line">public class ThreadLocalTest &#123;</span><br><span class="line">    private static ThreadLocal&lt;Integer&gt; x = new ThreadLocal&lt;Integer&gt;();</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        for (int i = 0; i &lt; 2; i++) &#123;</span><br><span class="line">            new Thread(new Runnable() &#123;</span><br><span class="line">                public void run() &#123;</span><br><span class="line">                    int data = new Random().nextInt();</span><br><span class="line">                    System.out.println(Thread.currentThread().getName()</span><br><span class="line">                            + &quot; has put data :&quot; + data);</span><br><span class="line">                    x.set(data);</span><br><span class="line"></span><br><span class="line">                    new A().get();</span><br><span class="line">                    new B().get();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获取数据</span><br><span class="line">     * @version 1.0.0</span><br><span class="line">     */</span><br><span class="line">    static class A &#123;</span><br><span class="line">        public void get() &#123;</span><br><span class="line">            int data = x.get();</span><br><span class="line">            System.out.println(&quot;A from &quot; + Thread.currentThread().getName()</span><br><span class="line">                    + &quot; get data :&quot; + data);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 获取数据</span><br><span class="line">     * @version 1.0.0</span><br><span class="line">     */</span><br><span class="line">    static class B &#123;</span><br><span class="line">        public void get() &#123;</span><br><span class="line">            int data = x.get();</span><br><span class="line">            System.out.println(&quot;B from &quot; + Thread.currentThread().getName()</span><br><span class="line">                    + &quot; get data :&quot; + data);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Thread-0 has put data :-889773907</span><br><span class="line">Thread-1 has put data :-514366238</span><br><span class="line">A from Thread-0 get data :-889773907</span><br><span class="line">A from Thread-1 get data :-514366238</span><br><span class="line">B from Thread-1 get data :-514366238</span><br><span class="line">B from Thread-0 get data :-889773907</span><br></pre></td></tr></table></figure></p>
-<p>可以看到每个线程get()到的都是自己set()进去的值</p>
-<p>我们写程序过程中经常有这样的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">private final static ThreadLocal&lt;SystemUser&gt; userThreadLocal = new ThreadLocal&lt;SystemUser&gt;();</span><br><span class="line">    </span><br><span class="line">    @Autowired</span><br><span class="line">    private SystemLogService systemLogService;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 设置当前用户</span><br><span class="line">     * @param user</span><br><span class="line">     */</span><br><span class="line">    public void setCurrentSystemUser(SystemUser user) &#123;</span><br><span class="line">        userThreadLocal.set(user);</span><br><span class="line">    &#125;</span><br><span class="line">    /**</span><br><span class="line">     * 从本地线程中取当前用户</span><br><span class="line">     * @return 系统用户</span><br><span class="line">     */</span><br><span class="line">    public SystemUser getCurrentSystemUser() &#123;</span><br><span class="line">        SystemUser user = userThreadLocal.get();</span><br><span class="line">        if (null == user) &#123;</span><br><span class="line">            user = (SystemUser) SecurityUtils.getSubject().getPrincipal();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        return user;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
-<p>小结：</p>
-<p>ThreadLocal是解决线程安全问题一个很好的思路，它通过为每个线程提供一个独立的变量副本解决了变量并发访问的冲突问题。</p>
-<p>在很多情况下，ThreadLocal比直接使用synchronized同步机制解决线程安全问题更简单，更方便，且结果程序拥有更高的并发性。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/understanding-java-thread/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2125,117 +1518,14 @@
 </ul>
 <h2 id="概述-Overview"><a href="#概述-Overview" class="headerlink" title="概述 Overview"></a>概述 Overview</h2><p>每个节点有一个全局唯一的标识符，作为 “node ID”。节点 ID 是一个随机选择的 160bit 空间，BitTorrent infohash[2] 也使用这样的 160bit 空间。 “距离”用来比较两个节点 ID 之间或者节点 ID 和 infohash 之间的”远近”。节点必须维护一个路由表，路由表中含有一部分其它节点的联系信息。其它节点距离自己越近时，路由表信息越详细。因此每个节点都知道 DHT 中离自己很”近”的节点的联系信息，而离自己非常远的 ID 的联系信息却知道的很少。</p>
 <p>在 Kademlia 网络中，距离是通过异或(XOR)计算的，结果为无符号整数。<code>distance(A, B) = |A xor B|</code>，值越小表示越近。</p>
-<p>当节点要为 torrent 寻找 peer 时，它将自己路由表中的节点 ID 和 torrent 的 infohash 进行”距离对比”。然后向路由表中离 infohash 最近的节点发送请求，问它们正在下载这个 torrent 的 peer 的联系信息。如果一个被联系的节点知道下载这个 torrent 的 peer 信息，那个 peer 的联系信息将被回复给当前节点。否则，那个被联系的节点则必须回复在它的路由表中离该 torrent 的 infohash 最近的节点的联系信息。最初的节点重复地请求比目标 infohash 更近的节点，直到不能再找到更近的节点为止。查询完了之后，客户端把自己作为一个 peer 插入到所有回复节点中离种子最近的那个节点中。</p>
-<p>请求 peer 的返回值包含一个不透明的值，称之为”令牌(token)”。如果一个节点宣布它所控制的 peer 正在下载一个种子，它必须在回复请求节点的同时，附加上对方向我们发送的最近的”令牌(token)”。这样当一个节点试图”宣布”正在下载一个种子时，被请求的节点核对令牌和发出请求的节点的 IP 地址。这是为了防止恶意的主机登记其它主机的种子。由于令牌仅仅由请求节点返回给收到令牌的同一个节点，所以没有规定他的具体实现。但是令牌必须在一个规定的时间内被接受，超时后令牌则失效。在 BitTorrent 的实现中，token 是在 IP 地址后面连接一个 secret(通常是一个随机数)，这个 secret 每五分钟改变一次，其中 token 在十分钟以内是可接受的。</p>
-<h2 id="路由表-Routing-Table"><a href="#路由表-Routing-Table" class="headerlink" title="路由表 Routing Table"></a>路由表 Routing Table</h2><p>每个节点维护一个路由表保存已知的好节点。路由表中的节点是用来作为在 DHT 中请求的起始点。路由表中的节点是在不断的向其他节点请求过程中，对方节点回复的。</p>
-<p>并不是我们在请求过程中收到得节点都是平等的，有的节点是好的，而另一些则不是。许多使用 DHT 协议的节点都可以发送请求并接收回复，但是不能主动回复其他节点的请求。节点的路由表只包含已知的好节点，这很重要。好节点是指在过去的 15 分钟以内，曾经对我们的某一个请求给出过回复的节点，或者曾经对我们的请求给出过一个回复(不用在15分钟以内)，并且在过去的 15 分钟给我们发送过请求。上述两种情况都可将节点视为好节点。在 15 分钟之后，对方没有上述 2 种情况发生，这个节点将变为可疑的。当节点不能给我们的一系列请求给出回复时，这个节点将变为坏的。相比那些未知状态的节点，已知的好节点会被给于更高的优先级。</p>
-<p>路由表覆盖从 0 到 2^160 全部的节点 ID 空间。路由表又被划分为桶(bucket)，每个桶包含一部分的 ID 空间。空的路由表只有一个桶，它的 ID 范围从 min=0 到 max=2^160。当 ID 为 N 的节点插入到表中时，它将被放到 ID 范围在 min &lt;= N &lt; max 的 桶 中。空的路由表只有一个桶，所以所有的节点都将被放到这个桶中。每个桶最多只能保存 K 个节点，当前 K=8。当一个桶放满了好节点之后，将不再允许新的节点加入，除非我们自身的节点 ID 在这个桶的范围内。在这样的情况下，这个桶将被分裂为 2 个新的桶，每个新桶的范围都是原来旧桶的一半。原来旧桶中的节点将被重新分配到这两个新的桶中。如果一个新表只有一个桶，这个包含整个范围的桶将总被分裂为 2 个新的桶，每个桶的覆盖范围从 0..2^159 和 2^159..2^160。</p>
-<p>当桶装满了好节点，新的节点会被丢弃。一旦桶中的某个节点变为了坏的节点，那么我们就用新的节点来替换这个坏的节点。如果桶中有在 15 分钟内都没有活跃过的节点，我们将这样的节点视为可疑的节点，这时我们向最久没有联系的节点发送 ping。如果被 ping 的节点给出了回复，那么我们向下一个可疑的节点发送 ping，不断这样循环下去，直到有某一个节点没有给出 ping 的回复，或者当前桶中的所有节点都是好的(也就是所有节点都不是可疑节点，他们在过去 15 分钟内都有活动)。如果桶中的某个节点没有对我们的 ping 给出回复，我们最好再试一次(再发送一次 ping，因为这个节点也许仍然是活跃的，但由于网络拥塞，所以发生了丢包现象，注意 DHT 的包都是 UDP 的)，而不是立即丢弃这个节点或者直接用新节点来替代它。这样，我们得路由表将充满稳定的长时间在线的节点。</p>
-<p>每个桶都应该维持一个 lastchange 字段来表明桶中节点的”新鲜”度。当桶中的节点被 ping 并给出了回复，或者一个节点被加入到了桶，或者一个节点被新的节点所替代，桶的 lastchange 字段都应当被更新。如果一个桶的 lastchange 在过去的 15 分钟内都没有变化，那么我们将更新它。这个更新桶操作是这样完成的：从这个桶所覆盖的范围中随机选择一个 ID，并对这个 ID 执行 find_nodes 查找操作。常常收到请求的节点通常不需要常常更新自己的桶，反之，不常常收到请求的节点常常需要周期性的执行更新所有桶的操作，这样才能保证当我们用到 DHT 的时候，里面有足够多的好的节点。</p>
-<p>在插入第一个节点到路由表并启动服务后，这个节点应试着查找 DHT 中离自己更近的节点，这个查找工作是通过不断的发出 find_node 消息给越来越近的节点来完成的，当不能找到更近的节点时，这个扩散工作就结束了。路由表应当被启动工作和客户端软件保存（也就是启动的时候从客户端中读取路由表信息，结束的时候客户端软件记录到文件中）。</p>
-<h2 id="BitTorrent-协议扩展-BitTorrent-Protocol-Extension"><a href="#BitTorrent-协议扩展-BitTorrent-Protocol-Extension" class="headerlink" title="BitTorrent 协议扩展 BitTorrent Protocol Extension"></a>BitTorrent 协议扩展 BitTorrent Protocol Extension</h2><p>BitTorrent 协议已经被扩展为可以在通过 tracker 得到的 peer 之间互相交换节点的 UDP 端口号(也就是告诉对方我们的 DHT 服务端口号)，在这样的方式下，客户端可以通过下载普通的种子文件来自动扩展 DHT 路由表。新安装的客户端第一次试着下载一个无 tracker 的种子时，它的路由表中将没有任何节点，这是它需要在 torrent 文件中找到联系信息。</p>
-<p>peers 如果支持 DHT 协议就将 BitTorrent 协议握手消息的保留位的第 8 字节的最后一位置为 1。这时如果 peer 收到一个 handshake 表明对方支持 DHT 协议，就应该发送 PORT 消息。它由字节 0x09 开始，payload 的长度是 2 个字节，包含了这个 peer 的 DHT 服务使用的网络字节序的 UDP 端口号。当 peer 收到这样的消息是应当向对方的 IP 和消息中指定的端口号的节点发送 ping。如果收到了 ping 的回复，那么应当使用上述的方法将新节点的联系信息加入到路由表中。</p>
-<h2 id="Torrent-文件扩展-Torrent-File-Extensions"><a href="#Torrent-文件扩展-Torrent-File-Extensions" class="headerlink" title="Torrent 文件扩展 Torrent File Extensions"></a>Torrent 文件扩展 Torrent File Extensions</h2><p>一个无 tracker 的 torrent 文件字典不包含 <code>announce</code> 关键字，而使用 <code>nodes</code> 关键字来替代。这个关键字对应的内容应该设置为 torrent 创建者的路由表中 K 个最接近的节点。可供选择的，这个关键字也可以设置为一个已知的可用节点，比如这个 torrent 文件的创建者。请不要自动加入 <code>router.bittorrent.com</code> 到 torrent 文件中或者自动加入这个节点到客户端路由表中。</p>
-<ul>
-<li>nodes = <code>[[&quot;&lt;host&gt;&quot;, &lt;port&gt;], [&quot;&lt;host&gt;&quot;, &lt;port&gt;], ...]</code></li>
-<li>nodes = <code>[[&quot;127.0.0.1&quot;, 6881], [&quot;your.router.node&quot;, 4804]]</code></li>
-</ul>
-<h2 id="KRPC-协议-KRPC-Protocol"><a href="#KRPC-协议-KRPC-Protocol" class="headerlink" title="KRPC 协议 KRPC Protocol"></a>KRPC 协议 KRPC Protocol</h2><p>KRPC 协议是由 bencode 编码组成的一个简单的 RPC 结构，他使用 UDP 报文发送。一个独立的请求包被发出去然后一个独立的包被回复。这个协议没有重发。它包含 3 种消息：请求，回复和错误。对DHT协议而言，这里有 4 种请求：ping，find_node，get_peers 和 announce_peer。</p>
-<p>一条 KRPC 消息由一个独立的字典组成，其中有 2 个关键字是所有的消息都包含的，其余的附加关键字取决于消息类型。每条消息都包含 t 关键字，它是一个代表了 transaction ID 的字符串类型。transaction ID 由请求节点产生，并且回复中要包含回显该字段，所以回复可能对应一个节点的多个请求。transaction ID 应当被编码为一个短的二进制字符串，比如 2 个字节，这样就可以对应 2^16 个请求。另外每个 KRPC 消息还应该包含的关键字是 y，它由一个字节组成，表明这个消息的类型。y 对应的值有三种情况：q 表示请求，r 表示回复，e 表示错误。</p>
-<h2 id="联系信息编码-Contact-Encoding"><a href="#联系信息编码-Contact-Encoding" class="headerlink" title="联系信息编码 Contact Encoding"></a>联系信息编码 Contact Encoding</h2><p>Peers 的联系信息被编码为 6 字节的字符串。又被称为 “CompactIP-address/port info”，其中前 4 个字节是网络字节序的 IP 地址，后 2 个字节是网络字节序的端口。</p>
-<p>节点的联系信息被编码为 26 字节的字符串。又被称为 “Compactnode info”，其中前 20 字节是网络字节序的节点 ID，后面 6 个字节是 peers 的 “CompactIP-address/port info”。</p>
-<h2 id="请求-Queries"><a href="#请求-Queries" class="headerlink" title="请求 Queries"></a>请求 Queries</h2><p>请求，对应于 KPRC 消息字典中的 y 关键字的值是 q，它包含 2 个附加的关键字 q 和 a。关键字 q 是字符串类型，包含了请求的方法名字。关键字 a 一个字典类型包含了请求所附加的参数。</p>
-<h2 id="回复-Responses"><a href="#回复-Responses" class="headerlink" title="回复 Responses"></a>回复 Responses</h2><p>回复，对应于 KPRC 消息字典中的 y 关键字的值是 r，包含了一个附加的关键字 r。关键字 r 是字典类型，包含了返回的值。发送回复消息是在正确解析了请求消息的基础上完成的。</p>
-<h2 id="错误-Errors"><a href="#错误-Errors" class="headerlink" title="错误 Errors"></a>错误 Errors</h2><p>错误，对应于 KPRC 消息字典中的 y 关键字的值是 e，包含一个附加的关键字 e。关键字 e 是列表类型。第一个元素是数字类型，表明了错误码。第二个元素是字符串类型，表明了错误信息。当一个请求不能解析或出错时，错误包将被发送。下表描述了可能出现的错误码：</p>
-<table>
-<thead>
-<tr>
-<th>错误码</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>201</td>
-<td>一般错误</td>
-</tr>
-<tr>
-<td>202</td>
-<td>服务错误</td>
-</tr>
-<tr>
-<td>203</td>
-<td>协议错误，比如不规范的包，无效的参数，或者错误的 token</td>
-</tr>
-<tr>
-<td>204</td>
-<td>未知方法</td>
-</tr>
-</tbody>
-</table>
-<p>错误包例子 Example Error Packets:</p>
-<ul>
-<li>generic error = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;e&quot;, &quot;e&quot;:[201, &quot;A Generic Error Ocurred&quot;]}</code></li>
-<li>bencoded = <code>d1:eli201e23:A Generic Error Ocurrede1:t2:aa1:y1:ee</code></li>
-</ul>
-<h2 id="DHT-请求-DHT-Queries"><a href="#DHT-请求-DHT-Queries" class="headerlink" title="DHT 请求 DHT Queries"></a>DHT 请求 DHT Queries</h2><p>所有的请求都包含一个关键字 id，它包含了请求节点的节点 ID。所有的回复也包含关键字 id，它包含了回复节点的节点 ID。</p>
-<h3 id="ping"><a href="#ping" class="headerlink" title="ping"></a>ping</h3><p>最基础的请求就是 ping。这时 KPRC 协议中的 “q” = “ping”。Ping 请求包含一个参数 id，它是一个 20 字节的字符串包含了发送者网络字节序的节点 ID。对应的 ping 回复也包含一个参数 id，包含了回复者的节点 ID。</p>
-<ul>
-<li>参数: <code>{&quot;id&quot; : &quot;&lt;querying nodes id&gt;&quot;}</code></li>
-<li>回复: <code>{&quot;id&quot; : &quot;&lt;queried nodes id&gt;&quot;}</code></li>
-</ul>
-<p><strong>报文包例子 Example Packets</strong></p>
-<ul>
-<li>ping Query = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;q&quot;, &quot;q&quot;:&quot;ping&quot;, &quot;a&quot;:{&quot;id&quot;:&quot;abcdefghij0123456789&quot;}}</code></li>
-<li>bencoded = <code>d1:ad2:id20:abcdefghij0123456789e1:q4:ping1:t2:aa1:y1:qe</code></li>
-<li>Response = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;r&quot;, &quot;r&quot;: {&quot;id&quot;:&quot;mnopqrstuvwxyz123456&quot;}}</code></li>
-<li>bencoded = <code>d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re</code></li>
-</ul>
-<h3 id="find-node"><a href="#find-node" class="headerlink" title="find_node"></a>find_node</h3><p>find_node 被用来查找给定 ID 的节点的联系信息。这时 KPRC 协议中的 “q” == “find_node”。find_node 请求包含 2 个参数，第一个参数是 id，包含了请求节点的ID。第二个参数是 target，包含了请求者正在查找的节点的 ID。当一个节点接收到了 find_node 的请求，他应该给出对应的回复，回复中包含 2 个关键字 id 和 nodes，nodes 是字符串类型，包含了被请求节点的路由表中最接近目标节点的 K(8) 个最接近的节点的联系信息。</p>
-<ul>
-<li>参数: <code>{&quot;id&quot; : &quot;&lt;querying nodes id&gt;&quot;, &quot;target&quot; : &quot;&lt;id of target node&gt;&quot;}</code></li>
-<li>回复: <code>{&quot;id&quot; : &quot;&lt;queried nodes id&gt;&quot;, &quot;nodes&quot; : &quot;&lt;compact node info&gt;&quot;}</code></li>
-</ul>
-<p><strong>报文包例子 Example Packets</strong></p>
-<ul>
-<li>find_node Query = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;q&quot;, &quot;q&quot;:&quot;find_node&quot;, &quot;a&quot;: {&quot;id&quot;:&quot;abcdefghij0123456789&quot;, &quot;target&quot;:&quot;mnopqrstuvwxyz123456&quot;}}</code></li>
-<li>bencoded = <code>d1:ad2:id20:abcdefghij01234567896:target20:mnopqrstuvwxyz123456e1:q9:find_node1:t2:aa1:y1:qe</code></li>
-<li>Response = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;r&quot;, &quot;r&quot;: {&quot;id&quot;:&quot;0123456789abcdefghij&quot;, &quot;nodes&quot;: &quot;def456...&quot;}}</code></li>
-<li>bencoded = <code>d1:rd2:id20:0123456789abcdefghij5:nodes9:def456...e1:t2:aa1:y1:re</code></li>
-</ul>
-<h3 id="get-peers"><a href="#get-peers" class="headerlink" title="get_peers"></a>get_peers</h3><p>get_peers 与 torrent 文件的 infohash 有关。这时 KPRC 协议中的 “q” = “get_peers”。get_peers 请求包含 2 个参数。第一个参数是 id，包含了请求节点的 ID。第二个参数是 info_hash，它代表 torrent 文件的 infohash。如果被请求的节点有对应 info_hash 的 peers，他将返回一个关键字 values，这是一个列表类型的字符串。每一个字符串包含了 “CompactIP-address/portinfo” 格式的 peers 信息。如果被请求的节点没有这个 infohash 的 peers，那么他将返回关键字 nodes，这个关键字包含了被请求节点的路由表中离 info_hash 最近的 K 个节点，使用 “Compactnodeinfo” 格式回复。在这两种情况下，关键字 token 都将被返回。token 关键字在今后的 annouce_peer 请求中必须要携带。token 是一个短的二进制字符串。</p>
-<ul>
-<li>参数: <code>{&quot;id&quot; : &quot;&lt;querying nodes id&gt;&quot;, &quot;info_hash&quot; : &quot;&lt;20-byte infohash of target torrent&gt;&quot;}</code></li>
-<li>回复: <code>{&quot;id&quot; : &quot;&lt;queried nodes id&gt;&quot;, &quot;token&quot; :&quot;&lt;opaque write token&gt;&quot;, &quot;values&quot; : [&quot;&lt;peer 1 info string&gt;&quot;, &quot;&lt;peer 2 info string&gt;&quot;]}</code></li>
-<li>或: <code>{&quot;id&quot; : &quot;&lt;queried nodes id&gt;&quot;, &quot;token&quot; :&quot;&lt;opaque write token&gt;&quot;, &quot;nodes&quot; : &quot;&lt;compact node info&gt;&quot;}</code></li>
-</ul>
-<p><strong>报文包例子 Example Packets:</strong></p>
-<ul>
-<li>get_peers Query = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;q&quot;, &quot;q&quot;:&quot;get_peers&quot;, &quot;a&quot;: {&quot;id&quot;:&quot;abcdefghij0123456789&quot;, &quot;info_hash&quot;:&quot;mnopqrstuvwxyz123456&quot;}}</code></li>
-<li>bencoded = <code>d1:ad2:id20:abcdefghij01234567899:info_hash20:mnopqrstuvwxyz123456e1:q9:get_peers1:t2:aa1:y1:qe</code></li>
-<li>Response with peers = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;r&quot;, &quot;r&quot;: {&quot;id&quot;:&quot;abcdefghij0123456789&quot;, &quot;token&quot;:&quot;aoeusnth&quot;, &quot;values&quot;: [&quot;axje.u&quot;, &quot;idhtnm&quot;]}}</code></li>
-<li>bencoded = <code>d1:rd2:id20:abcdefghij01234567895:token8:aoeusnth6:valuesl6:axje.u6:idhtnmee1:t2:aa1:y1:re</code></li>
-<li>Response with closest nodes = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;r&quot;, &quot;r&quot;: {&quot;id&quot;:&quot;abcdefghij0123456789&quot;, &quot;token&quot;:&quot;aoeusnth&quot;, &quot;nodes&quot;: &quot;def456...&quot;}}</code></li>
-<li>bencoded = <code>d1:rd2:id20:abcdefghij01234567895:nodes9:def456...5:token8:aoeusnthe1:t2:aa1:y1:re</code></li>
-</ul>
-<h3 id="announce-peer"><a href="#announce-peer" class="headerlink" title="announce_peer"></a>announce_peer</h3><p>这个请求用来表明发出 announce_peer 请求的节点，正在某个端口下载 torrent 文件。announce_peer 包含 4 个参数。第一个参数是 id，包含了请求节点的 ID；第二个参数是 info_hash，包含了 torrent 文件的 infohash；第三个参数是 port 包含了整型的端口号，表明 peer 在哪个端口下载；第四个参数数是 token，这是在之前的 get_peers 请求中收到的回复中包含的。收到 announce_peer 请求的节点必须检查这个 token 与之前我们回复给这个节点 get_peers 的 token 是否相同。如果相同，那么被请求的节点将记录发送 announce_peer 节点的 IP 和请求中包含的 port 端口号在 peer 联系信息中对应的 infohash 下。</p>
-<ul>
-<li>参数: <code>{&quot;id&quot; : &quot;&lt;querying nodes id&gt;&quot;, &quot;implied_port&quot;: &lt;0 or 1&gt;, &quot;info_hash&quot; : &quot;&lt;20-byte infohash of target torrent&gt;&quot;, &quot;port&quot; : &lt;port number&gt;, &quot;token&quot; : &quot;&lt;opaque token&gt;&quot;}</code></li>
-<li>回复: <code>{&quot;id&quot; : &quot;&lt;queried nodes id&gt;&quot;}</code></li>
-</ul>
-<p><strong>报文包例子 Example Packets:</strong></p>
-<ul>
-<li>announce_peers Query = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;q&quot;, &quot;q&quot;:&quot;announce_peer&quot;, &quot;a&quot;: {&quot;id&quot;:&quot;abcdefghij0123456789&quot;, &quot;implied_port&quot;: 1, &quot;info_hash&quot;:&quot;mnopqrstuvwxyz123456&quot;, &quot;port&quot;: 6881, &quot;token&quot;: &quot;aoeusnth&quot;}}</code></li>
-<li>bencoded = <code>d1:ad2:id20:abcdefghij01234567899:info_hash20:&lt;br /&gt; mnopqrstuvwxyz1234564:porti6881e5:token8:aoeusnthe1:q13:announce_peer1:t2:aa1:y1:qe</code></li>
-<li>Response = <code>{&quot;t&quot;:&quot;aa&quot;, &quot;y&quot;:&quot;r&quot;, &quot;r&quot;: {&quot;id&quot;:&quot;mnopqrstuvwxyz123456&quot;}}</code></li>
-<li>bencoded = <code>d1:rd2:id20:mnopqrstuvwxyz123456e1:t2:aa1:y1:re</code></li>
-</ul>
-<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
-<li>[1] Peter Maymounkov, David Mazieres, “Kademlia: A Peer-to-peer Information System Based on the XOR Metric”, IPTPS 2002. <a href="http://www.cs.rice.edu/Conferences/IPTPS02/109.pdf" target="_blank" rel="noopener">http://www.cs.rice.edu/Conferences/IPTPS02/109.pdf</a></li>
-<li>[2] Use SHA1 and plenty of entropy to ensure a unique ID.</li>
-</ul>
-<h2 id="Copyright"><a href="#Copyright" class="headerlink" title="Copyright"></a>Copyright</h2><p>This document has been placed in the public domain.</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/dht-protocol/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2385,105 +1675,15 @@
 </tr>
 </tbody>
 </table>
-<h2 id="crontab-实例"><a href="#crontab-实例" class="headerlink" title="crontab 实例"></a>crontab 实例</h2><h3 id="特定时间执行"><a href="#特定时间执行" class="headerlink" title="特定时间执行"></a>特定时间执行</h3><p>crontab 的基本用法是在特定的时间执行一项任务，如下是 6 月 10 上午 8:30 执行 Full backup shell script。 要注意的是时间字段采用的是 24 小时制，如果是下午 8 点，则改写为 20 点</p>
-<p><code>30 08 10 06 * /home/ramesh/full-backup</code></p>
-<ul>
-<li><code>30</code> – 第 30 分钟</li>
-<li><code>08</code> – 早上 8 点</li>
-<li><code>10</code> – 10 号</li>
-<li><code>06</code> – 第 6 个月 (6 月)</li>
-<li><code>*</code> – 一周的任何一天<h3 id="安排多个实例（比如一天执行两次）"><a href="#安排多个实例（比如一天执行两次）" class="headerlink" title="安排多个实例（比如一天执行两次）"></a>安排多个实例（比如一天执行两次）</h3>下面的增量备份脚本每天执行两次。</li>
-</ul>
-<p>每天于 11:00, 16:00 执行，逗号两侧的时间都会执行。</p>
-<p><code>00 11,16 * * * /home/ramesh/bin/incremental-backup</code></p>
-<ul>
-<li><code>00</code> – 第 0 分钟 (每小时开时)</li>
-<li><code>11,16</code> – 早上 11 点与下午 4 点</li>
-<li><code>*</code> – 每天</li>
-<li><code>*</code> – 每个月</li>
-<li><code>*</code> – 一周的任何一天</li>
-</ul>
-<h3 id="让任务只在特定时间执行（比如仅当工作日时执行）"><a href="#让任务只在特定时间执行（比如仅当工作日时执行）" class="headerlink" title="让任务只在特定时间执行（比如仅当工作日时执行）"></a>让任务只在特定时间执行（比如仅当工作日时执行）</h3><p>下面这个例子是每天 9:00-16:00 检查数据库状态（包括周六）</p>
-<p><code>00 09-18 * * * /home/ramesh/bin/check-db-status</code></p>
-<ul>
-<li><code>00</code> – 第 0 分钟 (每小时开时)</li>
-<li><code>09-18</code> – 9 点, 10 点, 11 点, 12 点, 下午 1 点, 下午 2 点, 下午 3 点, 下午 4 点, 下午 5 点, 下午 6 点</li>
-<li><code>*</code> – 每天</li>
-<li><code>*</code> – 每个月</li>
-</ul>
-<ul>
-<li>– 一周的任何一天</li>
-</ul>
-<p>如果只想工作日执行此操作</p>
-<p><code>00 09-18 * * 1-5 /home/ramesh/bin/check-db-status</code></p>
-<ul>
-<li><code>00</code> – 第 0 分钟 (每小时开时)</li>
-<li><code>09-18</code> – 9 点, 10 点, 11 点, 12 点, 下午 1 点, 下午 2 点, 下午 3 点, 下午 4 点, 下午 5 点, 下午 6 点</li>
-<li><code>*</code> – 每天</li>
-<li><code>*</code> – 每个月</li>
-<li><code>1-5</code> – 周一, 周二, 周三, 周四和周五 (工作日)</li>
-</ul>
-<h3 id="如何查看-cron-定时任务"><a href="#如何查看-cron-定时任务" class="headerlink" title="如何查看 cron 定时任务"></a>如何查看 cron 定时任务</h3><p>查看当前用户定时任务</p>
-<p><code>ramesh@dev-db$ crontab -l</code></p>
-<p>查看 ROOT 用户定时任务，用 root 登入 su-root，再执行 <code>crontab -l</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@dev-db# crontab -l</span><br><span class="line">no crontab for root</span><br></pre></td></tr></table></figure>
-<p>查看其它用户定时任务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@dev-db# crontab -u sathiya -l</span><br><span class="line">@monthly /home/sathiya/monthly-backup</span><br><span class="line">00 09-18 * * * /home/sathiya/check-db-status</span><br></pre></td></tr></table></figure></p>
-<h3 id="如何编辑-cron-定时任务"><a href="#如何编辑-cron-定时任务" class="headerlink" title="如何编辑 cron 定时任务"></a>如何编辑 cron 定时任务</h3><p><code>ramesh@dev-db$ crontab -e</code></p>
-<h3 id="安排每分钟都执行定时任务"><a href="#安排每分钟都执行定时任务" class="headerlink" title="安排每分钟都执行定时任务"></a>安排每分钟都执行定时任务</h3><p>理论情况下，没有每分钟都要执行的 shell，但下面这个例子，让我们更好的了解 crontab</p>
-<p><code>* * * * * 命令</code></p>
-<blockquote>
-<p>*<em> 代表着所有可能取到的值，除了直接用 </em> 外，下面的几个例子也较为常用</p>
-</blockquote>
-<ul>
-<li>当指定 */5 在分钟字段，代表每五分钟。</li>
-<li>当指定 0-10/2 在分钟字段，代表在前十分钟的每两分钟</li>
-</ul>
-<p>上面的例子对于其它四个字段同样试用</p>
-<h3 id="安排后台每十分钟执行定时任务"><a href="#安排后台每十分钟执行定时任务" class="headerlink" title="安排后台每十分钟执行定时任务"></a>安排后台每十分钟执行定时任务</h3><p><code>*/10 * * * * /home/ramesh/check-disk-space</code></p>
-<p>有一些特殊的例子，可以用关键字替代上述五个字段– <code>reboot</code>, <code>midnight</code>, <code>yearly</code>, <code>hourly</code></p>
-<p>Table: Cron special keywords and its meaning</p>
-<table>
-<thead>
-<tr>
-<th>Keyword</th>
-<th>Equivalent</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>@yearly</td>
-<td>0 0 1 1 *</td>
-</tr>
-<tr>
-<td>@daily</td>
-<td>0 0 <em> </em> *</td>
-</tr>
-<tr>
-<td>@hourly</td>
-<td>0 <em> </em> <em> </em></td>
-</tr>
-<tr>
-<td>@reboot</td>
-<td>重启时运行</td>
-</tr>
-</tbody>
-</table>
-<h3 id="每一年的第一分钟执行定时任务（-yearly）"><a href="#每一年的第一分钟执行定时任务（-yearly）" class="headerlink" title="每一年的第一分钟执行定时任务（@yearly）"></a>每一年的第一分钟执行定时任务（@yearly）</h3><p>下面的例子将在每一年的 1 月 1 日 0:00 执行</p>
-<p><code>@yearly /home/ramesh/red-hat/bin/annual-maintenance</code></p>
-<h3 id="每月执行定时任务（-mothly）"><a href="#每月执行定时任务（-mothly）" class="headerlink" title="每月执行定时任务（@mothly）"></a>每月执行定时任务（@mothly）</h3><p>下面的例子将在每月 1 日 0:00 执行</p>
-<p><code>@monthly /home/ramesh/suse/bin/tape-backup</code></p>
-<h3 id="每天执行定时任务（-daily）"><a href="#每天执行定时任务（-daily）" class="headerlink" title="每天执行定时任务（@daily）"></a>每天执行定时任务（@daily）</h3><p>下面的例子将在每天 0:00 执行</p>
-<p><code>@daily /home/ramesh/arch-linux/bin/cleanup-logs &quot;day started&quot;</code></p>
-<h3 id="每次重启时执行定时任务（-reboot）"><a href="#每次重启时执行定时任务（-reboot）" class="headerlink" title="每次重启时执行定时任务（@reboot）"></a>每次重启时执行定时任务（@reboot）</h3><p><code>@reboot CMD</code></p>
-<h3 id="如何用-mail-关键字禁止-重定向-cron-的邮件"><a href="#如何用-mail-关键字禁止-重定向-cron-的邮件" class="headerlink" title="如何用 mail 关键字禁止/重定向 cron 的邮件"></a>如何用 mail 关键字禁止/重定向 cron 的邮件</h3><p>默认情况下，crontab 将向布置定时任务的管理员发送邮件，如果想重定向此用户，添加并更新 MAIL</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ramesh@dev-db$ crontab -l</span><br><span class="line">MAIL=&quot;ramesh&quot;</span><br><span class="line"> </span><br><span class="line">@yearly /home/ramesh/annual-maintenance</span><br><span class="line">*/10 * * * * /home/ramesh/check-disk-space</span><br></pre></td></tr></table></figure>
-<p>如果不想任何人接收，则直接将 MAIL 置空</p>
-<h3 id="如何系秒每执行一个定时任务"><a href="#如何系秒每执行一个定时任务" class="headerlink" title="如何系秒每执行一个定时任务"></a>如何系秒每执行一个定时任务</h3><p>无法安排每秒执行，因为最小处理单元是分钟，另一方面，没有什么理由让我们每秒都执行一任务</p>
-<h3 id="crontab-中的-PATH-变量"><a href="#crontab-中的-PATH-变量" class="headerlink" title="crontab 中的 PATH 变量"></a>crontab 中的 PATH 变量</h3><p>上面的例子都是用绝对的路径</p>
-<p>如果你想用相对的路径，设置环境变量可以在 crontab 增加<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ramesh@dev-db$ crontab -l</span><br><span class="line"> </span><br><span class="line">PATH=/bin:/sbin:/usr/bin:/usr/sbin:/home/ramesh</span><br><span class="line"> </span><br><span class="line">@yearly annual-maintenance</span><br><span class="line">*/10 * * * * check-disk-space</span><br></pre></td></tr></table></figure></p>
-<h3 id="从-cron-文件中定义-cron-任务"><a href="#从-cron-文件中定义-cron-任务" class="headerlink" title="从 cron 文件中定义 cron 任务"></a>从 cron 文件中定义 cron 任务</h3><p>除了直接编辑外，你也可以先在一个文件中编辑好任务，再导入<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ramesh@dev-db$ crontab -l</span><br><span class="line">no crontab for ramesh</span><br><span class="line"> </span><br><span class="line">$ cat cron-file.txt</span><br><span class="line">@yearly /home/ramesh/annual-maintenance</span><br><span class="line">*/10 * * * * /home/ramesh/check-disk-space</span><br><span class="line"> </span><br><span class="line">ramesh@dev-db$ crontab cron-file.txt</span><br><span class="line"> </span><br><span class="line">ramesh@dev-db$ crontab -l</span><br><span class="line">@yearly /home/ramesh/annual-maintenance</span><br><span class="line"> </span><br><span class="line">*/10 * * * * /home/ramesh/check-disk-space</span><br></pre></td></tr></table></figure></p>
-<p>应用时要注意，此操作会删除原有的cron任务</p>
-
+<h2 id="crontab-实例"><a href="#crontab-实例" class="headerlink" title="crontab 实例"></a>crontab 实例</h2><h3 id="特定时间执行"><a href="#特定时间执行" class="headerlink" title="特定时间执行"></a>特定时间执行</h3>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-planned-task-crontab/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

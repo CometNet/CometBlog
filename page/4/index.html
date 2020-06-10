@@ -250,61 +250,14 @@
 <blockquote>
 <p>一个类应该有且只有一个去改变它的理由，这意味着一个类应该只有一项工作。</p>
 </blockquote>
-<p>例如，假设我们有一些shape（形状），并且我们想求所有shape的面积的和。这很简单对吗?<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">class Circle &#123;</span><br><span class="line">    public $radius;</span><br><span class="line"> </span><br><span class="line">    public function __construct($radius) &#123;</span><br><span class="line">        $this-&gt;radius = $radius;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Square &#123;</span><br><span class="line">    public $length;</span><br><span class="line"> </span><br><span class="line">    public function __construct($length) &#123;</span><br><span class="line">        $this-&gt;length = $length;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>首先，我们创建shape类，让构造函数设置需要的参数。接下来，我们继续通过创建AreaCalculator类，然后编写求取所提供的shape面积之和的逻辑。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">class AreaCalculator &#123;</span><br><span class="line"></span><br><span class="line">    protected $shapes;</span><br><span class="line"></span><br><span class="line">    public function __construct($shapes = array()) &#123;</span><br><span class="line">        $this-&gt;shapes = $shapes;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function sum() &#123;</span><br><span class="line">        // logic to sum the areas</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function output() &#123;</span><br><span class="line">        return implode(&apos;&apos;, array(</span><br><span class="line">            &quot;&quot;,</span><br><span class="line">                &quot;Sum of the areas of provided shapes: &quot;,</span><br><span class="line">                $this-&gt;sum(),</span><br><span class="line">            &quot;&quot;</span><br><span class="line">        ));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>使用AreaCalculator类，我们简单地实例化类，同时传入一个shape数组，并在页面的底部显示输出。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$shapes = array(</span><br><span class="line">    new Circle(2),</span><br><span class="line">    new Square(5),</span><br><span class="line">    new Square(6)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line"></span><br><span class="line">echo $areas-&gt;output();</span><br></pre></td></tr></table></figure></p>
-<p>输出方法的问题在于，AreaCalculator处理了输出数据的逻辑。因此，如果用户想要以json或其他方式输出数据该怎么办?</p>
-<p>所有的逻辑将由AreaCalculator类处理，这是违反单一职责原则（SRP）的；AreaCalculator类应该只对提供的shape进行面积求和，它不应该关心用户是需要json还是HTML。</p>
-<p>因此，为了解决这个问题，你可以创建一个SumCalculatorOutputter类，使用这个来处理你所需要的逻辑，即对所提供的shape进行面积求和后如何显示。</p>
-<p>SumCalculatorOutputter类按如下方式工作:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$shapes = array(</span><br><span class="line">    new Circle(2),</span><br><span class="line">    new Square(5),</span><br><span class="line">    new Square(6)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line">$output = new SumCalculatorOutputter($areas);</span><br><span class="line"> </span><br><span class="line">echo $output-&gt;JSON();</span><br><span class="line">echo $output-&gt;HAML();</span><br><span class="line">echo $output-&gt;HTML();</span><br><span class="line">echo $output-&gt;JADE();</span><br></pre></td></tr></table></figure></p>
-<p>现在，不管你需要何种逻辑来输出数据给用户，皆由SumCalculatorOutputter类处理。</p>
-<h2 id="开放封闭原则"><a href="#开放封闭原则" class="headerlink" title="开放封闭原则"></a>开放封闭原则</h2><blockquote>
-<p>对象或实体应该对扩展开放，对修改封闭。</p>
-</blockquote>
-<p>这就意味着一个类应该无需修改类本身但却容易扩展。让我们看看AreaCalculator类，尤其是它的sum方法。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        if(is_a($shape, &apos;Square&apos;)) &#123;</span><br><span class="line">            $area[] = pow($shape-&gt;length, 2);</span><br><span class="line">        &#125; else if(is_a($shape, &apos;Circle&apos;)) &#123;</span><br><span class="line">            $area[] = pi() * pow($shape-&gt;radius, 2);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果我们希望sum方法能够对更多的shape进行面积求和，我们会添加更多的If / else块，这违背了开放封闭原则。</p>
-<p>能让这个sum方法做的更好的一种方式是，将计算每个shape面积的逻辑从sum方法中移出，将它附加到shape类上。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">class Square &#123;</span><br><span class="line">    public $length;</span><br><span class="line"> </span><br><span class="line">    public function __construct($length) &#123;</span><br><span class="line">        $this-&gt;length = $length;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function area() &#123;</span><br><span class="line">        return pow($this-&gt;length, 2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>对Circle类应该做同样的事情，area方法应该添加。现在，计算任何所提的shape的面积的和的方法应该和如下简单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        $area[] = $shape-&gt;area;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>现在我们可以创建另一个shape类，并在计算和时将其传递进来，这不会破坏我们的代码。然而，现在另一个问题出现了，我们怎么知道传递到AreaCalculator上的对象确实是一个shape，或者这个shape具有一个叫做area的方法?</p>
-<p>对接口编程是S.O.L.I.D不可或缺的一部分，一个快速的例子是我们创建一个接口，让每个shape实现它:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Circle implements ShapeInterface &#123;</span><br><span class="line">    public $radius;</span><br><span class="line"> </span><br><span class="line">    public function __construct($radius) &#123;</span><br><span class="line">        $this-&gt;radius = $radius;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function area() &#123;</span><br><span class="line">        return pi() * pow($this-&gt;radius, 2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在我们AreaCalculator的求和中，我们可以检查所提供的shape确实是ShapeInterface的实例，否则我们抛出一个异常:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        if(is_a($shape, &apos;ShapeInterface&apos;)) &#123;</span><br><span class="line">            $area[] = $shape-&gt;area();</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        throw new AreaCalculatorInvalidShapeException;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h2 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h2><blockquote>
-<p>在对象 x 为类型 T 时 q(x) 成立，那么当 S 是 T 的子类时，对象 y 为类型 S 时 q(y) 也应成立。（即对父类的调用同样适用于子类）</p>
-</blockquote>
-<p>这一切说明的是，每一个子类或派生类应该可以替换它们基类或父类。</p>
-<p>还利用AreaCalculator类，我们有一个VolumeCalculator类，它扩展了AreaCalculator类:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class VolumeCalculator extends AreaCalulator &#123;</span><br><span class="line">    public function __construct($shapes = array()) &#123;</span><br><span class="line">        parent::__construct($shapes);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function sum() &#123;</span><br><span class="line">        // logic to calculate the volumes and then return and array of output</span><br><span class="line">        return array($summedData);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>In the SumCalculatorOutputter class:</p>
-<p>在SumCalculatorOutputter类中:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">class SumCalculatorOutputter &#123;</span><br><span class="line">    protected $calculator;</span><br><span class="line"> </span><br><span class="line">    public function __constructor(AreaCalculator $calculator) &#123;</span><br><span class="line">        $this-&gt;calculator = $calculator;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function JSON() &#123;</span><br><span class="line">        $data = array(</span><br><span class="line">            &apos;sum&apos; =&gt; $this-&gt;calculator-&gt;sum();</span><br><span class="line">        );</span><br><span class="line"> </span><br><span class="line">        return json_encode($data);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function HTML() &#123;</span><br><span class="line">        return implode(&apos;&apos;, array(</span><br><span class="line">            &apos;&lt;h1&gt;&apos;,</span><br><span class="line">                &apos;Sum of the areas of provided shapes: &apos;,</span><br><span class="line">                $this-&gt;calculator-&gt;sum(),</span><br><span class="line">            &apos;&lt;/h1&gt;&apos;</span><br><span class="line">        ));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>如果我们试图这样来运行一个例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line">$volumes = new AreaCalculator($solidShapes);</span><br><span class="line"> </span><br><span class="line">$output = new SumCalculatorOutputter($areas);</span><br><span class="line">$output2 = new SumCalculatorOutputter($volumes);</span><br></pre></td></tr></table></figure></p>
-<p>程序可以运行，但是当我们在$output2对象调用HTML方法，我们得到一个E_NOTICE错误，提示数组到字符串的转换。</p>
-<p>为了解决这个问题，不要从VolumeCalculator类的sum方法返回一个数组，你应该:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    // logic to calculate the volumes and then return and array of output</span><br><span class="line">    return $summedData;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>求和的结果作为一个浮点数，双精度或整数。</p>
-<h2 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h2><blockquote>
-<p>不应强迫客户端实现一个它用不上的接口，或是说客户端不应该被迫依赖它们不使用的方法。</p>
-</blockquote>
-<p>仍然以shape为例，我们知道也有立体shape，如果我们也想计算shape的体积，我们可以添加另一个合约到ShapeInterface:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">    public function volume();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>任何我们创建的shape必须实现volume的方法，但是我们知道正方形是平面形状没有体积，所以这个接口将迫使正方形类实现一个它没有使用的方法。</p>
-<p>接口隔离原则（ISP）不允许这样，你可以创建另一个名为SolidShapeInterface的接口，它有一个volume合约，对于立体形状比如立方体等等，可以实现这个接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">interface SolidShapeInterface &#123;</span><br><span class="line">    public function volume();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Cuboid implements ShapeInterface, SolidShapeInterface &#123;</span><br><span class="line">    public function area() &#123;</span><br><span class="line">        // calculate the surface area of the cuboid</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function volume() &#123;</span><br><span class="line">        // calculate the volume of the cuboid</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>这是一个更好的方法，但小心一个陷阱，当这些接口做类型提示时，不要使用ShapeInterface或SolidShapeInterface。</p>
-<p>你可以创建另一个接口，可以是ManageShapeInterface，平面和立体shape都可用，这样你可以很容易地看到它有一个管理shape的单一API。例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">interface ManageShapeInterface &#123;</span><br><span class="line">    public function calculate();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Square implements ShapeInterface, ManageShapeInterface &#123;</span><br><span class="line">    public function area() &#123; /*Do stuff here*/ &#125;</span><br><span class="line"> </span><br><span class="line">    public function calculate() &#123;</span><br><span class="line">        return $this-&gt;area();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Cuboid implements ShapeInterface, SolidShapeInterface, ManageShapeInterface &#123;</span><br><span class="line">    public function area() &#123; /*Do stuff here*/ &#125;</span><br><span class="line">    public function volume() &#123; /*Do stuff here*/ &#125;</span><br><span class="line"> </span><br><span class="line">    public function calculate() &#123;</span><br><span class="line">        return $this-&gt;area() + $this-&gt;volume();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>现在AreaCalculator类中，我们可以轻易用calculate替代area调用，同时可以检查一个对象是ManageShapeInterface而不是ShapeInterface的实例。</p>
-<h2 id="依赖反转原则"><a href="#依赖反转原则" class="headerlink" title="依赖反转原则"></a>依赖反转原则</h2><p>最后一条，但肯定不是最无足轻重的一条：</p>
-<blockquote>
-<p>实体必须依靠抽象而不是具体实现。它表示高层次的模块不应该依赖于低层次的模块，它们都应该依赖于抽象。</p>
-</blockquote>
-<p>这听起来可能有点绕，但它很容易理解。这一原则允许解耦，这似乎是用来解释这一原则最好的例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">class PasswordReminder &#123;</span><br><span class="line">    private $dbConnection;</span><br><span class="line"> </span><br><span class="line">    public function __construct(MySQLConnection $dbConnection) &#123;</span><br><span class="line">        $this-&gt;dbConnection = $dbConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>首先MySQLConnection是低层次模块，而PasswordReminder处于高层次，但根据S.O.L.I.D.中D的定义，即依赖抽象而不是具体实现，上面这段代码违反这一原则，PasswordReminder类被迫依赖于MySQLConnection类。</p>
-<p>以后如果你改变数据库引擎，你还必须编辑PasswordReminder类，因此违反了开闭原则。</p>
-<p>PasswordReminder类不应该关心你的应用程序使用什么数据库，为了解决这个问题我们又一次“对接口编程”，因为高层次和低层次模块应该依赖于抽象，我们可以创建一个接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interface DBConnectionInterface &#123;</span><br><span class="line">    public function connect();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>接口有一个connect方法，MySQLConnection类实现该接口，在PasswordReminder类的构造函数不使用MySQLConnection类，而是使用接口替换，不用管你的应用程序使用的是什么类型的数据库，PasswordReminder类可以很容易地连接到数据库，没有任何问题，且不违反OCP。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">class MySQLConnection implements DBConnectionInterface &#123;</span><br><span class="line">    public function connect() &#123;</span><br><span class="line">        return &quot;Database connection&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class PasswordReminder &#123;</span><br><span class="line">    private $dbConnection;</span><br><span class="line"> </span><br><span class="line">    public function __construct(DBConnectionInterface $dbConnection) &#123;</span><br><span class="line">        $this-&gt;dbConnection = $dbConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>根据上面的代码片段，你现在可以看到，高层次和低层次模块依赖于抽象。</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>老实说，S.O.L.I.D初看起来可能棘手，但只要通过连续使用并遵守其指导方针，它就会变成你和你的代码的一部分，可以让你的代码很容易地扩展、修改、测试和重构，不出任何问题。</p>
-<p>原文：<a href="https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design" target="_blank" rel="noopener">https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -400,502 +353,14 @@
 <h3 id="静态超文本"><a href="#静态超文本" class="headerlink" title="静态超文本"></a>静态超文本</h3><p>客户端直接通过URL请求到服务端相对应的资源，服务端直接将部署在数据库或者文件系统中的标签语言文件返还给客户端，其中可以包括其他的URL来使得客户端再次和网络中的其他主机发送HTTP请求来递归地完成超文本的解析，如HTML中的img标签。</p>
 <h3 id="动态超文本"><a href="#动态超文本" class="headerlink" title="动态超文本"></a>动态超文本</h3><p>动态超文本需要通过软件技术来实现创建和处理动态文本，例如CGI，JavaServlet，PHP，等后端技术，将URL中‘？’之后的动态部分做解析并生成动态文档，并且可以嵌入脚本语言交付给浏览器中的解析引擎来提高动态文档的效率，使文档中不必要的重复的部分独立解析完成，甚至可以实现活动文档，直接在文档上运行字节码形式的java程序或者javascript脚本。</p>
 <h2 id="HTTP运行事务"><a href="#HTTP运行事务" class="headerlink" title="HTTP运行事务"></a>HTTP运行事务</h2><h3 id="HTTP报文分组"><a href="#HTTP报文分组" class="headerlink" title="HTTP报文分组"></a>HTTP报文分组</h3><p><strong>HTTP请求和响应报文模型</strong></p>
-<table>
-<thead>
-<tr>
-<th>请求报文</th>
-<th>响应报文</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>请求行</td>
-<td>状态行</td>
-</tr>
-<tr>
-<td>首部</td>
-<td>首部</td>
-</tr>
-<tr>
-<td>空行</td>
-<td>空行</td>
-</tr>
-<tr>
-<td>实体</td>
-<td>实体</td>
-</tr>
-</tbody>
-</table>
-<p><img src="https://wx4.sinaimg.cn/mw690/0060lm7Tly1fts3jnr5b0j30qo0k076b.jpg" alt="报文模型"></p>
-<h4 id="请求报文"><a href="#请求报文" class="headerlink" title="请求报文"></a>请求报文</h4><p><img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1fts2fj8nxqj30co0c6t8n.jpg" alt="一个HTTP的完整请求报文图"></p>
-<h4 id="请求行（方法）"><a href="#请求行（方法）" class="headerlink" title="请求行（方法）"></a>请求行（方法）</h4><table>
-<thead>
-<tr>
-<th>METHOD</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>GET</td>
-<td>请求服务器的文档</td>
-</tr>
-<tr>
-<td>HEAD</td>
-<td>请求关于文档的信息，但不是这个文档本身</td>
-</tr>
-<tr>
-<td>POST</td>
-<td>从客户向服务器发送一些信息</td>
-</tr>
-<tr>
-<td>PUT</td>
-<td>从服务器向客户发送文档</td>
-</tr>
-<tr>
-<td>TRACE</td>
-<td>把到达的请求回送</td>
-</tr>
-<tr>
-<td>CONNECT</td>
-<td>保留</td>
-</tr>
-<tr>
-<td>DELETE</td>
-<td>删除Web网页</td>
-</tr>
-<tr>
-<td>OPTIONs</td>
-<td>询问关于可用的选项</td>
-</tr>
-</tbody>
-</table>
-<h4 id="请求行-URL"><a href="#请求行-URL" class="headerlink" title="请求行(URL)"></a>请求行(URL)</h4><p>URL：统一资源定位符，是在因特网上知名任何种类的信息的标准，URL定义的是四样东西：</p>
-<p>协议 ：// 主机 ： 端口 / 路径</p>
-<p>我们经常访问的网站不包含端口是因为http默认端口是80</p>
-<p>具体详细不属于HTTP内容范畴，暂且不赘述。</p>
-<h4 id="请求行（版本）"><a href="#请求行（版本）" class="headerlink" title="请求行（版本）"></a>请求行（版本）</h4><p>目前HTTP的最新版本是1.1，旧版本还有1.0等，具体相关定义在对应RFC中可以查找。</p>
-<h4 id="请求报文的首部行（头域）"><a href="#请求报文的首部行（头域）" class="headerlink" title="请求报文的首部行（头域）"></a>请求报文的首部行（头域）</h4><p>首部行是客户向服务器发送信息时的附加信息，数量为零到多个，如上图所示的格式，每个首部行占有一个首部名，一个冒号，一个空格和一个首部值。在RFC中完整的首部值列表及分类如下所示：</p>
-<blockquote>
-<p><strong>a.通用首部：</strong>既可以出现在请求报文中，也可以出现在响应报文中。这些是客户端和服务器都可以使用的通用首部。可以在客户端、服务器和其他应用程序之间提供一些非常有用的通用功能。不论报文是何种类型，都为其提供一些有用的信息。例如不管是构建请求报文还是响应报文，创建报文的日期时间都是同一个意思，因此提供这类信息的首部对这两种类型的报文来说都是通用的。下面用表格的形式给出通用的信息性首部。</p>
-</blockquote>
-<p><strong>通用的信息性首部：</strong></p>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Connection</td>
-<td>允许客户端和服务器指定与请求/响应连接有关的选项</td>
-</tr>
-<tr>
-<td>Date</td>
-<td>提供日期和时间标志，说明报文是什么时间创建的</td>
-</tr>
-<tr>
-<td>MIME-Version</td>
-<td>给出了发送端使用的MIME版本</td>
-</tr>
-<tr>
-<td>Trailer</td>
-<td>如果报文采用了分块传输编码(chunked transfer encoding)方式，就可以用这个首部列出位于报文拖鞋    (trailer)部分的首部集合。</td>
-</tr>
-<tr>
-<td>Transfer-Encoding</td>
-<td>告知接收端为了保证报文的可靠传输，对报文采用了什么编码方式。</td>
-</tr>
-<tr>
-<td>Update</td>
-<td>给出了发送端可能想要”升级”使用的新版本或协议</td>
-</tr>
-<tr>
-<td>Via</td>
-<td>显示了报文经过的中间节点(代理、网关)</td>
-</tr>
-</tbody>
-</table>
-<p><strong>通用缓存首部：</strong></p>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Cache-Control</td>
-<td>用于随报文传送缓存指示</td>
-</tr>
-<tr>
-<td>Pragma</td>
-<td>另一种随报文传送指示的方式，但并不专用于缓存</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>b.请求首部：</strong>提供更多有关请求的信息。请求首部是在请求报文中有意义的首部。用于说明是谁或什么在发送请求，请求源自何处，或者客户端的喜好及能力。服务器可以根据请求首部给出的客户端的信息，试着为客户端提供更好的响应。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Client-IP</td>
-<td>提供了运行客户端的机器的IP地址</td>
-</tr>
-<tr>
-<td>From</td>
-<td>提供了客户端用户的E-mail地址</td>
-</tr>
-<tr>
-<td>Host</td>
-<td>给出了接收请求的服务器的主机名和端</td>
-<td>口号</td>
-</tr>
-<tr>
-<td>Referer</td>
-<td>提供了包含当前请求URI的文档的URL</td>
-<td></td>
-</tr>
-<tr>
-<td>UA-Color</td>
-<td>提供了与客户端显示器的显示颜色有关的信息</td>
-</tr>
-<tr>
-<td>UA-CPU</td>
-<td>给出了客户端CPU的类型或制造商</td>
-</tr>
-<tr>
-<td>US-Disp</td>
-<td>提供了与客户端显示器(屏幕)能力有关的信息</td>
-</tr>
-<tr>
-<td>US-OS</td>
-<td>给出了客户端显示器的像素信息</td>
-</tr>
-<tr>
-<td>UA-Pixels</td>
-<td>提供了客户端显示器的像素信息</td>
-</tr>
-<tr>
-<td>User-Agent</td>
-<td>将发起请求的应用程序名称告知服务器(User-Agent)用户代理</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>Accept首部为客户端提供了一种将其喜好和能力告知服务器的方式，包括他们想要什么，可以使用什么，以及最重要的，他们不想要什么。这样服务器就可以根据这些额外信息，对要发送的内容做出更明智的决定。Accept首部会使连接的两端都受益。客户端会得到他们想要的内容，服务器则不会浪费其时间和带宽来发送客户端无法使用的东西。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Accept</td>
-<td>告诉服务器能够发送哪些媒体类型</td>
-</tr>
-<tr>
-<td>Accept-Charset</td>
-<td>告诉服务器能够发送哪些字符集</td>
-</tr>
-<tr>
-<td>Accept-Encoding</td>
-<td>告诉服务器能够发送哪些编码方式</td>
-</tr>
-<tr>
-<td>Accept-Language</td>
-<td>告诉服务器能够发送哪些语言</td>
-</tr>
-<tr>
-<td>TE</td>
-<td>告诉服务器可以使用哪些扩展传输编码</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>条件请求首部：</strong>有时客户端希望为请求加上某些限制。比如客户端已经有了一份副本，就希望只在服务器上的文档与客户端拥有的副本有所区别时，才请求服务器传输文档。通过条件请求首部，客户端就可以加上这种限制，要求服务器在对请求进行相应之前，确保某个请求为真。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Expect</td>
-<td>允许客户端列出某请求所要求的服务器行为</td>
-</tr>
-<tr>
-<td>If-Match</td>
-<td>如果实体标记与文档当前的实体标记相匹配，就或者这份文档</td>
-</tr>
-<tr>
-<td>If-Modified-Since</td>
-<td>除非在某个指定的日期之后资源被修改过，否则就限制这个请求</td>
-</tr>
-<tr>
-<td>If-Range</td>
-<td>允许对文档的某个范围进行条件请求</td>
-</tr>
-<tr>
-<td>If-Unmodified-Since</td>
-<td>除非在某个指定的日期之后资源没有被修改过，否则就限制这个请求</td>
-</tr>
-<tr>
-<td>Range</td>
-<td>如果服务器支持范围请求，就请求资源的指定范围</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>安全请求首部：</strong>HTTP本身就支持一种简单的机制，可以对请求进行质询/响应认证。这种机制要求客户端在获取特定的资源之前，先对自身进行认证，这样就可以使事务稍微安全一些。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Authorization</td>
-<td>包含了客户端提供给服务器，以便对其自身进行认证的数据</td>
-</tr>
-<tr>
-<td>Cookie</td>
-<td>客户端用它想服务器传送一个令牌-他并不是真正的安全首部，但却是隐含了安全功能</td>
-</tr>
-<tr>
-<td>Cookie2</td>
-<td>用来说明请求端支持的cookie版本</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>代理请求首部：</strong>随着因特网上代理的普遍应用，人们定义了几个首部来协助其更好地工作。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Max-Forword</td>
-<td>在通往源端服务器的路径上，将请求转发给其他代理或网关的最大次数-与TRACE方法一同使用</td>
-</tr>
-<tr>
-<td>Proxy-Authorization</td>
-<td>与Authorization首部相同，但这个首部是在与代理进行认证时使用的</td>
-</tr>
-<tr>
-<td>Proxy-Connection</td>
-<td>与Connection首部相同，但这个首部是在于代理建立连接时使用的</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>c.响应首部：</strong>提供更多有关响应的信息。响应报文由自己的响应首部集。响应首部为客户端提供了一些额外的信息，比如谁在发送响应、响应者的功能，甚至与响应相关的一些特殊指令。这些首部有助于客　　　　　户端处理响应，并在将来发起更好的请求。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Age</td>
-<td>(从最初创建开始)响应持续时间</td>
-</tr>
-<tr>
-<td>Public</td>
-<td>服务器为其资源支持的请求方法列表</td>
-</tr>
-<tr>
-<td>Retry-After</td>
-<td>如果资源不可用的话，再次日期或时间重试</td>
-</tr>
-<tr>
-<td>Server</td>
-<td>服务器应用程序软件的名称和版本</td>
-</tr>
-<tr>
-<td>Title</td>
-<td>对HTML文档来说，就是HTML文档的源端给出的标题</td>
-</tr>
-<tr>
-<td>Warning</td>
-<td>比原因短语中更详细的一些警告报文</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>协商首部：如果资源有多种表示方法-比如，如果服务器上有某文档的法语和德语译稿，HTTP/1.1可以为服务器和客户端提供对资源进行协商的能力。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Accept-Ranges</td>
-<td>对此资源来说，服务器可接受的范围类型</td>
-</tr>
-<tr>
-<td>Vary</td>
-<td>服务器查看的其他首部的列表，可能会使响应发生变化；也就是说，这是一个首部列表，服务器会根据这些首部的内容挑选出最合适的资源版本发送给客户端。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>安全响应首部：</strong></p>
-<p>我们已经看到过安全请求首部了，本质上这里说的就是HTTP的质询/响应认证机制的响应侧。</p>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Proxy-Authenticate</td>
-<td>来自代理的对客户端的质询列表</td>
-</tr>
-<tr>
-<td>Set-Cookie</td>
-<td>不是真正的安全首部，但隐含有安全功能；可以在客户端设置一个令牌，以便服务器对客户端进行标识。</td>
-</tr>
-<tr>
-<td>Set-Cookie2</td>
-<td>与Set-Cookie类似。</td>
-</tr>
-<tr>
-<td>WWW-Authenticate</td>
-<td>来自服务器的对客户端的质询列表</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>d、实体首部：</strong>描述主体的长度和内容，或者资源自身。有很多首部可以用来描述HTTP报文的负荷。由于请求和响应文本中都可能包含实体部分，所以在这两种类型的报文中都可能出现这些首部。实体首部提供了有关实体及其内容的大量信息，从有关对象类型的信息，到能够对资源使用的各种有效的请求方法。总之，实体首部可以告知报文的接收者它在对什么进行处理。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Allow</td>
-<td>列出了可以对此实体执行的请求方法</td>
-</tr>
-<tr>
-<td>Location</td>
-<td>告知客户端实体实际上位于何处；用于将接收端定向到资源的位置上去</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>内容首部：</strong>内容首部提供了与实体内容有关的特定信息，说明了其类型、尺寸以及处理它所需的其他有用信息。比如，Web浏览器可以通过查看返回的内容类型，得知如何显示对象。</p>
-</blockquote>
-<p>|首部|描述|<br>|Content-Base|解析主体中的相对URL时使用的基础URL|<br>|Content-Encoding|对主体执行的任意编码方式|<br>|Content-Language|理解主体时最适宜使用的自然语言|<br>|Content-Length|主体的长度或尺寸|<br>|Content-Location|资源实际所处的位置|<br>|Content-MD5|主体的MD5校验|<br>|Content-Range|在整个资源中此实体表示的字节范围|<br>|Content-Type|这个主体的对象模型|</p>
-<blockquote>
-<p><strong>实体缓存首部：</strong>通用的缓存首部说明了如何或什么时候进行缓存。实体的缓存首部提供了与被缓存实体有关的信息，比如验证已缓存的资源副本是否仍然有效所需的信息，以及更好地估计已缓存资源合适失效所需的线索。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>首部</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>ETag</td>
-<td>与此实体有关的实体标记</td>
-</tr>
-<tr>
-<td>Expires</td>
-<td>实体不在有效，要从原始的源端再次获取此实体的日期和时间</td>
-</tr>
-<tr>
-<td>Last-Modified</td>
-<td>这个实体最后一次被修改的日期和时间</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>首部行有的时候为了提高可读性会被分为多行来提高可读性，将其值划分为多个延续行，每个延续行的前面至少要有一个空格或者一个制表符。请求报文的实体是一些需要发送的备注性信息。</p>
-</blockquote>
-<h3 id="响应报文"><a href="#响应报文" class="headerlink" title="响应报文"></a>响应报文</h3><p><img src="https://wx4.sinaimg.cn/mw690/0060lm7Tly1fts33lymikj30c60cet8n.jpg" alt="一个HTTP的完整响应报文"><br>A.状态行–版本：同请求行–版本</p>
-<p>B.状态行–状态码：</p>
-<p>大致分类如下所示：</p>
-<p>100-199 用于指定客户端应相应的某些动作。<br>200-299 用于表示请求成功。<br>300-399 用于已经移动的文件并且常被包含在定位头信息中指定新的地址信息。<br>400-499 用于指出客户端的错误。<br>500-599 用于支持服务器错误。 </p>
-<p>具体的状态码参见：<a href="https://baike.baidu.com/item/HTTP%E7%8A%B6%E6%80%81%E7%A0%81/5053660" target="_blank" rel="noopener">https://baike.baidu.com/item/HTTP%E7%8A%B6%E6%80%81%E7%A0%81/5053660</a></p>
-<p>C.状态行–短语：所谓的短语是和状态码相对应的，如常见的404状态码对应Not found，403对应Forbidden</p>
-<p>D.响应报文的首部行：参见请求报文的首部行</p>
-<p>响应报文的实体与请求报文不同，主要存放的是服务端向客户端发送的文档，如果响应不是错误报文，则实体出现在响应报文中。</p>
-<h2 id="连接模型"><a href="#连接模型" class="headerlink" title="连接模型"></a>连接模型</h2><p><img src="http://wx4.sinaimg.cn/mw690/0060lm7Tly1fts38pruhij30eb048glq.jpg" alt="连接模型"><br>如上图所示，尽管服务端使用了80号端口作为TCP连接的接收端，但HTTP本身是个无状态的协议，服务端不会保留关于客户端的信息，每次HTTP永远是客户端先发起请求，然后服务端回送响应。<br>关于长连接和短连接：</p>
-<p>从HTTP1.1之后默认使用了长连接，在HTTP1.0中使用的是HTTP首部Connection：Keep-alive来进行长连接的实验性拓展。长连接使数据传输完成之后保持TCP连接不断开，等待在同域名下继续使用这个通道传输数据，与之相对应的就是短连接，从HTTP1.1开始要在HTTP请求报文中使用Connection：close来通知不希望使用长连接。在短连接中，对每一个请求/响应都要建立一次TCP连接，举个例子如某一个超文本文档上有N个位于同一个服务器的图片时，那么就要先后对该图片所在的服务器打开和关闭N+1次TCP连接，短链接会给服务器带来巨大的不必要的开销，也减慢了连接建立和关闭的过程。在使用了长连接之后，服务器允许TCP连接的保持已减少握手过程，服务器也可以在客户端请求时或者请求超时时关闭这个连接，在某些情况下，服务器并不知道要发送的文档的长度，那么服务器就要把长度未知这个首部通知客户，并在发送数据后关闭这个连接，因此客户就可以知道数据结束的地方就要到了。另外在首部中可以通过定义Keep-Alive首部来定义TCP连接的最长使用限时。实际上头部有了Connection： Keep-alive这个首部并不代表服务器一定就会使用长连接，客户端和服务端都可以忽略这个首部的定义。如下所示为长连接的连接模式图：</p>
-<p><img src="http://wx4.sinaimg.cn/mw690/0060lm7Tly1fts39o6g9zj30f1085dg9.jpg" alt="长连接的连接模式图"></p>
-<p>长连接模式下。当客户端向服务器发生请求之后，客户端如何判断服务器的数据已经发生完成？除了通过服务器关闭连接来被动的关闭HTTP的TCP连接之外，可以通过消息首部字段Content-Length来判断数据传输是否完毕，单位为字节，另外也可以通过使用消息首部字段Transfer-Encoding来协助完成判断，Transfer-Encoding：clunk或者Transfer-Encoding：clunked模式可以将数据分为一块一块的传输，clunk编码的具体格式这里暂不赘述。</p>
-<h2 id="关于HTTP中的Cookie"><a href="#关于HTTP中的Cookie" class="headerlink" title="关于HTTP中的Cookie"></a>关于HTTP中的Cookie</h2><p>Cookie的实质就是一个键值对，当一个客户端向服务端发送请求的时候，浏览器就查找在Cookie目录中是否有那个服务器发送的Cookie，如果有的话就会把相应的Cookie包含对请求之中，当这个Cookie包含在请求之中的时候服务端就可以知道这个客户是一个老客户，cookie的使用者和消费者都是服务端，这对于浏览器和消费者都是透明的。在HTTP报文分组中，与其功能相关的首部是Cookie首部和Set-Cookie首部。具体格式如下所示：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Set-Cookie:value [ ;expires=date][ ;domain=domain][ ;path=path][ ;secure]</span><br><span class="line">Cookie : value</span><br><span class="line">Cookie:value1 ; value2 ; name1=value1</span><br></pre></td></tr></table></figure>
-<p>在Set-Cookie中，可以通过定义选项的值来进一步确定Cookie的功能。</p>
-<h3 id="有效期选项（The-expires-option）"><a href="#有效期选项（The-expires-option）" class="headerlink" title="有效期选项（The expires  option）"></a>有效期选项（The expires  option）</h3><p>紧跟cookie值后面的每个选项都以分号和空格分割，并且每个选项都指定cookie何时应该被发送到服务器。第一个选项是expires，其指定了cookie何时不会再被发送到服务器端的，因此该cookie可能会被浏览器删掉。例如：</p>
-<ol>
-<li><p>Set-Cookie:name=Nicholas;expires=Sat, 02 May 2009 23:38:25 GMT<br>在没有expires选项时，cookie的寿命仅限于单一的会话中。浏览器的关闭意味这一次会话的结束，所以会话cookie只存在于浏览器保持打开的状态之下。这就是为什么当你登录到一个web应用时经常看到一个checkbox，询问你是否选择存储你的登录信息：如果你选择是的话，那么一个expires选项会被附加到登录的cookie中。如果expires选项设置了一个过去的时间点，那么这个cookie会被立即删除。</p>
-</li>
-<li><p>域选项（The domain option）</p>
-</li>
-</ol>
-<p>下一个选项是domain，指示cookie将要发送到哪个域或那些域中。默认情况下，domain会被设置为创建该cookie的页面所在的域名。例如本站中的cookie的domain属性的默认值为<a href="http://www.nczonline.com。domain选项被用来扩展cookie值所要发送域的数量。例如" target="_blank" rel="noopener">www.nczonline.com。domain选项被用来扩展cookie值所要发送域的数量。例如</a>:</p>
-<p><code>Set-Cookie:name=Nicholas;domain=huixing.org</code></p>
-<p>domain设置的值必须是发送Set-Cookie消息头的域名。例如，我无法向google.com发送一个cookie，因为这个产生安全问题。不合法的domain选项只要简单的忽略即可。</p>
-<ol start="3">
-<li>Path选项（The path option）</li>
-</ol>
-<p>另一个控制何时发送Cookie消息头的方式是指定path选项。与domain选项相同的是，path指明了在发Cookie消息头之前必须在请求资源中存在一个URL路径。这个比较是通过将path属性值与请求的URL从头开始逐字符串比较完成的。如果字符匹配，则发送Cookie消息头，例如：</p>
-<p><code>Set-Cookie:name=Nicholas;path=/blog</code></p>
-<p>在这个例子中，path选项值会与/blog,/blogrool等等相匹配；任何以/blog开头的选项都是合法的。要注意的是只有在domain选项核实完毕之后才会对path属性进行比较。path属性的默认值是发送Set-Cookie消息头所对应的URL中的path部分。</p>
-<ol start="4">
-<li>secure选项（The  secure  option）</li>
-</ol>
-<p>最后一个选项是secure。不像其它选项，该选项只是一个标记并且没有其它的值。一个secure cookie只有当请求是通过SSL和HTTPS创建时，才会发送到服务器端。这种cookie的内容意指具有很高的价值并且可能潜在的被破解以纯文本形式传输。例如</p>
-<p><code>Set-Cookie:name=Nicholas;secure</code></p>
-<p>现实中，机密且敏感的信息绝不应该在cookies中存储或传输，因为cookies的整个机制都是原本不安全的。默认情况下，在HTTPS链接上传输的cookies都会被自动添加上secure选项。</p>
-<h3 id="关于HTTP的安全"><a href="#关于HTTP的安全" class="headerlink" title="关于HTTP的安全"></a>关于HTTP的安全</h3><p>HTTP本身并不提供安全，然而通过在传输层和应用层中使用安全套接层（SSL）可以使HTTP运行在安全的环境下，即HTTPS，HTTPS可以提供保密性，客户和服务器鉴别以及数据的完整性。</p>
-<p>SSL的设计时为了给应用层生成的数据提供安全以及压缩服务，一般来说SSL能接收来自任何应用层协议的数据，但最多情况下这个应用层的协议就是HTTP，SSL对应用层传来的数据提供多种服务：</p>
-<p>分片：SSL把数据划分为长度小于或者等于2的14次字节的数据分片</p>
-<p>压缩：数据分片通过使用一种由客户端和服务器协商好的无损压缩方式进行压缩，这个服务是可选的。</p>
-<p>报文完整性：为了保护数据的完整性，SSL使用密钥散列函数来创建MAC。</p>
-<p>保密：为了提供保密性，原始的数据和MAC一起用对称密钥加密技术来加密。</p>
-<p>组帧：先在被加密的有效载荷上添加一个首部，然后再把这个恶有效载荷传递给可靠的运输层协议。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/thorough-understand-http-protocol/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1003,26 +468,14 @@
 <p>windows版本： <a href="https://sourceforge.net/projects/qcachegrindwin/" target="_blank" rel="noopener">https://sourceforge.net/projects/qcachegrindwin/</a></p>
 <p>其他版本：<a href="https://sourceforge.net/projects/kcachegrind" target="_blank" rel="noopener">https://sourceforge.net/projects/kcachegrind</a></p>
 <p><strong>使用方式</strong></p>
-<p>File-&gt;Open 找到 php.ini设置的xdebug.profiler_output_dir 路径即可看到每段代码加载的时间</p>
-<p>kcachegrind 的使用教程可以访问 <a href="http://docs.kde.org/stable/en/kdesdk/kcachegrind/index.html" target="_blank" rel="noopener">http://docs.kde.org/stable/en/kdesdk/kcachegrind/index.html</a></p>
-<h2 id="webgrind"><a href="#webgrind" class="headerlink" title="webgrind"></a>webgrind</h2><p>webgrind是一个网页版的性能分析工具，它的主要作用就是分析xdebug生成的cachegrind文件，以一种界面友好详尽的方式来展示性能数据。试用了一下感觉还是很不错的。</p>
-<p>webgrind是性能分析工具xdebug的php web版。它实现了 kcachegrind  的部分功能，但安装简便，适用所有平台，性能优化。</p>
-<p>另外它是 Google Summer of Code(Google编程之夏)2008的建议计划之一。</p>
-<p><strong>特点：</strong></p>
-<ul>
-<li>跨平台，简便</li>
-<li>可以记录函数自身耗时self cost或者综合耗时inclusive cost（指的是函数自身耗时+调用其他函数耗时）</li>
-<li>可以查看php函数耗时以及用户自定义函数耗时</li>
-<li>可以查看任何函数在哪里以及被哪个调用</li>
-<li>通过gprof2dot.py 生成了种调用<a href="https://github-camo.global.ssl.fastly.net/a264619233ac41fb21c34ff6bf728d3d0daab20c/687474703a2f2f77696b692e6a72666f6e736563612e676f6f676c65636f64652e636f6d2f6769742f6770726f6632646f745f736d616c6c2e706e67" target="_blank" rel="noopener">图表</a></li>
-</ul>
-<p>相关的讨论建议版：webgrind google group.</p>
-<p><strong>安装：</strong></p>
-<p>1.解压，放入网站文件夹，然后进入相关路径即可。比如<a href="http://localhost/webgrind" target="_blank" rel="noopener">http://localhost/webgrind</a>.</p>
-<p>2.xdebug是后台程序，所以首先要安装xdebug <a href="http://www.xdebug.org/docs/install" target="_blank" rel="noopener">http://www.xdebug.org/docs/install</a></p>
-<p><img src="https://wx2.sinaimg.cn/mw690/0060lm7Tly1ftnfj8fdx7j30t60i8t9x.jpg" alt="webgrind软件界面"></p>
-<p>下载地址：<a href="https://github.com/jokkedk/webgrind/downloads" target="_blank" rel="noopener">https://github.com/jokkedk/webgrind/downloads</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/php-code-performance-analysis-Xdebug-and-kcachegrind-webgrind/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1113,31 +566,14 @@
 <h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>OS: CentOS7(amd64)</p>
 <p>软件需要：gcc、git、openssh、golang环境</p>
 <h3 id="安装环境"><a href="#安装环境" class="headerlink" title="安装环境"></a>安装环境</h3><p>安装GCC编译器：<code>yum install gcc -y</code></p>
-<p>安装GIT（获取ngrok代码）：<code>yum install git -y</code></p>
-<p>安装go语言环境：<code>yum install -y mercurial git bzr subversion golang golang-pkg-windows-amd64 golang-pkg-windows-386</code></p>
-<p>获取Ngrok源码：<code>git clone https://github.com/inconshreveable/ngrok.git</code></p>
-<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><h3 id="生成证书"><a href="#生成证书" class="headerlink" title="生成证书"></a>生成证书</h3><p>进入ngrok代码目录：<code>cd ngrok</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#这里修改为自己的域名</span><br><span class="line">export NGROK_DOMAIN=&quot;huixing.org&quot;</span><br><span class="line"></span><br><span class="line">openssl genrsa -out rootCA.key 2048</span><br><span class="line"></span><br><span class="line">openssl req -x509 -new -nodes -key rootCA.key -subj &quot;/CN=$NGROK_DOMAIN&quot; -days 5000 -out rootCA.pem</span><br><span class="line"></span><br><span class="line">openssl genrsa -out device.key 2048</span><br><span class="line"></span><br><span class="line">openssl req -new -key device.key -subj &quot;/CN=$NGROK_DOMAIN&quot; -out device.csr</span><br><span class="line"></span><br><span class="line">openssl x509 -req -in device.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out device.crt -days 5000</span><br></pre></td></tr></table></figure>
-<p>替换证书：</p>
-<p>将新生成的证书替换，执行下面命令后 “y” 回车 一行一行执行代码！</p>
-<p><code>cp rootCA.pem assets/client/tls/ngrokroot.crt</code></p>
-<p><code>cp device.crt assets/server/tls/snakeoil.crt</code></p>
-<p><code>cp device.key assets/server/tls/snakeoil.key</code></p>
-<h3 id="编译生成ngrokd-服务端"><a href="#编译生成ngrokd-服务端" class="headerlink" title="编译生成ngrokd (服务端)"></a>编译生成ngrokd (服务端)</h3><p><code>GOOS=linux GOARCH=amd64 make release-server</code></p>
-<p>生成的服务端在<code>bin/ngrokd</code></p>
-<p>启动服务端</p>
-<p><code>./bin/ngrokd -domain=&quot;huixing.org&quot;  -httpAddr=&quot;:80&quot; -httpsAddr=&quot;:443&quot; -tunnelAddr=&quot;:8083&quot; &amp;</code></p>
-<h3 id="编译生成ngrok-客户端"><a href="#编译生成ngrok-客户端" class="headerlink" title="编译生成ngrok (客户端)"></a>编译生成ngrok (客户端)</h3><p><code>GOOS=windows GOARCH=amd64 make release-client</code></p>
-<p>生成在<code>bin/windows_amd64/</code>目录中</p>
-<p>客户端编译完成后可以下载到本地：<code>sz bin/windows_amd64/ngrok.exe</code></p>
-<h3 id="配置客户端"><a href="#配置客户端" class="headerlink" title="配置客户端"></a>配置客户端</h3><p>在客户端目录新建ngrok配置文件ngrok.yml yml配置切记注意空格，否则识别不了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server_addr: &quot;huixing.org:8083&quot;</span><br><span class="line">trust_host_root_certs: false</span><br><span class="line">tunnels: </span><br><span class="line">    api:</span><br><span class="line">        subdomain: &quot;api&quot;</span><br><span class="line">        proto:</span><br><span class="line">            http: 80</span><br><span class="line">    wx:</span><br><span class="line">        subdomain: &quot;wx&quot;</span><br><span class="line">        proto:</span><br><span class="line">            http: 80</span><br></pre></td></tr></table></figure></p>
-<p>以上 8083 80 443 与 远程开启的端口一致.</p>
-<p>启动客户端 <code>ngrok -config=ngrok.yml start api wx</code></p>
-<p><img src="https://wx4.sinaimg.cn/mw690/0060lm7Tly1ftm7rl7gzjj30kj0800so.jpg" alt="客户端启动界面"><br><strong>如果遇到通道建立失败，请查看服务器的远程端口是否在安全组中</strong></p>
-<h3 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h3><p>检查配置tunnel列表：<code>ngrok -config=ngrok.yml list</code></p>
-<p>启动所有tunnel：<code>ngork -config=ngrok.yml start-all</code></p>
-<p>完整配置说明可查看官方文档：<a href="https://ngrok.com/docs#config-location" target="_blank" rel="noopener">https://ngrok.com/docs#config-location</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/centos-build-ngrok/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1248,68 +684,14 @@
 <p>下面我们来定义mysql错误日志的功能：</p>
 <p>一般而言，日志级别的定义没有回话变量都只是在全局级别下进行定义。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW  GLOBAL VARIABLES LIKE &apos;%log%&apos;;</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">| Variable_name                           | Value                                        |</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">| back_log                                | 50                                           |</span><br><span class="line">| binlog_cache_size                       | 32768                                        |</span><br><span class="line">| binlog_direct_non_transactional_updates | OFF                                          |</span><br><span class="line">| binlog_format                           | MIXED                                        |</span><br><span class="line">| binlog_stmt_cache_size                  | 32768                                        |</span><br><span class="line">| expire_logs_days                        | 10                                           |</span><br><span class="line">| general_log                             | OFF                                          |</span><br><span class="line">| general_log_file                        | /www/server/data/general_log.log 			|</span><br><span class="line">| innodb_flush_log_at_trx_commit          | 1                                            |</span><br><span class="line">| innodb_locks_unsafe_for_binlog          | OFF                                          |</span><br><span class="line">| innodb_log_buffer_size                  | 8388608                                      |</span><br><span class="line">| innodb_log_file_size                    | 33554432                                     |</span><br><span class="line">| innodb_log_files_in_group               | 2                                            |</span><br><span class="line">| innodb_log_group_home_dir               | /www/server/data                             |</span><br><span class="line">| innodb_mirrored_log_groups              | 1                                            |</span><br><span class="line">| log                                     | OFF                                          |</span><br><span class="line">| log_bin                                 | ON                                           |</span><br><span class="line">| log_bin_trust_function_creators         | OFF                                          |</span><br><span class="line">| log_error                               | ./log_error.err  			                |</span><br><span class="line">| log_output                              | FILE                                         |</span><br><span class="line">| log_queries_not_using_indexes           | OFF                                          |</span><br><span class="line">| log_slave_updates                       | OFF                                          |</span><br><span class="line">| log_slow_queries                        | ON                                           |</span><br><span class="line">| log_warnings                            | 1                                            |</span><br><span class="line">| max_binlog_cache_size                   | 18446744073709547520                         |</span><br><span class="line">| max_binlog_size                         | 1073741824                                   |</span><br><span class="line">| max_binlog_stmt_cache_size              | 18446744073709547520                         |</span><br><span class="line">| max_relay_log_size                      | 0                                            |</span><br><span class="line">| relay_log                               |                                              |</span><br><span class="line">| relay_log_index                         |                                              |</span><br><span class="line">| relay_log_info_file                     | relay-log.info                               |</span><br><span class="line">| relay_log_purge                         | ON                                           |</span><br><span class="line">| relay_log_recovery                      | OFF                                          |</span><br><span class="line">| relay_log_space_limit                   | 0                                            |</span><br><span class="line">| slow_query_log                          | ON                                           |</span><br><span class="line">| slow_query_log_file                     | /www/server/data/mysql-slow.log              |</span><br><span class="line">| sql_log_bin                             | ON                                           |</span><br><span class="line">| sql_log_off                             | OFF                                          |</span><br><span class="line">| sync_binlog                             | 0                                            |</span><br><span class="line">| sync_relay_log                          | 0                                            |</span><br><span class="line">| sync_relay_log_info                     | 0                                            |</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">41 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
-<p>其中，log_error可以直接定义为文件路径，也可以为ON|OFF；log_warings只能使用1|0来定义开关启动。</p>
-<p>更改错误日志位置可以使用log_error来设置形式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 data]#  vim /etc/my.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">Log_error=DIR/[filename]</span><br></pre></td></tr></table></figure></p>
-<p>解析：其中，DIR参数指定错误日志的路径filename参数是错误日志的名称，没有指定该参数时默认为主机名。重启mysql服务器即可生效。</p>
-<p>查看mysql错误日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 data]#  tail -20 stu18.magedu.com.err</span><br><span class="line">130813  15:30:50  InnoDB: Starting shutdown...</span><br><span class="line">130813  15:30:51  InnoDB: Shutdown completed;  log sequence number 1630920</span><br><span class="line">130813 15:30:51  [Note] /usr/local/mysql/bin/mysqld: Shutdown complete</span><br><span class="line">130813 15:30:52  mysqld_safe mysqld from pid file /mydata/data/stu18.magedu.com.pid ended</span><br><span class="line">130813 15:30:53  mysqld_safe Starting mysqld daemon with databases from /mydata/data</span><br><span class="line">130813 15:30:54  InnoDB: The InnoDB memory heap is disabled     #禁用了InnoDB memory的堆功能。</span><br><span class="line">130813 15:30:54  InnoDB: Mutexes and rw_locks use GCC atomic builtins #Mutexes（互斥量）和rw_locks（行级锁）是GCC编译的是InnoDB内置的。</span><br><span class="line">130813 15:30:54  InnoDB: Compressed tables use zlib 1.2.3     #默认压缩工具是zlib</span><br><span class="line">130813 15:30:55  InnoDB: Initializing buffer pool, size = 128.0M    #InnoDB引擎的缓冲池（buffer pool）的值大小</span><br><span class="line">130813 15:30:55  InnoDB: Completed initialization of buffer pool</span><br><span class="line">130813 15:30:55  InnoDB: highest supported file format is Barracuda.</span><br><span class="line">130813  15:30:57  InnoDB: Waiting for the  background threads to start</span><br><span class="line">130813 15:30:58  InnoDB: 5.5.33 started; log sequence number 1630920</span><br><span class="line">130813 15:30:58  [Note] Server hostname (bind-address): &apos;0.0.0.0&apos;; port: 3306</span><br><span class="line">130813 15:30:58  [Note]   - &apos;0.0.0.0&apos; resolves to  &apos;0.0.0.0&apos;;  #0.0.0.0会反解主机名，这里反解失败</span><br><span class="line">130813 15:30:58  [Note] Server socket created on IP: &apos;0.0.0.0&apos;.</span><br><span class="line">130813 15:30:58  [Note] Event Scheduler: Loaded 0 events    #事件调度器没有任何事件，因为没有装载。</span><br><span class="line">130813 15:30:58  [Note] /usr/local/mysql/bin/mysqld: ready for connections. #mysql启动完成等待客户端的请求。</span><br><span class="line">Version:  &apos;5.5.33-log&apos;  socket:  &apos;/tmp/mysql.sock&apos;  port: 3306  Source distribution  #创建一个本地sock用于本地连接。</span><br></pre></td></tr></table></figure></p>
-<h2 id="删除错误日志"><a href="#删除错误日志" class="headerlink" title="删除错误日志"></a>删除错误日志</h2><p>在mysql5.5.7之前：数据库管理员可以删除很长时间之前的错误日志，以保证mysql服务器上的硬盘空间。mysql数据库中，可以使用mysqladmin命令开启新的错误日志。mysqladmin命令的语法如下：mysqladmin –u root –pflush-logs也可以使用登录mysql数据库中使用FLUSHLOGS语句来开启新的错误日志。</p>
-<p>在mysql5.5.7之后：服务器将关闭此项功能。只能使用重命名原来的错误日志文件，手动冲洗日志创建一个新的：方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 data]# mv stu18.magedu.com.err  stu18.magedu.com.err.old</span><br><span class="line">[root@stu18 data]#  mysqladmin flush-logs</span><br><span class="line">[root@stu18 data]# ls</span><br><span class="line">hellodb  myclass  mysql-bin.000003  mysql-bin.index           stu18.magedu.com.pid     ibdata1      mysql     mysql-bin.000004  performance_schema    ib_logfile0  mysql-bin.000001  stu18.magedu.com.err           test   ib_logfile1  mysql-bin.000002  stu18.magedu.com.err.old</span><br></pre></td></tr></table></figure></p>
-<p>更多信息请查阅官方文档：<a href="http://dev.mysql.com/doc/refman/5.5/en/error-log.html" target="_blank" rel="noopener">http://dev.mysql.com/doc/refman/5.5/en/error-log.html</a></p>
-<h2 id="查询日志"><a href="#查询日志" class="headerlink" title="查询日志"></a>查询日志</h2><p>默认情况下查询日志是关闭的。由于查询日志会记录用户的所有操作，其中还包含增删查改等信息，在并发操作大的环境下会产生大量的信息从而导致不必要的磁盘IO，会影响mysql的性能的。如若不是为了调试数据库的目的建议不要开启查询日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW  GLOBAL VARIABLES LIKE &apos;%log%&apos;;</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">| Variable_name                           | Value                                        |</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">| back_log                                | 50                                           |</span><br><span class="line">| binlog_cache_size                       | 32768                                        |</span><br><span class="line">| binlog_direct_non_transactional_updates | OFF                                          |</span><br><span class="line">| binlog_format                           | MIXED                                        |</span><br><span class="line">| binlog_stmt_cache_size                  | 32768                                        |</span><br><span class="line">| expire_logs_days                        | 10                                           |</span><br><span class="line">| general_log                             | OFF        #定义查询日志是否开启             |</span><br><span class="line">| general_log_file                        | /www/server/data/general_log.log#日志路径	|</span><br><span class="line">| innodb_flush_log_at_trx_commit          | 1                                            |</span><br><span class="line">| innodb_locks_unsafe_for_binlog          | OFF                                          |</span><br><span class="line">| innodb_log_buffer_size                  | 8388608                                      |</span><br><span class="line">| innodb_log_file_size                    | 33554432                                     |</span><br><span class="line">| innodb_log_files_in_group               | 2                                            |</span><br><span class="line">| innodb_log_group_home_dir               | /www/server/data                             |</span><br><span class="line">| innodb_mirrored_log_groups              | 1                                            |</span><br><span class="line">| log                        			 | OFF  #是否开启日志（开启则表示开启所有的日志)|</span><br><span class="line">| log_bin                                 | ON                                           |</span><br><span class="line">| log_bin_trust_function_creators         | OFF                                          |</span><br><span class="line">| log_error                               | ./log_error.err  			                |</span><br><span class="line">| log_output                              | FILE         ##日志的输出的位置              |</span><br><span class="line">| log_queries_not_using_indexes           | OFF                                          |</span><br><span class="line">| log_slave_updates                       | OFF                                          |</span><br><span class="line">| log_slow_queries                        | ON                                           |</span><br><span class="line">| log_warnings                            | 1                                            |</span><br><span class="line">| max_binlog_cache_size                   | 18446744073709547520                         |</span><br><span class="line">| max_binlog_size                         | 1073741824                                   |</span><br><span class="line">| max_binlog_stmt_cache_size              | 18446744073709547520                         |</span><br><span class="line">| max_relay_log_size                      | 0                                            |</span><br><span class="line">| relay_log                               |                                              |</span><br><span class="line">| relay_log_index                         |                                              |</span><br><span class="line">| relay_log_info_file                     | relay-log.info                               |</span><br><span class="line">| relay_log_purge                         | ON                                           |</span><br><span class="line">| relay_log_recovery                      | OFF                                          |</span><br><span class="line">| relay_log_space_limit                   | 0                                            |</span><br><span class="line">| slow_query_log                          | ON                                           |</span><br><span class="line">| slow_query_log_file                     | /www/server/data/mysql-slow.log              |</span><br><span class="line">| sql_log_bin                             | ON                                           |</span><br><span class="line">| sql_log_off                             | OFF                                          |</span><br><span class="line">| sync_binlog                             | 0                                            |</span><br><span class="line">| sync_relay_log                          | 0                                            |</span><br><span class="line">| sync_relay_log_info                     | 0                                            |</span><br><span class="line">+-----------------------------------------+----------------------------------------------+</span><br><span class="line">41 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
-<p>拓展解析：日志的输出位置一般有三种方式：file(文件)，table(表)，none(不保存)；其中前两个输出位置可以同时定义，none表示是开启日志功能但是记录日志信息。file就是通过general_log_file |/mydata/data/stu18.log 等方式定义的，而输出位置定义为表时查看日志的内容方式为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; use  mysql;                    #在此数据库中</span><br><span class="line">Database changed</span><br><span class="line">mysql&gt; show  tables;</span><br><span class="line">+---------------------------+</span><br><span class="line">|  Tables_in_mysql           |</span><br><span class="line">+---------------------------+</span><br><span class="line">|  columns_priv              |</span><br><span class="line">| db                        |</span><br><span class="line">| event                     |</span><br><span class="line">| func                      |</span><br><span class="line">| general_log               |      #这个就是查询日志的表输出位置</span><br><span class="line">|  help_category             |</span><br><span class="line">|  help_keyword              |</span><br><span class="line">|  help_relation             |</span><br><span class="line">| help_topic</span><br><span class="line">………………                |</span><br><span class="line">+---------------------------+</span><br></pre></td></tr></table></figure></p>
-<h2 id="慢查询日志"><a href="#慢查询日志" class="headerlink" title="慢查询日志"></a>慢查询日志</h2><p>慢查询日志是用来记录执行时间超过指定时间的查询语句。通过慢查询日志，可以查找出哪些查询语句的执行效率很低，以便进行优化。一般建议开启，它对服务器性能的影响微乎其微，但是可以记录mysql服务器上执行了很长时间的查询语句。可以帮助我们定位性能问题的。</p>
-<p>查看慢查询日志的定义：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW  GLOBAL VARIABLES LIKE &apos;%log%&apos;;</span><br><span class="line">|  slow_query_log         | OFF    #定义慢查询日志的</span><br><span class="line">|  slow_query_log_file    |/mydata/data/stu18-slow.log    #输出方式为file（文件）时定义慢查询日志的位置</span><br></pre></td></tr></table></figure></p>
-<p>启动和设置慢查询日志：</p>
-<p>1、通过配置文件my.cnf中的log-slow-queries选项可以开启慢查询日志；形式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 data]#  vim /etc/my.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">slow_query_log=1</span><br><span class="line">log-slow-queries [=  DIR/[filename] ]</span><br></pre></td></tr></table></figure></p>
-<p>其中，DIR参数指定慢查询日志的存储路径；filename参数指定日志的文件名，生成日志文件的完成名称为filename-slow.log。如果不指定存储路径，慢查询日志默认存储到mysql数据库的数据文件下，如果不指定文件名，默认文件名为hostname-slow.log。</p>
-<p>2、通过登录mysql服务器直接定义，方式如下：</p>
-<p>首先要有全局权限；然后执行mysql&gt;set global slow_query_log=1;</p>
-<p>时间默认超过多少的称为慢查询日志？</p>
-<p>一般都是通过long_query_time选项来设置这个时间值，时间以秒为单位，可以精确到微秒。如果查询时间超过了这个时间值（默认为10秒），这个查询语句将被记录到慢查询日志中。查看服务器默认时间值方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW  GLOBAL VARIABLES LIKE &apos;long%&apos;;</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">|  Variable_name   | Value     |</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">| long_query_time  | 10.000000 |</span><br><span class="line">+-----------------+-----------+</span><br><span class="line">1 row in set (0.04  sec)</span><br></pre></td></tr></table></figure></p>
-<p>注释：其中这个慢查询时间并不是只表示语句自身执行超过10秒还包含由于其他资源被征用造成阻塞的查询执行时间或其他原因等都被记录到慢查询中。所以这个慢查的时长表示从查询开始到查询结束中间包含可能的任何原因所经历的所有时间。</p>
-<p>测试是否可以记录日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; set globalslow_query_log=1;       #开启慢查询日志</span><br><span class="line">Query OK, 0 rowsaffected (0.35 sec)</span><br><span class="line">mysql&gt; setsession long_query_time=0.001;     #更改时间（当前session中，退出则重置）</span><br><span class="line">Query OK, 0 rowsaffected (0.00 sec)</span><br><span class="line">mysql&gt; set globallong_query_time=0.001;      #更改时间（全局中，重启服务则重置）</span><br><span class="line">mysql&gt; SHOWVARIABLES LIKE &apos;long%&apos;;          #查询定义时间</span><br><span class="line">+-----------------+----------+</span><br><span class="line">| Variable_name   | Value   |</span><br><span class="line">+-----------------+----------+</span><br><span class="line">| long_query_time |0.001000 |</span><br><span class="line">+-----------------+----------+</span><br><span class="line">1 row in set (0.00sec)</span><br><span class="line">mysql&gt; showglobal variables like &quot;%slow%&quot;;  #查看慢查询日志开启状态</span><br><span class="line">+---------------------+-----------------------------+</span><br><span class="line">| Variable_name       | Value                       |</span><br><span class="line">+---------------------+-----------------------------+</span><br><span class="line">|log_slow_queries    | ON                          |</span><br><span class="line">|slow_launch_time    | 2                           |</span><br><span class="line">|slow_query_log      | ON                          |</span><br><span class="line">|slow_query_log_file | /mydata/data/stu18-slow.log |</span><br><span class="line">+---------------------+-----------------------------+</span><br><span class="line">4 rows in set (0.03sec)</span><br></pre></td></tr></table></figure></p>
-<p>查看慢查询日志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; use mysql</span><br><span class="line">mysql&gt; selectuser,host,password from user where user=&quot;root&quot;;</span><br><span class="line">+------+------------------+----------+</span><br><span class="line">| user | host             | password |</span><br><span class="line">+------+------------------+----------+</span><br><span class="line">| root |localhost        |          |</span><br><span class="line">| root |stu18.magedu.com |          |</span><br><span class="line">| root |127.0.0.1        |          |</span><br><span class="line">| root | ::1              |          |</span><br><span class="line">+------+------------------+----------+</span><br><span class="line">4 rows in set (0.08sec)       #查询时间为0.08</span><br><span class="line">mysql&gt; systemmore /mydata/data/stu18_slow.log          #查询慢查询日志记录信息</span><br><span class="line">/usr/local/mysql/bin/mysqld,Version: 5.5.33-log (Source distribution). started</span><br><span class="line">with:</span><br><span class="line">Tcp port: 3306  Unix socket: /tmp/mysql.sock</span><br><span class="line">Time                 Id Command    Argument</span><br><span class="line">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;部分已省略&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><br><span class="line"># Time: 13100723:46:33</span><br><span class="line"># User@Host:root[root] @ localhost []</span><br><span class="line"># Query_time:0.108459  Lock_time: 0.000216 Rows_sent:4  Rows_examined: 6</span><br><span class="line">SETtimestamp=1381160793;</span><br><span class="line">selectuser,host,password from user where user=&quot;root&quot;;</span><br></pre></td></tr></table></figure></p>
-<h2 id="事务日志"><a href="#事务日志" class="headerlink" title="事务日志"></a>事务日志</h2><p>事务日志（InnoDB特有的日志）可以帮助提高事务的效率。使用事务日志，存储引擎在修改表的数据时只需要修改其内存拷贝，再把改修改行为记录到持久在硬盘上的事务日志中，而不用每次都将修改的数据本身持久到磁盘。事务日志采用追加的方式，因此写日志的操作是磁盘上一小块区域内的顺序I/O，而不像随机I/O需要在磁盘的多个地方移动磁头，所以采用事务日志的方式相对来说要快得多。事务日志持久以后，内存中被修改的数据在后台可以慢慢的刷回到磁盘。目前大多数的存储引擎都是这样实现的，我们通常称之为预写式日志，修改数据需要写两次磁盘。</p>
-<p>如果数据的修改已经记录到事务日志并持久化，但数据本身还没有写回磁盘，此时系统崩溃，存储引擎在重启时能够自动恢复这部分修改的数据。具有的恢复方式则视存储引擎而定。</p>
-<p>查看事务日志的定义：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOWGLOBAL VARIABLES LIKE &apos;%log%&apos;;</span><br><span class="line">+-----------------------------------------+-----------------------------------+</span><br><span class="line">| Variable_name                           | Value                             |</span><br><span class="line">+-----------------------------------------+-----------------------------------+</span><br><span class="line">| innodb_flush_log_at_trx_commit          | 1        #在事务提交时innodb是否同步日志从缓冲到文件中1表示事务以提交就同步不提交每隔一秒同步一次，性能会很差造成大量的磁盘I/O；定义为2表示只有在事务提交时才会同步但是可能会丢失整个事务      |</span><br><span class="line">|innodb_locks_unsafe_for_binlog          |OFF                               |</span><br><span class="line">| innodb_log_buffer_size                  | 8388608                           |</span><br><span class="line">|innodb_log_file_size                    |5242880                           |</span><br><span class="line">| innodb_log_files_in_group               | 2      #至少有两个                |</span><br><span class="line">|innodb_log_group_home_dir               |./      #定义innodb事务日志组的位置       |</span><br><span class="line">|innodb_mirrored_log_groups              |1    #表示对日志组做镜像          |</span><br><span class="line">每个事务日志都是大小为5兆的文件：</span><br><span class="line">[root@stu18 data]#ls -lh</span><br><span class="line">-rw-rw---- 1 mysqlmysql 5.0M Oct  7 23:36 ib_logfile0</span><br><span class="line">-rw-rw---- 1 mysqlmysql 5.0M Aug 12 01:06 ib_logfile1</span><br></pre></td></tr></table></figure></p>
-<h2 id="二进制日志"><a href="#二进制日志" class="headerlink" title="二进制日志"></a>二进制日志</h2><p>二进制日志也叫作变更日志，主要用于记录修改数据或有可能引起数据改变的mysql语句，并且记录了语句发生时间、执行时长、操作的数据等等。所以说通过二进制日志可以查询mysql数据库中进行了哪些变化。一般大小体积上限为1G。</p>
-<p>二进制开启状态：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; showglobal variables like &quot;%log_bin%&quot;;</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| Variable_name                   | Value |</span><br><span class="line">+---------------------------------+-------+</span><br><span class="line">| log_bin                         | ON    |  #已开启</span><br><span class="line">|log_bin_trust_function_creators | OFF   |</span><br><span class="line">| sql_log_bin                     | ON    |</span><br><span class="line">+---------------------------------+-------+</span><br></pre></td></tr></table></figure></p>
-<p>二进制日志相关的参数：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; showglobal variables like &quot;%log%&quot;;</span><br><span class="line">sql_log_bin =&#123;ON|OFF&#125;     #用于控制会话级别二进制日志功能的开启或关闭。默认为ON，表示启用记录功能。用户可以在会话级别修改此变量的值，但其必须具有SUPER权限。</span><br><span class="line">binlog_cache_size =32768   #默认值32768 Binlog Cache用于在打开了二进制日志（binlog）记录功能的环境，是MySQL 用来提高binlog的记录效率而设计的一个用于短时间内临时缓存binlog数据的内存区域。一般来说，如果我们的数据库中没有什么大事务，写入也不是特别频繁，2MB～4MB是一个合适的选择。但是如果我们的数据库大事务较多，写入量比较大，可与适当调高binlog_cache_size。同时，我们可以通过binlog_cache_use 以及 binlog_cache_disk_use来分析设置的binlog_cache_size是否足够，是否有大量的binlog_cache由于内存大小不够而使用临时文件（binlog_cache_disk_use）来缓存了。</span><br><span class="line">binlog_stmt_cache_size= 32768       #当非事务语句使用二进制日志缓存，但是超出binlog_stmt_cache_size时，使用一个临时文件来存放这些语句。</span><br><span class="line">log_bin = mysql-bin#指定binlog的位置，默认在数据目录下。</span><br><span class="line">binlog-format= &#123;ROW|STATEMENT|MIXED&#125;     #指定二进制日志的类型，默认为MIXED。如果设定了二进制日志的格式，却没有启用二进制日志，则MySQL启动时会产生警告日志信息并记录于错误日志中。</span><br><span class="line">sync_binlog = 10#设定多久同步一次二进制日志至磁盘文件中，0表示不同步，任何正数值都表示对二进制每多少次写操作之后同步一次。当autocommit的值为1时，每条语句的执行都会引起二进制日志同步，否则，每个事务的提交会引起二进制日志同步</span><br><span class="line">max_binlog_cache_size= &#123;4096 .. 18446744073709547520&#125;      #二进定日志缓存空间大小，5.5.9及以后的版本仅应用于事务缓存，其上限由max_binlog_stmt_cache_size决定。</span><br><span class="line">max_binlog_stmt_cache_size= &#123;4096 .. 18446744073709547520&#125;    #二进定日志缓存空间大小，5.5.9及以后的版本仅应用于事务缓存</span><br><span class="line">expire_log_days =&#123;0..99&#125;    #设定二进制日志的过期天数，超出此天数的二进制日志文件将被自动删除。默认为0，表示不启用过期自动删除功能。如果启用此功能，自动删除工作通常发生在MySQL启动时或FLUSH日志时。</span><br></pre></td></tr></table></figure></p>
-<p>二进制日志定义方式：</p>
-<p>其一、log_bin可以直接定义为文件路径，也可以为ON|OFF。</p>
-<p>其二、通过编辑my.cnf中的log-bin选项可以开启二进制日志；形式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 ~]#my.cnf</span><br><span class="line">[mysqld]</span><br><span class="line">log-bin [=DIR \ [filename]]</span><br></pre></td></tr></table></figure></p>
-<p>其中，DIR参数指定二进制文件的存储路径；filename参数指定二级制文件的文件名，其形式为filename.number，number的形式为000001、000002等。每次重启mysql服务或运行mysql&gt; flush logs;都会生成一个新的二进制日志文件，这些日志文件的number会不断地递增。除了生成上述的文件外还会生成一个名为filename.index的文件。这个文件中存储所有二进制日志文件的清单又称为二进制文件的索引。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 ~]# cd /mydata/data/</span><br><span class="line">[root@stu18 data]#ls -lh</span><br><span class="line">-rw-rw---- 1 mysqlmysql  14K Aug 13 15:30 mysql-bin.000001</span><br><span class="line">-rw-rw---- 1 mysqlmysql  150 Aug 13 17:05 mysql-bin.000002</span><br><span class="line">-rw-rw---- 1 mysqlmysql  150 Aug 13 17:06 mysql-bin.000003</span><br><span class="line">-rw-rw---- 1 mysqlmysql  150 Aug 13 17:07 mysql-bin.000004</span><br><span class="line">-rw-rw---- 1 mysqlmysql  150 Aug 13 17:39 mysql-bin.000005</span><br><span class="line">-rw-rw---- 1 mysqlmysql  126 Aug 13 19:03 mysql-bin.000006</span><br><span class="line">-rw-rw---- 1 mysqlmysql  126 Aug 13 19:03 mysql-bin.000007</span><br><span class="line">-rw-rw---- 1 mysqlmysql  126 Aug 13 19:05 mysql-bin.000008</span><br><span class="line">-rw-rw---- 1 mysqlmysql  107 Aug 13 19:05 mysql-bin.000009</span><br><span class="line">-rw-rw---- 1 mysqlmysql  353 Oct  7 23:40 mysql-bin.000010</span><br><span class="line">-rw-rw---- 1 mysqlmysql  190 Oct  7 20:43 mysql-bin.index</span><br><span class="line">[root@stu18 data]#cat mysql-bin.index</span><br><span class="line">./mysql-bin.000001</span><br><span class="line">./mysql-bin.000002</span><br><span class="line">./mysql-bin.000003</span><br><span class="line">./mysql-bin.000004</span><br><span class="line">./mysql-bin.000005</span><br><span class="line">./mysql-bin.000006</span><br><span class="line">./mysql-bin.000007</span><br><span class="line">./mysql-bin.000008</span><br><span class="line">./mysql-bin.000009</span><br><span class="line">./mysql-bin.000010</span><br></pre></td></tr></table></figure></p>
-<p>如果说我们向某个表的某个字段插入一个数据而这个数据为当前时间(日期时间型)；过段时间将此二进制文件应用到另一台服务器上数据就会变动从而导致数据的不一致性所以说对于这种非确定性的数据使用默认的语句定义并不是可靠的；</p>
-<p>二进制日志中常用的定义格式：</p>
-<p>1、语句(statement)：默认的记录格式；</p>
-<p>2、行(row)：定义的并非数据本身而是这一行的数据是什么；</p>
-<p>3、混合模式(mixed)：交替使用行和语句、由mysql服务器自行判断。</p>
-<p>其中基于行的定义格式数据量会大一些但是可以保证数据的精确性。</p>
-<p>查看二进制日志：</p>
-<p>二进制日志的定义方式为二进制格式；使用此格式可以存储更多的信息，并且可以使写入二进制日志的效率更高。但是不能直接使用查看命令打开并查看二进制日志。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; showbinary logs;     #显示当前服务器使用的二进制文件及大小</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Log_name         | File_size |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| mysql-bin.000001|     13814 |</span><br><span class="line">| mysql-bin.000002|       150 |</span><br><span class="line">| mysql-bin.000003|       150 |</span><br><span class="line">| mysql-bin.000004|       150 |</span><br><span class="line">| mysql-bin.000005|       150 |</span><br><span class="line">| mysql-bin.000006|       126 |</span><br><span class="line">| mysql-bin.000007|       126 |</span><br><span class="line">| mysql-bin.000008|       126 |</span><br><span class="line">| mysql-bin.000009|       107 |</span><br><span class="line">| mysql-bin.000010|       353 |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">10 rows in set (0.07sec)</span><br><span class="line">mysql&gt; showmaster logs;      #显示主服务器使用的二进制文件及大小</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Log_name         | File_size |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| mysql-bin.000001|     13814 |</span><br><span class="line">| mysql-bin.000002|       150 |</span><br><span class="line">| mysql-bin.000003|       150 |</span><br><span class="line">| mysql-bin.000004|       150 |</span><br><span class="line">| mysql-bin.000005|       150 |</span><br><span class="line">| mysql-bin.000006|       126 |</span><br><span class="line">| mysql-bin.000007|       126 |</span><br><span class="line">| mysql-bin.000008|       126 |</span><br><span class="line">| mysql-bin.000009|       107 |</span><br><span class="line">| mysql-bin.000010|       353 |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">10 rows in set (0.02sec)</span><br><span class="line">mysql&gt; showmaster status;   #当前使用的二进制文件及所处位置</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB |Binlog_Ignore_DB |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| mysql-bin.000010|      353 |              |                  |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">1 row in set (0.00sec)</span><br></pre></td></tr></table></figure></p>
-<p>小扩展：二进制日志的记录位置：通常为上一个事件执行结束时间的位置，每一个日志文件本身也有自己的元数据所以说对于当前版本的mysql来说二进制的开始位置通常为107；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; flushlogs;</span><br><span class="line">Query OK, 0 rowsaffected (0.23 sec)</span><br><span class="line">注意：flush logs一般只会滚动中继日志和二进制日志。</span><br><span class="line">mysql&gt; showmaster status;</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB |Binlog_Ignore_DB |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| mysql-bin.000011|      107 |              |                  |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">1 row in set (0.00sec)</span><br></pre></td></tr></table></figure></p>
-<p>查看当前二进制文件的信息：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; createdatabase yong;</span><br><span class="line">Query OK, 1 rowaffected (0.12 sec)</span><br><span class="line">mysql&gt; createtable yong.tb1 (id int,name char(20));</span><br><span class="line">Query OK, 0 rowsaffected (0.44 sec)</span><br><span class="line">mysql&gt; insertinto yong.tb1 values(1,&apos;tom&apos;);</span><br><span class="line">Query OK, 1 rowaffected (0.14 sec)</span><br><span class="line">mysql&gt; showmaster status;</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB |Binlog_Ignore_DB |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">| mysql-bin.000011|      479 |              |                  |</span><br><span class="line">+------------------+----------+--------------+------------------+</span><br><span class="line">1 row in set (0.00sec)</span><br></pre></td></tr></table></figure></p>
-<p>查看二进制日志信息的命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">SHOW BINLOG EVENTS[IN &apos;log_name&apos;] [FROM pos] [LIMIT [offset,] row_count]</span><br><span class="line">mysql&gt; showbinlog events\G         #查看所有的二进制信息</span><br><span class="line">***************************87. row ***************************</span><br><span class="line">   Log_name: mysql-bin.000001</span><br><span class="line">        Pos: 13580</span><br><span class="line"> Event_type: Query</span><br><span class="line">  Server_id: 1</span><br><span class="line">End_log_pos: 13688</span><br><span class="line">       Info: use `hellodb`; /*!40000 ALTERTABLE `toc` DISABLE KEYS */</span><br><span class="line">***************************88. row ***************************</span><br><span class="line">   Log_name: mysql-bin.000001</span><br><span class="line">        Pos: 13688</span><br><span class="line"> Event_type: Query</span><br><span class="line">  Server_id: 1</span><br><span class="line">End_log_pos: 13795</span><br><span class="line">       Info: use `hellodb`; /*!40000 ALTERTABLE `toc` ENABLE KEYS */</span><br><span class="line">***************************89. row ***************************</span><br><span class="line">   Log_name: mysql-bin.000001</span><br><span class="line">        Pos: 13795</span><br><span class="line"> Event_type: Stop</span><br><span class="line">  Server_id: 1</span><br><span class="line">End_log_pos: 13814</span><br><span class="line">       Info:</span><br><span class="line">89 rows in set (0.00sec)</span><br><span class="line">mysql&gt; showbinlog events in &apos;mysql-bin.000011&apos;;    #查看指定日志的二进制信息</span><br><span class="line">+------------------+-----+-------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| Log_name         | Pos | Event_type  | Server_id | End_log_pos | Info                                         |</span><br><span class="line">+------------------+-----+-------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| mysql-bin.000011|   4 | Format_desc |         1 |         107 | Server ver: 5.5.33-log, Binlogver: 4        |</span><br><span class="line">| mysql-bin.000011 |107 | Query       |         1 |         190 | create database yong                         |</span><br><span class="line">| mysql-bin.000011 |190 | Query       |         1 |         293 | create table yong.tb1 (idint,name char(20)) |</span><br><span class="line">| mysql-bin.000011 |293 | Query       |         1 |         357 | BEGIN                                        |</span><br><span class="line">| mysql-bin.000011 |357 | Query       |         1 |         452 | insert into yong.tb1values(1,&apos;tom&apos;)         |</span><br><span class="line">| mysql-bin.000011 |452 | Xid         |         1 |         479 | COMMIT /* xid=103 */                         |</span><br><span class="line">+------------------+-----+-------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">6 rows in set (0.00sec)</span><br><span class="line">mysql&gt; showbinlog events in &apos;mysql-bin.000011&apos; from 190; #从指定的事件位置开始</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| Log_name         | Pos | Event_type | Server_id |End_log_pos | Info                                         |</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| mysql-bin.000011 |190 | Query      |         1 |         293 | create table yong.tb1 (idint,name char(20)) |</span><br><span class="line">| mysql-bin.000011 |293 | Query      |         1 |         357 | BEGIN                                        |</span><br><span class="line">| mysql-bin.000011 |357 | Query      |         1 |         452 | insert into yong.tb1values(1,&apos;tom&apos;)         |</span><br><span class="line">| mysql-bin.000011 |452 | Xid        |         1 |         479 | COMMIT /* xid=103 */                         |</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">4 rows in set (0.00sec)</span><br><span class="line">mysql&gt; showbinlog events in &apos;mysql-bin.000011&apos; from 190 limit 3;  #指定偏移量(不是语句，是事件)</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| Log_name         | Pos | Event_type | Server_id |End_log_pos | Info                                         |</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">| mysql-bin.000011 |190 | Query      |         1 |         293 | create table yong.tb1 (idint,name char(20)) |</span><br><span class="line">| mysql-bin.000011 |293 | Query      |         1 |         357 | BEGIN                                        |</span><br><span class="line">| mysql-bin.000011 |357 | Query      |         1 |         452 | insert into yong.tb1values(1,&apos;tom&apos;)         |</span><br><span class="line">+------------------+-----+------------+-----------+-------------+----------------------------------------------+</span><br><span class="line">3 rows in set (0.00sec)</span><br></pre></td></tr></table></figure></p>
-<p>命令行下查看二进制日志：</p>
-<p>由于无法使用cat等方式直接打开并查看二进制日志；所以必须使用mysqlbinlog命令。但是当正在执行mysql读写操作时建议不要使用此打开正在使用的二进制日志文件；若非要打开可flush logs。mysqlbinlog命令的使用方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@stu18 data]#mysqlbinlog mysql-bin.000017        #必须在数据目录下</span><br><span class="line">/*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=1*/;</span><br><span class="line">/*!40019 SET@@session.max_insert_delayed_threads=0*/;</span><br><span class="line">/*!50003 SET@OLD_COMPLETION_TYPE=@@COMPLETION_TYPE,COMPLETION_TYPE=0*/;</span><br><span class="line">DELIMITER /*!*/;</span><br><span class="line"># at 4       #事件开始处</span><br><span class="line">#131009  0:25:59 server id 1  end_log_pos 107   Start: binlog v 4, server v 5.5.33-log created 131009  0:25:59 </span><br><span class="line"># Warning: thisbinlog is either in use or was not closed properly.</span><br><span class="line">BINLOG &apos;</span><br><span class="line">FzJUUg8BAAAAZwAAAGsAAAABAAQANS41LjMzLWxvZwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span><br><span class="line">AAAAAAAAAAAAAAAAAAAAAAAAEzgNAAgAEgAEBAQEEgAAVAAEGggAAAAICAgCAA==</span><br><span class="line">&apos;/*!*/;</span><br><span class="line"># at 107</span><br><span class="line">#131009  0:26:36 server id 1  end_log_pos 192   Query   thread_id=12    exec_time=0 error_code=0     #131009 0:26:36年月日的简写方式；end_log_pos事件结束处；thread_id=12 哪个会话线程创建的此语句；exec_time=0 执行时长单位为秒；error_code=0 错误代码0表示没有</span><br><span class="line">SET TIMESTAMP=1381249596/*!*/;      #预设信息(环境设定)</span><br></pre></td></tr></table></figure></p>
-<p>导出此数据库的信息：</p>
-<p><code>[root@stu18 data]#mysqlbinlog mysql-bin.000017 &gt; /tmp/a.sql</code></p>
-<p>导入此数据库的信息：</p>
-<p><code>[root@stu18 data]#mysql &lt; a.sql</code></p>
-<p>删除二进制日志信息：</p>
-<p>二进制日志会记录大量的信息（其中包含一些无用的信息）。如果很长时间不清理二进制日志，将会浪费很多的磁盘空间。但是，删除之后可能导致数据库崩溃时无法进行恢复，所以若要删除二进制日志首先将其和数据库备份一份，其中也只能删除备份前的二进制日志，新产生的日志信息不可删(可以做即时点还原)。也不可在关闭mysql服务器之后直接删除因为这样可能会给数据库带来错误的。若非要删除二进制日志需要做如下操作：导出备份数据库和二进制日志文件进行压缩归档存储。删除二进制文件的方法如下：</p>
-<p>1、删除所有的二进制日志（不可效仿）：</p>
-<p>使用RESET MASTER语句可以删除所有的二进制日志。该语句的形式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; resetmaster;           </span><br><span class="line">Query OK, 0 rowsaffected (0.17 sec)</span><br><span class="line">mysql&gt; showbinary logs;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Log_name         | File_size |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| mysql-bin.000001|       107 |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">1 row in set (0.04sec)</span><br></pre></td></tr></table></figure></p>
-<p>解析：首先不建议在生产环境下使用此操作；删除所有的二进制日志后，Mysql将会重新创建新的二进制日志。新二进制日志的编号从000001开始。</p>
-<p>2、根据文件或时间点来删除二进制日志：</p>
-<p>语法形式：</p>
-<p><code>mysql&gt; PURGE { BINARY | MASTER } LOGS {TO &#39;log_name&#39; | BEFORE datetime_expr }</code></p>
-<p>其中TO’log_name’表示把这个文件之前的其他文件都删除掉，也可使用BEFORE datetime_expr指定把哪个时间之前的二进制文件删除了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; PURGEBINARY LOGS TO &apos;mysql-bin.000007&apos;;</span><br><span class="line">Query OK, 0 rowsaffected (0.11 sec)</span><br><span class="line">mysql&gt; showbinary logs;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Log_name         | File_size |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| mysql-bin.000007|       150 |</span><br><span class="line">| mysql-bin.000008|       150 |</span><br><span class="line">| mysql-bin.000009|       150 |</span><br><span class="line">| mysql-bin.000010|       150 |</span><br><span class="line">| mysql-bin.000011|       150 |</span><br><span class="line">| mysql-bin.000012|       150 |</span><br><span class="line">| mysql-bin.000013|       150 |</span><br><span class="line">| mysql-bin.000014|       150 |</span><br><span class="line">| mysql-bin.000015|       150 |</span><br><span class="line">| mysql-bin.000016|       150 |</span><br><span class="line">| mysql-bin.000017|       483 |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">11 rows in set (0.04sec)</span><br><span class="line">[root@stu18 data]#cat mysql-bin.index</span><br><span class="line">./mysql-bin.000007</span><br><span class="line">./mysql-bin.000008</span><br><span class="line">./mysql-bin.000009</span><br><span class="line">./mysql-bin.000010</span><br><span class="line">./mysql-bin.000011</span><br><span class="line">./mysql-bin.000012</span><br><span class="line">./mysql-bin.000013</span><br><span class="line">./mysql-bin.000014</span><br><span class="line">./mysql-bin.000015</span><br><span class="line">./mysql-bin.000016</span><br><span class="line">./mysql-bin.000017</span><br></pre></td></tr></table></figure>
-<p>由此可以看出这种清理二进制日志文件的方式是非常合理的，不会导致数据库的错误发生。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; PURGEBINARY LOGS BEFORE &apos;13-10-19 10:26:36&apos;; #使用时间来删除二进制日志</span><br><span class="line">Query OK, 0 rowsaffected (0.05 sec)</span><br></pre></td></tr></table></figure></p>
-<p>(完)</p>
-<p>转载：<a href="http://blog.51cto.com/pangge/1319304" target="_blank" rel="noopener">51cto</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/mysql-logs-detailed-analysis/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1413,60 +795,14 @@
 <p>文件数据都储存在”块”中，那么很显然，我们还必须找到一个地方储存文件的元信息，比如文件的创建者、文件的创建日期、文件的大小等等。这种储存文件元信息的区域就叫做inode，中文译名为”索引节点”。</p>
 <p>每一个文件都有对应的inode，里面包含了与该文件有关的一些信息。</p>
 <h2 id="inode的内容"><a href="#inode的内容" class="headerlink" title="inode的内容"></a>inode的内容</h2><p>inode包含文件的元信息，具体来说有以下内容：</p>
-<ul>
-<li>文件的字节数</li>
-<li>文件拥有者的User ID</li>
-<li>文件的Group ID</li>
-<li>文件的读、写、执行权限</li>
-<li>文件的时间戳，共有三个：ctime指inode上一次变动的时间，mtime指文件内容上一次变动的时间，atime指文件上一次打开的时间。</li>
-<li>链接数，即有多少文件名指向这个inode</li>
-<li>文件数据block的位置</li>
-</ul>
-<p>可以用stat命令，查看某个文件的inode信息：</p>
-<p><code>stat huixing.txt</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# stat huixing.txt </span><br><span class="line">  File: ‘huixing.txt’</span><br><span class="line">  Size: 180             Blocks: 8          IO Block: 4096   regular file</span><br><span class="line">Device: fd00h/64768d    Inode: 100694490   Links: 1</span><br><span class="line">Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Context: unconfined_u:object_r:admin_home_t:s0</span><br><span class="line">Access: 2018-07-07 04:08:29.524266164 -0400</span><br><span class="line">Modify: 2018-07-07 04:08:25.301363288 -0400</span><br><span class="line">Change: 2018-07-07 04:08:25.301363288 -0400</span><br><span class="line"> Birth: -</span><br></pre></td></tr></table></figure></p>
-<p>总之，除了文件名以外的所有文件信息，都存在inode之中。至于为什么没有文件名，下文会有详细解释。</p>
-<h2 id="inode的大小"><a href="#inode的大小" class="headerlink" title="inode的大小"></a>inode的大小</h2><p>inode也会消耗硬盘空间，所以硬盘格式化的时候，操作系统自动将硬盘分成两个区域。一个是数据区，存放文件数据；另一个是inode区（inode table），存放inode所包含的信息。</p>
-<p>每个inode节点的大小，一般是128字节或256字节。inode节点的总数，在格式化时就给定，一般是每1KB或每2KB就设置一个inode。假定在一块1GB的硬盘中，每个inode节点的大小为128字节，每1KB就设置一个inode，那么inode table的大小就会达到128MB，占整块硬盘的12.8%。</p>
-<p>查看每个硬盘分区的inode总数和已经使用的数量，可以使用df命令。</p>
-<p><code>df -i</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# df -i</span><br><span class="line">Filesystem            Inodes IUsed    IFree IUse% Mounted on</span><br><span class="line">/dev/mapper/cl-root 26214400 50156 26164244    1% /</span><br><span class="line">devtmpfs              230656   397   230259    1% /dev</span><br><span class="line">tmpfs                 233411     1   233410    1% /dev/shm</span><br><span class="line">tmpfs                 233411   514   232897    1% /run</span><br><span class="line">tmpfs                 233411    16   233395    1% /sys/fs/cgroup</span><br><span class="line">/dev/sda1             524288   330   523958    1% /boot</span><br><span class="line">/dev/mapper/cl-home 14151680  9930 14141750    1% /home</span><br><span class="line">tmpfs                 233411     1   233410    1% /run/user/0</span><br></pre></td></tr></table></figure>
-<p>查看每个inode节点的大小，可以用如下命令：</p>
-<p><code>sudo dumpe2fs -h /dev/hda | grep &quot;Inode size&quot;</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# dumpe2fs -h /dev/hda | grep &quot;Inode size&quot;</span><br><span class="line">dumpe2fs 1.42.9 (28-Dec-2013)</span><br><span class="line">Inode size:	256</span><br></pre></td></tr></table></figure></p>
-<p>由于每个文件都必须有一个inode，因此有可能发生inode已经用光，但是硬盘还未存满的情况。这时，就无法在硬盘上创建新文件。</p>
-<h2 id="inode号码"><a href="#inode号码" class="headerlink" title="inode号码"></a>inode号码</h2><p>每个inode都有一个号码，操作系统用inode号码来识别不同的文件。</p>
-<p>这里值得重复一遍，Unix/Linux系统内部不使用文件名，而使用inode号码来识别文件。对于系统来说，文件名只是inode号码便于识别的别称或者绰号。</p>
-<p>表面上，用户通过文件名，打开文件。实际上，系统内部这个过程分成三步：首先，系统找到这个文件名对应的inode号码；其次，通过inode号码，获取inode信息；最后，根据inode信息，找到文件数据所在的block，读出数据。</p>
-<p>使用ls -i命令，可以看到文件名对应的inode号码：</p>
-<p><code>ls -i example.txt</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls -i huixing.txt </span><br><span class="line">100694490 huixing.txt</span><br></pre></td></tr></table></figure></p>
-<h2 id="目录文件"><a href="#目录文件" class="headerlink" title="目录文件"></a>目录文件</h2><p>Unix/Linux系统中，目录（directory）也是一种文件。打开目录，实际上就是打开目录文件。</p>
-<p>目录文件的结构非常简单，就是一系列目录项（dirent）的列表。每个目录项，由两部分组成：所包含文件的文件名，以及该文件名对应的inode号码。</p>
-<p>ls命令只列出目录文件中的所有文件名：</p>
-<p><code>ls /root</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls /root</span><br><span class="line">anaconda-ks.cfg  huixing.txt</span><br></pre></td></tr></table></figure></p>
-<p>ls -i命令列出整个目录文件，即文件名和inode号码：</p>
-<p><code>ls -i /etc</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls -i /root</span><br><span class="line">100663363 anaconda-ks.cfg  100694490 huixing.txt</span><br></pre></td></tr></table></figure></p>
-<p>如果要查看文件的详细信息，就必须根据inode号码，访问inode节点，读取信息。<code>ls -l</code>命令列出文件的详细信息。</p>
-<p><code>ls -l /etc</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls -l /root/</span><br><span class="line">total 8</span><br><span class="line">-rw-------. 1 root root 1264 Mar 13 19:13 anaconda-ks.cfg</span><br><span class="line">-rw-r--r--. 1 root root  180 Jul  7 04:08 huixing.txt</span><br></pre></td></tr></table></figure></p>
-<p>理解了上面这些知识，就能理解目录的权限。目录文件的读权限（r）和写权限（w），都是针对目录文件本身。由于目录文件内只有文件名和inode号码，所以如果只有读权限，只能获取文件名，无法获取其他信息，因为其他信息都储存在inode节点中，而读取inode节点内的信息需要目录文件的执行权限（x）。</p>
-<h2 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h2><p>一般情况下，文件名和inode号码是”一一对应”关系，每个inode号码对应一个文件名。但是，Unix/Linux系统允许，多个文件名指向同一个inode号码。</p>
-<p>这意味着，可以用不同的文件名访问同样的内容；对文件内容进行修改，会影响到所有文件名；但是，删除一个文件名，不影响另一个文件名的访问。这种情况就被称为”硬链接”（hard link）。</p>
-<p>ln命令可以创建硬链接：</p>
-<p><code>ln 源文件 目标文件</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls -li</span><br><span class="line">total 8</span><br><span class="line">100663363 -rw-------. 1 root root 1264 Mar 13 19:13 anaconda-ks.cfg</span><br><span class="line">100694490 -rw-r--r--. 1 root root  180 Jul  7 04:08 huixing.txt</span><br><span class="line">[root@localhost ~]# ln huixing.txt huixing.org.txt</span><br><span class="line">[root@localhost ~]# ls -li</span><br><span class="line">total 12</span><br><span class="line">100663363 -rw-------. 1 root root 1264 Mar 13 19:13 anaconda-ks.cfg</span><br><span class="line">100694490 -rw-r--r--. 2 root root  180 Jul  7 04:08 huixing.org.txt</span><br><span class="line">100694490 -rw-r--r--. 2 root root  180 Jul  7 04:08 huixing.txt</span><br></pre></td></tr></table></figure></p>
-<p>运行上面这条命令以后，源文件与目标文件的inode号码相同，都指向同一个inode。inode信息中有一项叫做”链接数”，记录指向该inode的文件名总数，这时就会增加1。</p>
-<p>反过来，删除一个文件名，就会使得inode节点中的”链接数”减1。当这个值减到0，表明没有文件名指向这个inode，系统就会回收这个inode号码，以及其所对应block区域。</p>
-<p>这里顺便说一下目录文件的”链接数”。创建目录时，默认会生成两个目录项：”.”和”..”。前者的inode号码就是当前目录的inode号码，等同于当前目录的”硬链接”；后者的inode号码就是当前目录的父目录的inode号码，等同于父目录的”硬链接”。所以，任何一个目录的”硬链接”总数，总是等于2加上它的子目录总数（含隐藏目录）。</p>
-<h2 id="软链接"><a href="#软链接" class="headerlink" title="软链接"></a>软链接</h2><p>除了硬链接以外，还有一种特殊情况。</p>
-<p>文件A和文件B的inode号码虽然不一样，但是文件A的内容是文件B的路径。读取文件A时，系统会自动将访问者导向文件B。因此，无论打开哪一个文件，最终读取的都是文件B。这时，文件A就称为文件B的”软链接”（soft link）或者”符号链接（symbolic link）。</p>
-<p>这意味着，文件A依赖于文件B而存在，如果删除了文件B，打开文件A就会报错：”No such file or directory”。这是软链接与硬链接最大的不同：文件A指向文件B的文件名，而不是文件B的inode号码，文件B的inode”链接数”不会因此发生变化。</p>
-<p><code>ln -s</code>命令可以创建软链接。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls -li</span><br><span class="line">total 8</span><br><span class="line">100663363 -rw-------. 1 root root 1264 Mar 13 19:13 anaconda-ks.cfg</span><br><span class="line">100694490 -rw-r--r--. 1 root root  180 Jul  7 04:08 huixing.txt</span><br><span class="line">[root@localhost ~]# ln -s huixing.txt huixing.org.txt</span><br><span class="line">[root@localhost ~]# ls -li</span><br><span class="line">total 8</span><br><span class="line">100663363 -rw-------. 1 root root 1264 Mar 13 19:13 anaconda-ks.cfg</span><br><span class="line">100663362 -rw-r--r--. 1 root root   11 Jul 22 10:44 huixing.org.txt -&gt; huixing.txt</span><br><span class="line">100694490 -rw-r--r--. 1 root root  180 Jul  7 04:08 huixing.txt</span><br></pre></td></tr></table></figure></p>
-<h2 id="inode的特殊作用"><a href="#inode的特殊作用" class="headerlink" title="inode的特殊作用"></a>inode的特殊作用</h2><p>由于inode号码与文件名分离，这种机制导致了一些Unix/Linux系统特有的现象。</p>
-<ul>
-<li>有时，文件名包含特殊字符，无法正常删除。这时，直接删除inode节点，就能起到删除文件的作用。</li>
-<li>移动文件或重命名文件，只是改变文件名，不影响inode号码。</li>
-<li>打开一个文件以后，系统就以inode号码来识别这个文件，不再考虑文件名。因此，通常来说，系统无法从inode号码得知文件名。</li>
-</ul>
-<p>第3点使得软件更新变得简单，可以在不关闭软件的情况下进行更新，不需要重启。因为系统通过inode号码，识别运行中的文件，不通过文件名。更新的时候，新版文件以同样的文件名，生成一个新的inode，不会影响到运行中的文件。等到下一次运行这个软件的时候，文件名就自动指向新版文件，旧版文件的inode则被回收。</p>
-<p>（完）<br>转载：<a href="http://www.ruanyifeng.com" target="_blank" rel="noopener">阮一峰</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-inode/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2106,136 +1442,14 @@
 </tr>
 </tbody>
 </table>
-<h2 id="usr目录"><a href="#usr目录" class="headerlink" title="usr目录"></a>usr目录</h2><table>
-<thead>
-<tr>
-<th>目录</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/usr</td>
-<td>最庞大的目录，因为所有应用程序几乎都安装在这里， 本地安装的程序和其他东西在/usr/local 下。</td>
-</tr>
-<tr>
-<td>/usr/etc</td>
-<td>存放配置文件。</td>
-</tr>
-<tr>
-<td>/usr/games</td>
-<td>存放游戏和教学文件。</td>
-</tr>
-<tr>
-<td>/usr/include</td>
-<td>开发和编译应用程序所需要的头文件。</td>
-</tr>
-<tr>
-<td>/usr/share</td>
-<td>存放结构独立的数据。</td>
-</tr>
-<tr>
-<td>/usr/bin</td>
-<td>几乎所有用户命令.有些命令在/bin 或/usr/local/bin 中。</td>
-</tr>
-<tr>
-<td>/usr/sbin</td>
-<td>根文件系统不必要的系统管理命令，例如多数服务程序。</td>
-</tr>
-<tr>
-<td>/usr/share/man , /usr/share/info , /usr/share/doc</td>
-<td>手册页、GNU信息文档和各种其他文档文件。</td>
-</tr>
-<tr>
-<td>/usr/lib</td>
-<td>程序或子系统的不变的数据文件，包括一些site-wide配置文件，名字lib来源于库(library)， 编程的原始库存在/usr/lib 里。</td>
-</tr>
-<tr>
-<td>/usr/local</td>
-<td>本地安装的软件和其他文件放在这里，/usr/local/bin存放本地增加的命令，/usr/local/include存放本地增加的库文件。</td>
-</tr>
-<tr>
-<td>/usr/src</td>
-<td>存放程序的源代码，linux内核的源代码存放在/usr/src/kernels。</td>
-</tr>
-</tbody>
-</table>
-<h2 id="var目录"><a href="#var目录" class="headerlink" title="var目录"></a>var目录</h2><table>
-<thead>
-<tr>
-<th>目录</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/var</td>
-<td>包括系统一般运行时要改变的数据.每个系统是特定的，即不通过网络与其他计算机共享。</td>
-</tr>
-<tr>
-<td>/var/catman</td>
-<td>当要求格式化时的man页的cache.man页的源文件一般存在/usr/man/man<em> 中；有些man页可能有预格式化的版本，存在/usr/man/cat</em> 中.而其他的man页在第一次看时需要格式化，格式化完的版本存在/var/man 中，这样其他人再看相同的页时就无须等待格式化了. (/var/catman 经常被清除，就象清除临时目录一样.)</td>
-</tr>
-<tr>
-<td>/var/lib</td>
-<td>系统正常运行时要改变的文件。</td>
-</tr>
-<tr>
-<td>/var/local，/usr/local</td>
-<td>中安装的程序的可变数据(即系统管理员安装的程序).注意，如果必要，即使本地安装的程序也会使用其他/var 目录，例如/var/lock 。</td>
-</tr>
-<tr>
-<td>/var/lock</td>
-<td>锁定文件.许多程序遵循在/var/lock 中产生一个锁定文件的约定，以支持他们正在使用某个特定的设备或文件.其他程序注意到这个锁定文件，将不试图使用这个设备或文件。</td>
-</tr>
-<tr>
-<td>/var/log</td>
-<td>各种程序的Log文件，特别是login (/var/log/wtmp log所有到系统的登录和注销) 和syslog (/var/log/messages 里存储所有核心和系统程序信息. /var/log 里的文件经常不确定地增长，应该定期清除。</td>
-</tr>
-<tr>
-<td>/var/run</td>
-<td>保存到下次引导前有效的关于系统的信息文件.例如， /var/run/utmp 包含当前登录的用户的信息。</td>
-</tr>
-<tr>
-<td>/var/spool，/var/mail, /var/news</td>
-<td>打印队列和其他队列工作的目录.每个不同的spool在/var/spool 下有自己的子目录，例如，用户的邮箱在/var/spool/mail 中。</td>
-</tr>
-<tr>
-<td>/var/tmp</td>
-<td>比/tmp 允许的大或需要存在较长时间的临时文件。 (虽然系统管理员可能不允许/var/tmp 有很旧的文件.)</td>
-</tr>
-</tbody>
-</table>
-<h2 id="比较重要的目录"><a href="#比较重要的目录" class="headerlink" title="比较重要的目录"></a>比较重要的目录</h2><p>在 Linux 系统中，有几个目录是特别需要注意的，以下提供几个需要注意的目录，以及预设相关的用途：　</p>
-<p>/etc：这个目录相当重要，如前所述，你的开机与系统数据文件均在这个目录之下，因此当这个目录被破坏，那你的系统大概也就差不多该死掉了！而在往后的文件中，你会发现我们常常使用这个目录下的 /etc/rc.d/init.d 这个子目录，因为这个 init.d 子目录是开启一些 Linux 系统服务的 scripts （可以想成是批次檔 ）的地方。而在 /etc/rc.d/rc.local 这个文件是开机的执行档。　</p>
-<p>/bin, /sbin, /usr/bin, /usr/sbin：这是系统预设的执行文件的放置目录，例如 root 常常使用的 userconf, netconf, perl, gcc, c++ 等等的数据都放在这几个目录中，所以如果你在提示字符下找不到某个执行档时，可以在这四个目录中查一查！其中， /bin, /usr/bin 是给系统使用者使用的指令，而 /sbin, /usr/sbin 则是给系统管理员使用的指令！ </p>
-<p>/usr/local：这是系统预设的让你安装你后来升级的套件的目录。例如，当你发现有更新的 Web 套件（如 Apache ）可以安装，而你又不想以 rpm 的方式升级你的套件，则你可以将 apache 这个套件安装在 /usr/local 底下。安装在这里有个好处，因为目前大家的系统都是差不多的，所以如果你的系统要让别人接管的话，也比较容易上手呀！也比较容易找的到数据喔！因此，如果你有需要的话，通常我都会将 /usr/local/bin 这个路径加到我的 path 中。</p>
-<p>/home：这个是系统将有账号的人口的家目录设置的地方。 　</p>
-<p>/var：这个路径就重要了！不论是登入、各类服务的问题发生时的记录、以及常态性的服务记录等等的记录目录，所以当你的系统有问题时，就需要来这个目录记录的文件数据中察看问题的所在啰！而 mail 的预设放置也是在这里，所以他是很重要的 。</p>
-<p>/usr/share/man, /usr/local/man： 这两个目录为放置各类套件说明档的地方，例如你如果执行 man man，则系统会自动去找这两个目录下的所有说明文件。</p>
-<h2 id="文件种类"><a href="#文件种类" class="headerlink" title="文件种类"></a>文件种类</h2><p>文件属性中最前面的标志 ( d 或 - ) 可以代表目录或文件，那就是不同的文件种类，Linux 的文件种类主要有底下这几种：</p>
-<p>正规文件( regular file )：就是一般类型的文件，在由 ls –al 所显示出来的属性方面，第一个属性为 [ - ]。</p>
-<p>另外，依照文件的内容，又大略可以分为两种文件种类：</p>
-<p>纯文字文件(ascii) ：这是 Unix 系统中最多的一种啰，几乎只要我们可以用来做为设定的文件都属于这一种；</p>
-<p>二进制文件(binary) ：通常执行档除了 scripts （文字型批次文件）之外，就是这一种文件格式； </p>
-<p>目录 (directory)：就是目录！第一个属性为 [ d ]；</p>
-<p>连结档 (link)：就是类似 Windows 底下的快捷方式啦！第一个属性为 [ l ]；</p>
-<p>设备档 (device)：与系统周边相关的一些文件，通常都集中在 /dev 这个目录之下！通常又分为两种：</p>
-<p>区块 (block) 设备档 ：就是一些储存数据，以提供系统存取的接口设备，简单的说就是硬盘啦！例如你的一号硬盘的代码是 /dev/hda1 等等的文件啦！第一个属性为 [ b ]；</p>
-<p>字符 (character) 设备档 ：亦即是一些串行端口的接口设备，例如键盘、鼠标等等！第一个属性为 [ c ]。</p>
-<h2 id="Linux-的文件系统-inode"><a href="#Linux-的文件系统-inode" class="headerlink" title="Linux 的文件系统( inode )"></a>Linux 的文件系统( inode )</h2><p>在 Linux 系统当中，每个文件不止有文件的内容数据，还包括文件的种种属性，例如：所属群组、所属使用者、能否执行、文件建立时间、文件特殊属性等等。我们将每个文件的内容分为两个部分来储存，一个是文件的属性，另一个则是文件的内容。</p>
-<p>为了应付这两个不同的东西，所以 ext2 规划出 inode 与block 来分别储存文件的属性( 放在 inode 当中 )与文件的内容( 放置在 Block area 当中 )。当我们要将一个 partition 格式化( format )为 ext2 时，就必须要指定 inode 与 Block 的大小才行，也就是说，当 partition 被格式化为 ext2 的文件系统时，他一定会有 inode table 与 block area 这两个区域。</p>
-<p>Block 已经在前面说过了，他是数据储存的最小单位。那么 inode 是什么？！简单的说， block 是记录『文件内容数据』的区域，至于 inode 则是记录『该文件的相关属性，以及文件内容放置在哪一个 Block 之内』的信息。简单的说， inode 除了记录文件的属性外，同时还必须要具有指向( pointer )的功能，亦即指向文件内容放置的区块之中，好让操作系统可以正确的去取得文件的内容啊</p>
-<ul>
-<li>该文件的拥有者与群组(owner/group)；</li>
-<li>该文件的存取模式；</li>
-<li>该文件的类型；</li>
-<li>该文件的建立日期(ctime)、最近一次的读取时间(atime)、最近修改的时间 (mtime)；</li>
-<li>该文件的容量；</li>
-<li>定义文件特性的旗标(flag)，如 SetUID…；</li>
-<li>该文件真正内容的指向 (pointer)；</li>
-</ul>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-directory-structure/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2341,45 +1555,14 @@
 </ul>
 <h2 id="Kong安装"><a href="#Kong安装" class="headerlink" title="Kong安装"></a>Kong安装</h2><p>参考<a href="https://getkong.org/install/centos/" target="_blank" rel="noopener">Kong CentOS Installation</a></p>
 <p>从下载Kong的配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install https://bintray.com/kong/kong-community-edition-rpm/download_file?file_path=centos/7/kong-community-edition-0.14.0.el7.noarch.rpm</span><br></pre></td></tr></table></figure></p>
-<p>安装Kong<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install epel-release</span><br><span class="line">yum install yum install kong-community-edition-0.14.0.*.noarch.rpm</span><br></pre></td></tr></table></figure></p>
-<h2 id="数据库安装"><a href="#数据库安装" class="headerlink" title="数据库安装"></a>数据库安装</h2><p>kong支持2种数据库存储（postgreSQL 和 Cassandra ）</p>
-<p>postgreSQL官网：<a href="https://www.postgresql.org/download/" target="_blank" rel="noopener">https://www.postgresql.org/download/</a></p>
-<p>Cassandra官网：<a href="http://cassandra.apache.org/download/" target="_blank" rel="noopener">http://cassandra.apache.org/download/</a></p>
-<h3 id="postgreSQL"><a href="#postgreSQL" class="headerlink" title="postgreSQL"></a>postgreSQL</h3><p>安装 Repository RPM<br><code>yum install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm</code></p>
-<p>安装客户端 Packages</p>
-<p><code>yum install postgresql96</code></p>
-<p>安装服务端 Packages</p>
-<p><code>yum install postgresql96-server</code></p>
-<p>初始化数据库</p>
-<p><code>/usr/pgsql-9.6/bin/postgresql96-setup initdb</code></p>
-<p>切换用户（不能使用root启动postgresql）</p>
-<p><code>su - postgres</code></p>
-<p>启动数据库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable postgresql-9.6</span><br><span class="line">systemctl start postgresql-9.6</span><br></pre></td></tr></table></figure></p>
-<p>创建Kong所需要的库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#su - postgres</span><br><span class="line">-bash-4.2$ psql</span><br><span class="line">postgres=# CREATE USER kong; CREATE DATABASE kong OWNER kong;</span><br><span class="line">postgres=# \</span><br></pre></td></tr></table></figure></p>
-<p>修改postgreSQL配置文件</p>
-<p><code>vim /var/lib/pgsql/9.6/data/postgresql.conf</code></p>
-<p>修改为：</p>
-<p><code>listen_addresses = &#39;*&#39;</code></p>
-<p>修改认证：</p>
-<p><code>vim /var/lib/pgsql/9.6/data/pg_hba.conf</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># &quot;local&quot; is for Unix domain socket connections only</span><br><span class="line">local   all             all              trust</span><br></pre></td></tr></table></figure></p>
-<p>Kong配置</p>
-<p><code>cp /etc/kong/kong.conf.default /etc/kong/kong.conf</code></p>
-<p>初始化Kong Database</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kong migrations up</span><br></pre></td></tr></table></figure>
-<p>启动Kong</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kong start</span><br></pre></td></tr></table></figure>
-<p>验证是否启动成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -i http://localhost:8001/</span><br></pre></td></tr></table></figure></p>
-<h2 id="FQA"><a href="#FQA" class="headerlink" title="FQA"></a>FQA</h2><h3 id="Docker中安装postgresql报错"><a href="#Docker中安装postgresql报错" class="headerlink" title="Docker中安装postgresql报错"></a>Docker中安装postgresql报错</h3><blockquote>
-<p>在Docker中初始化的时候报</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Failed to get D-Bus connection: Operation not permitted</span><br><span class="line">failed to find PGDATA setting in postgresql-9.6.service</span><br></pre></td></tr></table></figure>
-<h4 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h4><p>Docker 中没有 systemctl 命令,postgresql96-setup中的脚本使用了systemctl 查找数据路径</p>
-<h4 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h4><p>通过阅读代码可以得出 数据路径为 <code>/var/lib/pgsql/9.6/data/</code><br>然后 将 PGDATA注释 重新赋值 <code>PGDATA=/var/lib/pgsql/9.6/data/</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#PGDATA=`systemctl show -p Environment &quot;$&#123;SERVICE_NAME&#125;.service&quot; |</span><br><span class="line">#                sed &apos;s/^Environment=//&apos; | tr &apos; &apos; &apos;\n&apos; |</span><br><span class="line">#                sed -n &apos;s/^PGDATA=//p&apos; | tail -n 1`</span><br><span class="line">#if [ x&quot;$PGDATA&quot; = x ]; then</span><br><span class="line">#    echo &quot;failed to find PGDATA setting in $&#123;SERVICE_NAME&#125;.service&quot;</span><br><span class="line">#    exit 1</span><br><span class="line">#fi</span><br><span class="line">PGDATA=/var/lib/pgsql/9.6/data/</span><br></pre></td></tr></table></figure></p>
-<p>然后在执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/usr/pgsql-9.6/bin/postgresql96-setup initdb</span><br><span class="line">/usr/pgsql-9.6/bin/pg_ctl -D /var/lib/pgsql/9.6/data/ -l logfile start</span><br></pre></td></tr></table></figure></p>
-<p>提示 <code>server starting</code> 服务启动</p>
-<h3 id="没有修改数据库配置认证"><a href="#没有修改数据库配置认证" class="headerlink" title="没有修改数据库配置认证"></a>没有修改数据库配置认证</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Error: [postgres error] could not retrieve server_version: FATAL: Ident authentication failed for user &quot;kong&quot;</span><br><span class="line"></span><br><span class="line">  Run with --v (verbose) or --vv (debug) for more details</span><br></pre></td></tr></table></figure>
-<h3 id="没有Kong初始化数据库"><a href="#没有Kong初始化数据库" class="headerlink" title="没有Kong初始化数据库"></a>没有Kong初始化数据库</h3><p>如果数据库版本过低也会提示<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@kong kong]# kong start</span><br><span class="line"> [warn] postgres database &apos;kong&apos; is missing migration: (response-transformer) 2016-05-04-160000_resp_trans_schema_changes</span><br><span class="line">Error: /usr/local/share/lua/5.1/kong/cmd/start.lua:37: [postgres error] the current database schema does not match this version of Kong. Please run `kong migrations up` to update/initialize the database schema. Be aware that Kong migrations should only run from a single node, and that nodes running migrations concurrently will conflict with each other and might corrupt your database schema!</span><br><span class="line"></span><br><span class="line">  Run with --v (verbose) or --vv (debug) for more details</span><br></pre></td></tr></table></figure></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/api-gateway-of-kong-install/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2502,51 +1685,15 @@
 <li><p><a href="https://aws.amazon.com/cn/api-gateway/" target="_blank" rel="noopener">Amazon API Gateway</a></p>
 </li>
 </ul>
-<h2 id="三种常见API网关方案"><a href="#三种常见API网关方案" class="headerlink" title="三种常见API网关方案"></a>三种常见API网关方案</h2><h3 id="Nginx-Lua"><a href="#Nginx-Lua" class="headerlink" title="Nginx+ Lua"></a>Nginx+ Lua</h3><p>Nginx是由IgorSysoev为俄罗斯访问量第二的Rambler.ru站点开发的，一个高性能的HTTP和反向代理服务器。2012年，Nginx荣获年度云计算开发奖，并成长为世界第二大Web服务器。全世界流量最高的前1000名网站中，超过25%都使用Nginx来处理海量的互联网请求。 </p>
-<h4 id="Nginx基本功能"><a href="#Nginx基本功能" class="headerlink" title="Nginx基本功能"></a>Nginx基本功能</h4><p>静态web资源服务器，能够缓存打开的文件描述符</p>
-<p>支持http/imap/pop3/smtp的反向代理；支持缓存、负载均衡</p>
-<p>支持fastcgi(fpm)</p>
-<p>模块化，非DSO机制，支持过滤器zip压缩，SSI以及图像大小调整</p>
-<p>支持SSL</p>
-<p>Nginx通过插件的扩展功能：</p>
-<p>基于名称和IP的虚拟主机</p>
-<p>支持keepalive的保持机制</p>
-<p>支持平滑升级</p>
-<p>定制访问日志，支持使用日志缓存区提高日志存储性能</p>
-<p>支持url rewrite</p>
-<p>支持路径别名（root或alias指定）</p>
-<p>支持基于IP以及用户的访问控制</p>
-<p>支持传输速率限制，并发限制 </p>
-<h4 id="Nginx在性能和高可用性上的表现"><a href="#Nginx在性能和高可用性上的表现" class="headerlink" title="Nginx在性能和高可用性上的表现"></a>Nginx在性能和高可用性上的表现</h4><p>Nginx性能极高，Nginx先天的事件驱动型设计、全异步的网络I/O处理机制、极少的进程间切换以及许多优化设计，都使得Nginx天生善于处理高并发压力下的互联网请求。Nginx的稳定性也在各大网站得到验证。官方提供的常用模块都非常稳定，每个worker进程相对独立，master进程在1个worker进程出错时可以快速“拉起”新的worker子进程提供服务。支持热部署，可以不停机更新配置文件、更新日志文件、更新服务器程序版本。</p>
-<h4 id="Nginx的扩展性"><a href="#Nginx的扩展性" class="headerlink" title="Nginx的扩展性"></a>Nginx的扩展性</h4><p>Nginx的设计极具扩展性，它完全是由多个不同功能、不同层次、不同类型且耦合度极低的模块组成。因此，当对某一个模块修复Bug或进行升级时，可以专注于模块自身，无须在意其他。    </p>
-<h4 id="Nginx的易用性"><a href="#Nginx的易用性" class="headerlink" title="Nginx的易用性"></a>Nginx的易用性</h4><p>Nginx使用最自由的BSD许可协议，允许用户在自己的项目中直接使用或修改Nginx源码，有大量的插件可以利用。但是，Nginx模块需要用C开发，而且必须符合一系列复杂的规则。虽然通过第三方模块，可以支持Nginx与Perl、Lua等脚本语言集成工作，但对使用者的要求还是很高。 </p>
-<p>Nginx可以说是一款能够工业化API网关，在国内的很多互联网公司，例如阿里、新浪等都得到很好的应用。</p>
-<h3 id="SpringCloud-Zuul"><a href="#SpringCloud-Zuul" class="headerlink" title="SpringCloud Zuul"></a>SpringCloud Zuul</h3><p>Zuul Netflix公司开源的一个API网关组件。提供了认证&amp;鉴权、限流、动态路由，监控，弹性，安全、负载均衡、协助单点压测、静态响应等边缘服务的框架。 </p>
-<h4 id="Zuul的基本功能"><a href="#Zuul的基本功能" class="headerlink" title="Zuul的基本功能"></a>Zuul的基本功能</h4><p>验证与安全保障: 识别面向各类资源的验证要求并拒绝那些与要求不符的请求。</p>
-<p>审查与监控: 在边缘位置追踪有意义数据及统计结果，从而为我们带来准确的生产状态结论。</p>
-<p>动态路由: 以动态方式根据需要将请求路由至不同后端集群处。</p>
-<p>压力测试: 逐渐增加指向集群的负载流量，从而计算性能水平。</p>
-<p>负载分配: 为每一种负载类型分配对应容量，并弃用超出限定值的请求。</p>
-<p>静态响应处理: 在边缘位置直接建立部分响应，从而避免其流入内部集群。</p>
-<p>Netflix公司还利用Zuul的功能通过金丝雀版本实现精确路由与压力测试。</p>
-<p>虽然提供的功能还算丰富，但都比较弱，很难满足高要求的场景。</p>
-<h4 id="Zuul在性能和高可用性上的表现"><a href="#Zuul在性能和高可用性上的表现" class="headerlink" title="Zuul在性能和高可用性上的表现"></a>Zuul在性能和高可用性上的表现</h4><p>Zuul处理每个请求的方式是针对每个请求是用一个线程来处理。通常情况下，为了提高性能，所有请求会被放到处理队列中，从线程池中选取空闲线程来处理该请求。2016年底，Netflix将它们的网关服务Zuul进行了升级，全新的Zuul 2将HTTP请求的处理方式从同步变成了异步，以提升其处理性能。除了Netflix公司，目前Zuul在企业中用的还比较少，性能和稳定性方面还有待进一步观察。</p>
-<h4 id="Zuul的扩展性"><a href="#Zuul的扩展性" class="headerlink" title="Zuul的扩展性"></a>Zuul的扩展性</h4><p>从Zuul的架构图上可以看出，Zuul更像是一个过滤器框架，其自身的路由、日志、反向代理、ddos预防等功能都是通过过滤器实现的。提供了PRE、ROUTING、POST和ERROR四个扩展点，可以很容易的添加自定义的过滤器。  </p>
-<h4 id="Zuul的易用性"><a href="#Zuul的易用性" class="headerlink" title="Zuul的易用性"></a>Zuul的易用性</h4><p>Zuul的搭建非常简便，使用和配置也很简单。Zuul的开源社区比较活跃，一直在更新状态，但版本不算太稳定，在使用的过程中，还有一些坑要踩。例如重定向问题、异常处理问题，还没有解决的很好，需要自己重写一些filter。</p>
-<p>如果从通盘考虑， 这种方案不是最佳方案。但如果自己的团队对整体技术设施把控有限，且团队规模不大，没有专门的网关开发人员的情况下，Zuul是一款快速上手的最佳方案。</p>
-<h3 id="Mashape-Kong"><a href="#Mashape-Kong" class="headerlink" title="Mashape Kong"></a>Mashape Kong</h3><p>Kong是Mashape提供的一款API管理软件，它本身是基于Ngnix+lua的，但比nginx提供了更简单的配置方式，数据采用了 ApacheCassandra/PostgreSQL存储，并且提供了一些优秀的插件，比如验证，日志，调用频次限制等。 </p>
-<p>Kong的一个非常诱人的地方就是提供了大量的插件来扩展应用，通过设置不同的插件可以为服务提供各种增强的功能。Kong默认插件插件包括： </p>
-<p>身份认证：Kong提供了Basic Authentication、Key authentication、OAuth2.0authentication、HMAC authentication、JWT、LDAP authentication认证实现。</p>
-<p>安全：ACL（访问控制）、CORS（跨域资源共享）、动态SSL、IP限制、爬虫检测实现。</p>
-<p>流量控制：请求限流（基于请求计数限流）、上游响应限流（根据upstream响应计数限流）、请求大小限制。限流支持本地、Redis和集群限流模式。</p>
-<p>分析监控：Galileo（记录请求和响应数据，实现API分析）、Datadog（记录API Metric如请求次数、请求大小、响应状态和延迟，可视化API Metric）、Runscope（记录请求和响应数据，实现API性能测试和监控）。</p>
-<p>转换：请求转换、响应转换 </p>
-<p>Kong本身也是基于Nginx的，所以在性能和稳定性上都没有问题。Kong作为一款商业软件，在Nginx上做了很扩展工作，而且还有很多付费的商业插件。Kong本身也有付费的企业版，其中包括技术支持、使用培训服务以及API 分析插件。 </p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从对上面三种方案的比较中可以看到，Spring Cloud Zuul非常适合创业初期的团队，快速搭建一个“基本可用”的API网关。Nginx适合有较强研发团队，自主开发企业自己的API网关。Kong适合于没有自身研发团队，但需要拥有企业级API网关能力的公司。</p>
-<blockquote>
-<p>由于时间产品还在研发迭代阶段时间有限，综合考虑最后我们选择Kong，随后的文章会更新Kong的安装使用。以上仅供参考。</p>
-</blockquote>
-
+<h2 id="三种常见API网关方案"><a href="#三种常见API网关方案" class="headerlink" title="三种常见API网关方案"></a>三种常见API网关方案</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/api-gateway-under-the-architecture-of-micro-service/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -2635,17 +1782,14 @@
 <h4 id="网络畅通还是无法使用yum"><a href="#网络畅通还是无法使用yum" class="headerlink" title="网络畅通还是无法使用yum"></a>网络畅通还是无法使用yum</h4><p>在安装完CentOS后一般需要修改yum源，才能够在安装更新rpm包时获得比较理想的速度。国内比较快的有163源、sohu源、阿里云源，这里使用阿里云为例子。</p>
 <p><strong>作为运维人员任何修改文件最好都要备份</strong></p>
 <p>备份操作：<br><code>mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup</code></p>
-<h4 id="下载新的CentOS-Base-repo-到-etc-yum-repos-d"><a href="#下载新的CentOS-Base-repo-到-etc-yum-repos-d" class="headerlink" title="下载新的CentOS-Base.repo 到/etc/yum.repos.d/"></a>下载新的CentOS-Base.repo 到/etc/yum.repos.d/</h4><h5 id="CentOS-5"><a href="#CentOS-5" class="headerlink" title="CentOS 5"></a>CentOS 5</h5><p><code>wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-5.repo</code></p>
-<p>或者</p>
-<p><code>curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-5.repo</code></p>
-<h5 id="CentOS-6"><a href="#CentOS-6" class="headerlink" title="CentOS 6"></a>CentOS 6</h5><p><code>wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo</code></p>
-<p>或者</p>
-<p><code>curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo</code></p>
-<h4 id="CentOS-7"><a href="#CentOS-7" class="headerlink" title="CentOS 7"></a>CentOS 7</h4><p><code>wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo</code></p>
-<p>或者</p>
-<p><code>curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo</code></p>
-<p><strong>之后运行yum makecache生成缓存</strong></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
