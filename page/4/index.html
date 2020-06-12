@@ -174,6 +174,164 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-planned-task-crontab/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/linux-planned-task-crontab/" class="post-title-link" itemprop="url">Linux 计划任务 — crontab</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-01 16:24:00" itemprop="dateCreated datePublished" datetime="2018-08-01T16:24:00+08:00">2018-08-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 14:27:45" itemprop="dateModified" datetime="2019-10-16T14:27:45+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/架构/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/架构/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux-planned-task-crontab/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-planned-task-crontab/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1ftuodxvzafj30ey0cewes.jpg" alt="crontab说明图"></p>
+<h2 id="crontab-简介"><a href="#crontab-简介" class="headerlink" title="crontab 简介"></a>crontab 简介</h2><p>crontab 是 UNIX, SOLARIS，LINUX 下的一个十分有用的工具。通过 crontab 脚本能使计划任务定期地在系统后台自动运行。</p>
+<h2 id="crontab-命令"><a href="#crontab-命令" class="headerlink" title="crontab 命令"></a>crontab 命令</h2><ul>
+<li><code>crontab -e</code> – 编辑该用户的 crontab，当指定 crontab 不存在时新建。</li>
+<li><code>crontab -l</code> – 列出该用户的 crontab。</li>
+<li><code>crontab -r</code> – 删除该用户的 crontab。</li>
+<li><code>crontab -u&lt;用户名称&gt;</code> – 指定要设定 crontab 的用户名称。</li>
+</ul>
+<h2 id="Linux-Crontab-格式"><a href="#Linux-Crontab-格式" class="headerlink" title="Linux Crontab 格式"></a>Linux Crontab 格式</h2><blockquote>
+<p>表格: Crontab 字段与允许的值 (Linux Crontab)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>描述</th>
+<th>允许的值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>分钟</td>
+<td>一小时的第几分</td>
+<td>0-59</td>
+</tr>
+<tr>
+<td>小时</td>
+<td>一天的第几小时</td>
+<td>0-23</td>
+</tr>
+<tr>
+<td>日期</td>
+<td>一个月的的第几天</td>
+<td>1-31</td>
+</tr>
+<tr>
+<td>月份</td>
+<td>一年的第几个月</td>
+<td>1-12</td>
+</tr>
+<tr>
+<td>周几</td>
+<td>一周的第几天</td>
+<td>0-6</td>
+</tr>
+<tr>
+<td>命令</td>
+<td>命令</td>
+<td>可以被执行的任何命令</td>
+</tr>
+</tbody>
+</table>
+<h2 id="crontab-实例"><a href="#crontab-实例" class="headerlink" title="crontab 实例"></a>crontab 实例</h2><h3 id="特定时间执行"><a href="#特定时间执行" class="headerlink" title="特定时间执行"></a>特定时间执行</h3>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-planned-task-crontab/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1708,102 +1866,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/" class="post-title-link" itemprop="url">Centos使用yum提示Loaded plugins: fastestmirror, refresh-packagekit, security Loading mirror speeds from cached hostfi</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2018-07-19 03:39:29 / 修改时间：12:54:10" itemprop="dateCreated datePublished" datetime="2018-07-19T03:39:29+08:00">2018-07-19</time>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=365006559,198810446&amp;fm=27&amp;gp=0.jpg" alt="centos"></p>
-<blockquote>
-<p>今天在Docker中centos7镜像使用yum提示：Loaded plugins: fastestmirror, refresh-packagekit, security Loading mirror speeds from cached hostfi<br>我使用<code>ping www.huixing.org</code> 发现网络是正常的。</p>
-</blockquote>
-<p><strong>遇到这种情况有两种做法：</strong></p>
-<h4 id="查看网络是否畅通"><a href="#查看网络是否畅通" class="headerlink" title="查看网络是否畅通"></a>查看网络是否畅通</h4><p><code>ping www.huixing.org</code></p>
-<p>如果显示没有连接的话，就说明没网，也就无法使用yum 命令。</p>
-<h4 id="网络畅通还是无法使用yum"><a href="#网络畅通还是无法使用yum" class="headerlink" title="网络畅通还是无法使用yum"></a>网络畅通还是无法使用yum</h4><p>在安装完CentOS后一般需要修改yum源，才能够在安装更新rpm包时获得比较理想的速度。国内比较快的有163源、sohu源、阿里云源，这里使用阿里云为例子。</p>
-<p><strong>作为运维人员任何修改文件最好都要备份</strong></p>
-<p>备份操作：<br><code>mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup</code></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1873,7 +1935,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

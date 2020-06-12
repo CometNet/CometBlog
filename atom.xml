@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.huixing.org/"/>
-  <updated>2020-06-10T07:58:01.580Z</updated>
+  <updated>2020-06-10T09:36:42.422Z</updated>
   <id>http://blog.huixing.org/</id>
   
   <author>
@@ -15,6 +15,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MySQL GTID详解</title>
+    <link href="http://blog.huixing.org/mysql-gtid/"/>
+    <id>http://blog.huixing.org/mysql-gtid/</id>
+    <published>2020-06-10T08:40:44.000Z</published>
+    <updated>2020-06-10T09:36:42.422Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="GTID介绍"><a href="#GTID介绍" class="headerlink" title="GTID介绍"></a>GTID介绍</h1><h2 id="GTID概念"><a href="#GTID概念" class="headerlink" title="GTID概念"></a>GTID概念</h2><p>GTID（ Global Transaction Identifier）全局事务标识，由主库上生成的与事务绑定的唯一标识，这个标识不仅在主库上是唯一的，在MySQL集群内也是唯一的。GTID是 MySQL 5.6 版本引入的一个有关于主从复制的重大改进，相对于之前版本基于Binlog文件+Position的主从复制，基于GTID的主从复制，数据一致性更高，主从数据复制更健壮，主从切换、故障切换不易出错，很少需要人为介入处理。</p><p>划重点:</p><ol><li>全局事务表示(Global Transaction ID)</li><li>GTID与事务一一对应,并且全局唯一ID.</li><li>一个GTID在一个服务器上执行一次.</li><li>MySQL 5.6.5开始支持GTID.</li></ol><h2 id="GTID特点"><a href="#GTID特点" class="headerlink" title="GTID特点"></a>GTID特点</h2><ol><li>事务提交产生GTID，GTID与事务及事务提交所在的节点绑定，GTID与事务一起写入Binlog，但是从库应用Binlog并不会生成新的GTID。</li><li>集群中的任何一个节点，根据其GTID值就可以知道哪些事务已经执行，哪些事务没有执行，如果发现某个GTID已执行，重复执行该GTID，将会被忽略，即同一个GTID只能被应用一次。</li><li>当一个连接执行一个特定GTID的事务，但是还没有提交，此时有另外一个连接也要执行相同GTID的事务，那么第二个连接的执行将会被阻塞，直到第一个事务提交或者回滚。如果第一个事务成功提交，第二个事务将会被忽略。如果第一个事务回滚，第二个事务正常执行。</li></ol><h3 id="GTID组成"><a href="#GTID组成" class="headerlink" title="GTID组成"></a>GTID组成</h3><p>GTID = server_uuid:transaction+id</p><p>查看server_uuid:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@a84d983d7d50:/var/lib/mysql# more auto.cnf </span><br><span class="line">[auto]</span><br><span class="line">server-uuid=59fd3bd6-a6da-11ea-91d7-0242ac110003</span><br></pre></td></tr></table></figure></p><h2 id="GTID和binlog的关系"><a href="#GTID和binlog的关系" class="headerlink" title="GTID和binlog的关系"></a>GTID和binlog的关系</h2><p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfnalq0k0uj20do0btq4m.jpg" alt="GTID和binlog的关系"></p><p><img src="http://ww1.sinaimg.cn/large/a3eed545ly1gfnapf7ij3j21mg0907dz.jpg" alt="GTID event 结构"></p><p>Previous_gtid_log_event 在每个binlog 头部都会有每次binlog rotate的时候存储在binlog头部Previous-GTIDs在binlog中只会存储在这台机器上执行过的所有binlog，不包括手动设置gtid_purged值。换句话说，如果你手动set global gtid_purged=xx； 那么xx是不会记录在Previous_gtid_log_event中的。</p><p>假设有4个binlog: bin.001,bin.002,bin.003,bin.004</p><ul><li>bin.001 : Previous-GTIDs=empty; binlog_event有: 1-40</li><li>bin.002 : Previous-GTIDs=1-40; binlog_event有: 41-80</li><li>bin.003 : Previous-GTIDs=1-80; binlog_event有: 81-120</li><li>bin.004 : Previous-GTIDs=1-120; binlog_event有: 121-160</li></ul><p><strong>GTID和Binlog之间的关系是怎么对应的呢? 如何才能找到GTID=? 对应的binlog文件呢？</strong></p><p>假设现在我们要找GTID=$A，那么MySQL的扫描顺序为:</p><ul><li>从最后一个binlog开始扫描（即: bin.004）</li><li>bin.004的Previous-GTIDs=1-120，如果$A=140 &gt; Previous-GTIDs,那么肯定在bin.004中</li><li>bin.004的Previous-GTIDs=1-120，如果$A=88 包含在Previous-GTIDs中,那么继续对比上一个binlog文件 bin.003,然后再循环前面2个步骤，直到找到为止.</li></ul><h2 id="GTID的复制协议"><a href="#GTID的复制协议" class="headerlink" title="GTID的复制协议"></a>GTID的复制协议</h2><ol><li>从服务器向主服务器发送已经执行过的GTID.</li><li>主服务器将所有其他GTID发送给从服务器.</li><li>同样的GTID不能被执行两次,如果有同样的GTID,会自动跳过.</li></ol><p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfnbink7anj20gp0bjjv3.jpg" alt="COM_BINLOG_DUMP_GTID"></p><h2 id="传统复制与GTID对比"><a href="#传统复制与GTID对比" class="headerlink" title="传统复制与GTID对比"></a>传统复制与GTID对比</h2>]]></content>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;GTID介绍&quot;&gt;&lt;a href=&quot;#GTID介绍&quot; class=&quot;headerlink&quot; title=&quot;GTID介绍&quot;&gt;&lt;/a&gt;GTID介绍&lt;/h1&gt;&lt;h2 id=&quot;GTID概念&quot;&gt;&lt;a href=&quot;#GTID概念&quot; class=&quot;headerlink&quot; title=&quot;GTID概念&quot;&gt;&lt;/a&gt;GTID概念&lt;/h2&gt;&lt;p&gt;GTID（ Global Transaction Identifier）全局事务标识，由主库上生成的与事务绑定的唯一标识，这个标识不仅在主库上是唯一的，在MySQL集群内也是唯一的。GTID是 MySQL 5.6 版本引入的一个有关于主从复制的重大改进，相对于之前版本基于Binlog文件+Position的主从复制，基于GTID的主从复制，数据一致性更高，主从数据复制更健壮，主从切换、故障切换不易出错，很少需要人为介入处理。&lt;/p&gt;
+&lt;p&gt;划重点:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;全局事务表示(Global Transaction ID)&lt;/li&gt;
+&lt;li&gt;GTID与事务一一对应,并且全局唯一ID.&lt;/li&gt;
+&lt;li&gt;一个GTID在一个服务器上执行一次.&lt;/li&gt;
+&lt;li&gt;MySQL 5.6.5开始支持GTID.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&quot;GTID特点&quot;&gt;&lt;a href=&quot;#GTID特点&quot; class=&quot;headerlink&quot; title=&quot;GTID特点&quot;&gt;&lt;/a&gt;GTID特点&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;事务提交产生GTID，GTID与事务及事务提交所在的节点绑定，GTID与事务一起写入Binlog，但是从库应用Binlog并不会生成新的GTID。&lt;/li&gt;
+&lt;li&gt;集群中的任何一个节点，根据其GTID值就可以知道哪些事务已经执行，哪些事务没有执行，如果发现某个GTID已执行，重复执行该GTID，将会被忽略，即同一个GTID只能被应用一次。&lt;/li&gt;
+&lt;li&gt;当一个连接执行一个特定GTID的事务，但是还没有提交，此时有另外一个连接也要执行相同GTID的事务，那么第二个连接的执行将会被阻塞，直到第一个事务提交或者回滚。如果第一个事务成功提交，第二个事务将会被忽略。如果第一个事务回滚，第二个事务正常执行。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;GTID组成&quot;&gt;&lt;a href=&quot;#GTID组成&quot; class=&quot;headerlink&quot; title=&quot;GTID组成&quot;&gt;&lt;/a&gt;GTID组成&lt;/h3&gt;&lt;p&gt;GTID = server_uuid:transaction+id&lt;/p&gt;
+&lt;p&gt;查看server_uuid:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;root@a84d983d7d50:/var/lib/mysql# more auto.cnf &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;[auto]&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;server-uuid=59fd3bd6-a6da-11ea-91d7-0242ac110003&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>MySQL主从复制</title>
@@ -27,11 +59,26 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;复制概述&quot;&gt;&lt;a href=&quot;#复制概述&quot; class=&quot;headerlink&quot; title=&quot;复制概述&quot;&gt;&lt;/a&gt;复制概述&lt;/h1&gt;&lt;p&gt;MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库).&lt;/p&gt;
-&lt;
-      
+      &lt;h1 id=&quot;复制概述&quot;&gt;&lt;a href=&quot;#复制概述&quot; class=&quot;headerlink&quot; title=&quot;复制概述&quot;&gt;&lt;/a&gt;复制概述&lt;/h1&gt;&lt;p&gt;MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库).&lt;/p&gt;
+&lt;p&gt;MySQL的复制特性操作很灵活,即可以实现整个服务级别的复制,也可以只复制某一个数据库,甚至某个数据库中的某个表对象;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主从单向复制(即可以实现从A复制到B)&lt;/li&gt;
+&lt;li&gt;单主多从复制(B在复制到C,也可以实现A直接复制到B和C)&lt;/li&gt;
+&lt;li&gt;双主复制(甚至是A的数据复制给B,B的数据也复制回A)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;https://ww1.sinaimg.cn/large/a3eed545ly1gfheym1grdj20hj07c3yp.jpg&quot; alt=&quot;一主多从架构与双主双从架构&quot;&gt;&lt;/p&gt;
+&lt;p&gt;服务器间复制数据有很多种解决方案,究竟哪种方案最适合,取决于使用的数据引擎和期望实现的复制需求.一般来说,可以将MySQL的复制特性应用在下来场景上:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;实时灾备,用于故障切换&lt;/li&gt;
+&lt;li&gt;读写分离,提供查询服务&lt;/li&gt;
+&lt;li&gt;备份&lt;/li&gt;
+&lt;li&gt;延时库&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&quot;搭建环境&quot;&gt;&lt;a href=&quot;#搭建环境&quot; class=&quot;headerlink&quot; title=&quot;搭建环境&quot;&gt;&lt;/a&gt;搭建环境&lt;/h1&gt;&lt;p&gt;由于MySQL安装方式 网上很多教程 这里就不重复写了&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;运行环境 CentOS 7.5 &lt;/li&gt;
+&lt;li&gt;数据库环境 MySQL 5.7.30&lt;/li&gt;
+&lt;/ul&gt;
     
     </summary>
     
@@ -49,10 +96,14 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;Socket编程&quot;&gt;&lt;a href=&quot;#Socket编程&quot; class=&quot;headerlink&quot; title=&quot;Socket编程&quot;&gt;&lt;/a&gt;Socket编程&lt;/h2&gt;&lt;h3 id=&quot;套接字概念&quot;&gt;&lt;a href=&quot;#套接字概念&quot; class=&quot;headerlink
-      
+      &lt;h2 id=&quot;Socket编程&quot;&gt;&lt;a href=&quot;#Socket编程&quot; class=&quot;headerlink&quot; title=&quot;Socket编程&quot;&gt;&lt;/a&gt;Socket编程&lt;/h2&gt;&lt;h3 id=&quot;套接字概念&quot;&gt;&lt;a href=&quot;#套接字概念&quot; class=&quot;headerlink&quot; title=&quot;套接字概念&quot;&gt;&lt;/a&gt;套接字概念&lt;/h3&gt;&lt;p&gt;Socket本身有“插座”的意思，在Linux环境下，用于表示进程间网络通信的特殊文件类型。本质为内核借助缓冲区形成的伪文件。&lt;/p&gt;
+&lt;p&gt;既然是文件，那么理所当然的，我们可以使用文件描述符引用套接字。与管道类似的，Linux系统将其封装成文件的目的是为了统一接口，使得读写套接字和读写文件的操作一致。区别是管道主要应用于本地进程间通信，而套接字多应用于网络进程间数据的传递。&lt;/p&gt;
+&lt;p&gt;套接字的内核实现较为复杂，不宜在学习初期深入学习。&lt;/p&gt;
+&lt;p&gt;在TCP/IP协议中，“IP地址+TCP或UDP端口号”唯一标识网络通讯中的一个进程。“IP地址+端口号”就对应一个socket。欲建立连接的两个进程各自有一个socket来标识，那么这两个socket组成的socket pair就唯一标识一个连接。因此可以用Socket来描述网络连接的一对一关系。&lt;/p&gt;
+&lt;p&gt;套接字通信原理如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://ww1.sinaimg.cn/large/a3eed545ly1gcgzl1euvlj20eb04l0sx.jpg&quot; alt=&quot;套接字通信原理&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;在网络通信中，套接字一定是成对出现的。&lt;/strong&gt; 一端的发送缓冲区对应对端的接收缓冲区。我们使用同一个文件描述符索发送缓冲区和接收缓冲区。&lt;/p&gt;
+&lt;p&gt;TCP/IP协议最早在BSD UNIX上实现，为TCP/IP协议设计的应用层编程接口称为socket API。本章的主要内容是socket API，主要介绍TCP协议的函数接口，最后介绍UDP协议和UNIX Domain Socket的函数接口。&lt;/p&gt;
     
     </summary>
     
@@ -70,10 +121,14 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;同步概念&quot;&gt;&lt;a href=&quot;#同步概念&quot; class=&quot;headerlink&quot; title=&quot;同步概念&quot;&gt;&lt;/a&gt;同步概念&lt;/h2&gt;&lt;p&gt;所谓同步，即同时起步，协调一致。不同的对象，对“同步”的理解方式略有不同。如，设备同步，是指在两个设备之间规定一个共同的时间
-      
+      &lt;h2 id=&quot;同步概念&quot;&gt;&lt;a href=&quot;#同步概念&quot; class=&quot;headerlink&quot; title=&quot;同步概念&quot;&gt;&lt;/a&gt;同步概念&lt;/h2&gt;&lt;p&gt;所谓同步，即同时起步，协调一致。不同的对象，对“同步”的理解方式略有不同。如，设备同步，是指在两个设备之间规定一个共同的时间参考；数据库同步，是指让两个或多个数据库内容保持一致，或者按需要部分保持一致；文件同步，是指让两个或多个文件夹里的文件保持一致。等等…&lt;/p&gt;
+&lt;p&gt;而，编程中、通信中所说的同步与生活中大家印象中的同步概念略有差异。“同”字应是指协同、协助、互相配合。主旨在协同步调，按预定的先后次序运行。&lt;/p&gt;
+&lt;h2 id=&quot;线程同步&quot;&gt;&lt;a href=&quot;#线程同步&quot; class=&quot;headerlink&quot; title=&quot;线程同步&quot;&gt;&lt;/a&gt;线程同步&lt;/h2&gt;&lt;p&gt;同步即协同步调，按预定的先后次序运行。&lt;/p&gt;
+&lt;p&gt;线程同步，指一个线程发出某一功能调用时，在没有得到结果之前，该调用不返回。同时其它线程为保证数据一致性，不能调用该功能。&lt;/p&gt;
+&lt;p&gt;举例1：    银行存款 5000。柜台，折：取3000；提款机，卡：取 3000。剩余：2000&lt;/p&gt;
+&lt;p&gt;举例2： 内存中100字节，线程T1欲填入全1， 线程T2欲填入全0。但如果T1执行了50个字节失去cpu，T2执行，会将T1写过的内容覆盖。当T1再次获得cpu继续    从失去cpu的位置向后写入1，当执行结束，内存中的100字节，既不是全1，也不是全0。&lt;/p&gt;
+&lt;p&gt;产生的现象叫做“与时间有关的错误”(time related)。为了避免这种数据混乱，线程需要同步。&lt;/p&gt;
+&lt;p&gt;“同步”的目的，是为了避免数据混乱，解决与时间有关的错误。实际上，不仅线程间需要同步，进程间、信号间等等都需要同步机制。&lt;/p&gt;
     
     </summary>
     
@@ -91,10 +146,25 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;信号概念&quot;&gt;&lt;a href=&quot;#信号概念&quot; class=&quot;headerlink&quot; title=&quot;信号概念&quot;&gt;&lt;/a&gt;信号概念&lt;/h2&gt;&lt;p&gt;信号其实我们也见过，当我们在shell上写出一个死循环退不出来的时候，只需要一个组合键，ctrl+c,就可以解决了，这就是一
-      
+      &lt;h2 id=&quot;信号概念&quot;&gt;&lt;a href=&quot;#信号概念&quot; class=&quot;headerlink&quot; title=&quot;信号概念&quot;&gt;&lt;/a&gt;信号概念&lt;/h2&gt;&lt;p&gt;信号其实我们也见过，当我们在shell上写出一个死循环退不出来的时候，只需要一个组合键，ctrl+c,就可以解决了，这就是一个信号，但是真正的过程并不是那么简单的。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;当用户按下这一对组合键时，这个键盘输入会产生一个硬件中断，如果CPU正在执行这个进程的代码时，则该进程的用户代码先暂停执行，用户从用户态切换到内核态处理硬件中断&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;终端驱动程序将这一对组合键翻译成一个SIGINT(ctrl+c)信号记在该进程的PCB中（也就是发送了一个SIGINT信号给该进程）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;当某个时刻要从内核态回到该进程的用户·空间代码继续执行之前，首先处理PCB中的信号，发现有一个SIGINT信号需要处理，而这个信号的默认处理方式是终止进程，所以直接终止进程，不再返回用户空间执行代码。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;shell可以同时运行一个前台进程和多个后台进程，只有前台进程才能收到ctrl+c这种组合键产生的信号&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;前台进程在 运行过程中用户可以随时按下ctrl+c产生一个信号也就是说前台进程的用户空间代码执行到任意一个时刻都可能接收到SIGINT信号而终止，所以信号对于进程的控制流来说是异步的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;注意：ctrl+c只能终止前台进程。一个命令可以加&amp;amp;可以将进程放在后台执行，这样shell就不必等待进程结束就可以接收新的命令，启动新的进程&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id=&quot;信号介绍&quot;&gt;&lt;a href=&quot;#信号介绍&quot; class=&quot;headerlink&quot; title=&quot;信号介绍&quot;&gt;&lt;/a&gt;信号介绍&lt;/h2&gt;&lt;p&gt;在bash上执行命令kill -l便可看到系统定义的所有信号&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;$ kill -l&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5) SIGTRAP      6) SIGABRT      7) SIGBUS       8) SIGFPE&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9) SIGKILL     10) SIGUSR1     11) SIGSEGV     12) SIGUSR2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13) SIGPIPE     14) SIGALRM     15) SIGTERM     17) SIGCHLD&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18) SIGCONT     19) SIGSTOP     20) SIGTSTP     21) SIGTTIN&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30) SIGPWR      31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;36) SIGRTMIN+2  37) SIGRTMIN+3  38) SIGRTMIN+4  39) SIGRTMIN+5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8  43) SIGRTMIN+9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;52) SIGRTMAX-12 53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;56) SIGRTMAX-8  57) SIGRTMAX-7  58) SIGRTMAX-6  59) SIGRTMAX-5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2  63) SIGRTMAX-1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;64) SIGRTMAX&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;列表中，编号为1 ~ 31的信号为传统UNIX支持的信号，是不可靠信号(非实时的)，编号为32 ~ 63的信号是后来扩充的，称做可靠信号(实时信号)。不可靠信号和可靠信号的区别在于前者不支持排队，可能会造成信号丢失，而后者不会。&lt;/p&gt;
+&lt;p&gt;每个信号都有一个编号和一个宏定义名称，这些宏定义都可以在signal.h中找到，在man手册中还可以找到各种信号的详细信息&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;man 7 signal&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;下面我们对编号小于SIGRTMIN的信号进行讨论。&lt;/p&gt;
     
     </summary>
     
@@ -112,10 +182,14 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;孤儿进程&quot;&gt;&lt;a href=&quot;#孤儿进程&quot; class=&quot;headerlink&quot; title=&quot;孤儿进程&quot;&gt;&lt;/a&gt;孤儿进程&lt;/h2&gt;&lt;p&gt;父进程先于子进程结束，则子进程称为孤儿进程，子进程的父进程成为  init 进程，称 init 进程领养进程孤儿进程，ini
-      
+      &lt;h2 id=&quot;孤儿进程&quot;&gt;&lt;a href=&quot;#孤儿进程&quot; class=&quot;headerlink&quot; title=&quot;孤儿进程&quot;&gt;&lt;/a&gt;孤儿进程&lt;/h2&gt;&lt;p&gt;父进程先于子进程结束，则子进程称为孤儿进程，子进程的父进程成为  init 进程，称 init 进程领养进程孤儿进程，init 进程称为孤儿院。&lt;/p&gt;
+&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;38&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt;&lt;span class=&quot;meta-string&quot;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt;&lt;span class=&quot;meta-string&quot;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt;&lt;span class=&quot;meta-string&quot;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;pid_t&lt;/span&gt; pid;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    pid = fork();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 创建失败&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;( pid == &lt;span class=&quot;number&quot;&gt;-1&lt;/span&gt; )&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        perror(&lt;span class=&quot;string&quot;&gt;&quot;fork&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;exit&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 父进程&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;( pid &amp;gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;printf&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&quot;This is the parent process. My PID is %d.\n&quot;&lt;/span&gt;,getpid());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        sleep(&lt;span class=&quot;number&quot;&gt;4&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;printf&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&quot;--------------parent going to die------------------\n&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 子进程&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;(pid == &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;while&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            &lt;span class=&quot;built_in&quot;&gt;printf&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&quot;This is the child process. My PID is: %d. My PPID is: %d.\n&quot;&lt;/span&gt;,getpid(),getppid());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            sleep(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;运行结果:&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;tanhao@MacBook-Pro test % gcc pro.c &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tanhao@MacBook-Pro test % ./a.out  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the parent process. My PID is 46491.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the child process. My PID is: 46492. My PPID is: 46491.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the child process. My PID is: 46492. My PPID is: 46491.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the child process. My PID is: 46492. My PPID is: 46491.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;--------------parent going to die------------------&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;tanhao@MacBook-Pro test % This is the child process. My PID is: 46492. My PPID is: 1.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the child process. My PID is: 46492. My PPID is: 1.&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;This is the child process. My PID is: 46492. My PPID is: 1.&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;从上面运行结果可以看出来父进程退出后子进程自动被init进程领养ppid为1&lt;/p&gt;
+&lt;p&gt;此时程序中的打印信息会一直进行打印，即使你按下 ctrl+c   也不会退出正在执行的程序 ./a.out；此时需要使用 ps -ef ，查看正在打印的程序信息；然后使用 kill -9  + 进程ID（./a.out 的进程ID）&lt;/p&gt;
+&lt;h2 id=&quot;僵尸进程&quot;&gt;&lt;a href=&quot;#僵尸进程&quot; class=&quot;headerlink&quot; title=&quot;僵尸进程&quot;&gt;&lt;/a&gt;僵尸进程&lt;/h2&gt;&lt;p&gt;进程终止，父进程尚未回收，子进程残留资源（PCB）存放于内核中，变成僵尸进程。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;注意：僵尸进程是不能使用 kill 命令清除掉的。因为 kill 命令只是用来终止进程的，而僵尸进程已经终止。&lt;/strong&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight c&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;meta-string&quot;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;meta-string&quot;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;meta-string&quot;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; i = &lt;span class=&quot;number&quot;&gt;100&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;pid_t&lt;/span&gt; pid=fork();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;(pid &amp;lt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        perror(&lt;span class=&quot;string&quot;&gt;&quot;fork failed.&quot;&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;exit&lt;/span&gt;(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;(pid &amp;gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;printf&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&quot;This is the parent process. My PID is %d.\n&quot;&lt;/span&gt;, getpid());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt;(; i &amp;gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;; i--)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;            sleep(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;if&lt;/span&gt;(pid == &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;built_in&quot;&gt;printf&lt;/span&gt;(&lt;span class=&quot;string&quot;&gt;&quot;This is the child process. My PID is: %d. My PPID is: %d.\n&quot;&lt;/span&gt;, getpid(), getppid());&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
     
     </summary>
     
@@ -133,11 +207,12 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;库&quot;&gt;&lt;a href=&quot;#库&quot; class=&quot;headerlink&quot; title=&quot;库&quot;&gt;&lt;/a&gt;库&lt;/h2&gt;&lt;p&gt;所谓的库就是一种可执行代码的二进制形式，可以被操作系统载入内存执行。&lt;/p&gt;
-&lt;h2 id=&quot;静态库和动态库&quot;&gt;&lt;a href=&quot;#静态库和动态库&quot;
-      
+      &lt;h2 id=&quot;库&quot;&gt;&lt;a href=&quot;#库&quot; class=&quot;headerlink&quot; title=&quot;库&quot;&gt;&lt;/a&gt;库&lt;/h2&gt;&lt;p&gt;所谓的库就是一种可执行代码的二进制形式，可以被操作系统载入内存执行。&lt;/p&gt;
+&lt;h2 id=&quot;静态库和动态库&quot;&gt;&lt;a href=&quot;#静态库和动态库&quot; class=&quot;headerlink&quot; title=&quot;静态库和动态库&quot;&gt;&lt;/a&gt;静态库和动态库&lt;/h2&gt;&lt;h3 id=&quot;静态库-a&quot;&gt;&lt;a href=&quot;#静态库-a&quot; class=&quot;headerlink&quot; title=&quot;静态库 .a&quot;&gt;&lt;/a&gt;静态库 .a&lt;/h3&gt;&lt;p&gt;文件的命名方式：“libxxx.a”,库名前加“lib”，后缀是“.a”,库名是“xxx”&lt;/p&gt;
+&lt;p&gt;链接时间：静态库的代码是在编译过程中被载入到程序中的&lt;/p&gt;
+&lt;p&gt;链接方式：静态库的链接是将整个函数库的所有数据都合成进了目标代码，优点是编译后的执行程序不需要外部的函数库支持，因为所使用的函数已经被编进去了；缺点是如果所使用的静态库发生更新改变，则需要重新编译生成静态库。&lt;/p&gt;
+&lt;h3 id=&quot;动态库-so&quot;&gt;&lt;a href=&quot;#动态库-so&quot; class=&quot;headerlink&quot; title=&quot;动态库 .so&quot;&gt;&lt;/a&gt;动态库 .so&lt;/h3&gt;&lt;p&gt;文件命名方式：“libxxx.so”,库名前加“lib”，后缀是“.so”，库名是“xxx”&lt;/p&gt;
+&lt;p&gt;链接时间：动态库在编译时并没有被编译进目标代码，而是当你的程序执行到相关函数的时候才调用该函数库里的相应函数。缺点是函数库并没有整合进程序，所以程序的运行环境必须提供相应的库；优点是动态库的改变不影响程序。&lt;/p&gt;
     
     </summary>
     
@@ -155,10 +230,27 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;什么是线程&quot;&gt;&lt;a href=&quot;#什么是线程&quot; class=&quot;headerlink&quot; title=&quot;什么是线程&quot;&gt;&lt;/a&gt;什么是线程&lt;/h2&gt;&lt;p&gt;线程是操作系统能够进行运算调度的最小单位。它被包含在进程之中，是进程中的实际运作单位。一条线程指的是进程中一个单一顺
-      
+      &lt;h2 id=&quot;什么是线程&quot;&gt;&lt;a href=&quot;#什么是线程&quot; class=&quot;headerlink&quot; title=&quot;什么是线程&quot;&gt;&lt;/a&gt;什么是线程&lt;/h2&gt;&lt;p&gt;线程是操作系统能够进行运算调度的最小单位。它被包含在进程之中，是进程中的实际运作单位。一条线程指的是进程中一个单一顺序的控制流，一个进程中可以并发多个线程，每条线程并行执行不同的任务。在Unix System V及SunOS中也被称为轻量进程（lightweight processes），但轻量进程更多指内核线程（kernel thread），而把用户线程（user thread）称为线程。&lt;/p&gt;
+&lt;p&gt;线程是独立调度和分派的基本单位。线程可以为操作系统内核调度的内核线程，如Win32线程；由用户进程自行调度的用户线程，如Linux平台的POSIX Thread；或者由内核与用户进程，如Windows 7的线程，进行混合调度。&lt;/p&gt;
+&lt;p&gt;同一进程中的多条线程将共享该进程中的全部系统资源，如虚拟地址空间，文件描述符和信号处理等等。但同一进程中的多个线程有各自的调用栈（call stack），自己的寄存器环境（register context），自己的线程本地存储（thread-local storage）。&lt;br&gt;一个进程可以有很多线程，每条线程并行执行不同的任务。&lt;/p&gt;
+&lt;p&gt;在多核或多CPU，或支持Hyper-threading的CPU上使用多线程程序设计的好处是显而易见，即提高了程序的执行吞吐率。在单CPU单核的计算机上，使用多线程技术，也可以把进程中负责I/O处理、人机交互而常被阻塞的部分与密集计算的部分分开来执行，编写专门的workhorse线程执行密集计算，从而提高了程序的执行效率。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;LWP：light weight process 轻量级的进程，本质仍是进程(在Linux环境下)&lt;/li&gt;
+&lt;li&gt;进程：独立地址空间，拥有PCB&lt;/li&gt;
+&lt;li&gt;线程：也有PCB，但没有独立的地址空间(共享)&lt;/li&gt;
+&lt;li&gt;区别：在于是否共享地址空间。&lt;ul&gt;
+&lt;li&gt;独居(进程)&lt;/li&gt;
+&lt;li&gt;合租(线程)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Linux下：&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;线程：最小的执行单位&lt;/li&gt;
+&lt;li&gt;进程：最小分配资源单位，可看成是只有一个线程的进程。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;http://ww1.sinaimg.cn/large/a3eed545ly1g8ujxj4xb0j205m02gt8j.jpg&quot; alt=&quot;image.png&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;Linux内核线程实现原理&quot;&gt;&lt;a href=&quot;#Linux内核线程实现原理&quot; class=&quot;headerlink&quot; title=&quot;Linux内核线程实现原理&quot;&gt;&lt;/a&gt;Linux内核线程实现原理&lt;/h2&gt;
     
     </summary>
     
@@ -180,11 +272,19 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;程序和进程&quot;&gt;&lt;a href=&quot;#程序和进程&quot; class=&quot;headerlink&quot; title=&quot;程序和进程&quot;&gt;&lt;/a&gt;程序和进程&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;程序，是指编译好的二进制文件，在磁盘上，不占用系统资源(cpu、内存、打开的文件、设备、锁….)&lt;
-      
+      &lt;h2 id=&quot;程序和进程&quot;&gt;&lt;a href=&quot;#程序和进程&quot; class=&quot;headerlink&quot; title=&quot;程序和进程&quot;&gt;&lt;/a&gt;程序和进程&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;程序，是指编译好的二进制文件，在磁盘上，不占用系统资源(cpu、内存、打开的文件、设备、锁….)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;进程，是一个抽象的概念，与操作系统原理联系紧密。进程是活跃的程序，占用系统资源。在内存中执行。(程序运行起来，产生一个进程)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;程序 → 剧本(纸)&lt;/p&gt;
+&lt;p&gt;进程 → 戏(舞台、演员、灯光、道具…)&lt;/p&gt;
+&lt;p&gt;同一个剧本可以在多个舞台同时上演。同样，同一个程序也可以加载为不同的进程(彼此之间互不影响)&lt;/p&gt;
+&lt;p&gt;如：同时开两个终端。各自都有一个bash但彼此ID不同。&lt;/p&gt;
+&lt;h2 id=&quot;并发&quot;&gt;&lt;a href=&quot;#并发&quot; class=&quot;headerlink&quot; title=&quot;并发&quot;&gt;&lt;/a&gt;并发&lt;/h2&gt;&lt;p&gt;并发，在操作系统中，一个时间段中有多个进程都处于已启动运行到运行完毕之间的状态。但，任一个时刻点上仍只有一个进程在运行。&lt;/p&gt;
+&lt;p&gt;例如，当下，我们使用计算机时可以边听音乐边聊天边上网。 若笼统的将他们均看做一个进程的话，为什么可以同时运行呢，因为并发。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://ww1.sinaimg.cn/large/007SHHrCly1g8hnz7rgjbj307d049mx6.jpg&quot; alt=&quot;分时复用cpu&quot;&gt;&lt;/p&gt;
     
     </summary>
     
@@ -206,11 +306,27 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;map-multimap的简介&quot;&gt;&lt;a href=&quot;#map-multimap的简介&quot; class=&quot;headerlink&quot; title=&quot;map/multimap的简介&quot;&gt;&lt;/a&gt;map/multimap的简介&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;map是标准的关联式容器
-      
+      &lt;h2 id=&quot;map-multimap的简介&quot;&gt;&lt;a href=&quot;#map-multimap的简介&quot; class=&quot;headerlink&quot; title=&quot;map/multimap的简介&quot;&gt;&lt;/a&gt;map/multimap的简介&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;map是标准的关联式容器，一个map是一个键值对序列，即(key,value)对。它提供基于key的快速检索能力。&lt;/li&gt;
+&lt;li&gt;map中key值是唯一的。集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。&lt;/li&gt;
+&lt;li&gt;map的具体实现采用红黑树变体的平衡二叉树的数据结构。在插入操作和删除操作上比vector快。&lt;/li&gt;
+&lt;li&gt;map可以直接存取key所对应的value，支持[]操作符，如map[key]=value。&lt;/li&gt;
+&lt;li&gt;multimap与map的区别：map支持唯一键值，每个键只能出现一次；而multimap中相同键可以出现多次。multimap不支持[]操作符。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;头文件 &lt;code&gt;#include &amp;lt;map&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://tva1.sinaimg.cn/large/007X8olVly1g8fhpzk9iqj30dw050abl.jpg&quot; alt=&quot;map and multimaps&quot;&gt;&lt;/p&gt;
+&lt;p&gt;map/multimap采用模板类实现，对象的默认构造形式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;map&amp;lt;T1,T2&amp;gt; mapTT;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multimap&amp;lt;T1,T2&amp;gt;  multimapTT;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;map&amp;lt;int, char&amp;gt; mapA;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;map&amp;lt;string,float&amp;gt; mapB;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;其中T1,T2还可以用各种指针类型或自定义类型&lt;/p&gt;
+&lt;h2 id=&quot;map的插入与迭代器&quot;&gt;&lt;a href=&quot;#map的插入与迭代器&quot; class=&quot;headerlink&quot; title=&quot;map的插入与迭代器&quot;&gt;&lt;/a&gt;map的插入与迭代器&lt;/h2&gt;
     
     </summary>
     
@@ -232,11 +348,31 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;set-multiset的简介&quot;&gt;&lt;a href=&quot;#set-multiset的简介&quot; class=&quot;headerlink&quot; title=&quot;set/multiset的简介&quot;&gt;&lt;/a&gt;set/multiset的简介&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;set是一个集合容器，其
-      
+      &lt;h2 id=&quot;set-multiset的简介&quot;&gt;&lt;a href=&quot;#set-multiset的简介&quot; class=&quot;headerlink&quot; title=&quot;set/multiset的简介&quot;&gt;&lt;/a&gt;set/multiset的简介&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;set是一个集合容器，其中所包含的元素是唯一的，集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。&lt;br&gt;set采用红黑树变体的数据结构实现，红黑树属于平衡二叉树。在插入操作和删除操作上比vector快。&lt;/li&gt;
+&lt;li&gt;set不可以直接存取元素。（不可以使用at.(pos)与[]操作符）。&lt;/li&gt;
+&lt;li&gt;multiset与set的区别：set支持唯一键值，每个元素值只能出现一次；而multiset中同一值可以出现多次。&lt;/li&gt;
+&lt;li&gt;不可以直接修改set或multiset容器中的元素值，因为该类容器是自动排序的。如果希望修改一个元素值，必须先删除原有的元素，再插入新的元素。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;头文件 &lt;code&gt;#include &amp;lt;set&amp;gt;&lt;/code&gt; &lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://tva1.sinaimg.cn/large/007X8olVly1g8fhq4ih5wj31hw0u04j5.jpg&quot; alt=&quot;图解&quot;&gt;&lt;/p&gt;
+&lt;h2 id=&quot;set-multiset对象的默认构造&quot;&gt;&lt;a href=&quot;#set-multiset对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;set/multiset对象的默认构造&quot;&gt;&lt;/a&gt;set/multiset对象的默认构造&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;set&amp;lt;int&amp;gt; setInt;            //一个存放int的set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set&amp;lt;float&amp;gt; setFloat;     //一个存放float的set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set&amp;lt;string&amp;gt; setString;     //一个存放string的set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multiset&amp;lt;int&amp;gt; mulsetInt;            //一个存放int的multi set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multi set&amp;lt;float&amp;gt; multisetFloat;     //一个存放float的multi set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multi set&amp;lt;string&amp;gt; multisetString;     //一个存放string的multi set容器。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;set的插入与迭代器&quot;&gt;&lt;a href=&quot;#set的插入与迭代器&quot; class=&quot;headerlink&quot; title=&quot;set的插入与迭代器&quot;&gt;&lt;/a&gt;set的插入与迭代器&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;set.insert(elem);     //在容器中插入元素。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set.begin();  //返回容器中第一个数据的迭代器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set.end();  //返回容器中最后一个数据之后的迭代器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set.rbegin();  //返回容器中倒数第一个元素的迭代器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;set.rend();   //返回容器中倒数最后一个元素的后面的迭代器。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;set&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; setInt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;setInt.insert(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;); setInt.insert(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);setInt.insert(&lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;);setInt.insert(&lt;span class=&quot;number&quot;&gt;2&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;for&lt;/span&gt;(&lt;span class=&quot;built_in&quot;&gt;set&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt;::iterator it=setInt.begin(); it!=setInt.end(); ++it)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; iItem = *it;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;      &lt;span class=&quot;built_in&quot;&gt;cout&lt;/span&gt; &amp;lt;&amp;lt; iItem;    &lt;span class=&quot;comment&quot;&gt;//或直接使用cout &amp;lt;&amp;lt; *it&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//这样子便顺序输出  1 2 3 5。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;&lt;code&gt;set.rbegin()&lt;/code&gt;与&lt;code&gt;set.rend()&lt;/code&gt;略。&lt;/p&gt;
     
     </summary>
     
@@ -258,12 +394,26 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;List简介&quot;&gt;&lt;a href=&quot;#List简介&quot; class=&quot;headerlink&quot; title=&quot;List简介&quot;&gt;&lt;/a&gt;List简介&lt;/h2&gt;&lt;ul&gt;
+      &lt;h2 id=&quot;List简介&quot;&gt;&lt;a href=&quot;#List简介&quot; class=&quot;headerlink&quot; title=&quot;List简介&quot;&gt;&lt;/a&gt;List简介&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;list是一个双向链表容器，可高效地进行插入删除元素。&lt;/li&gt;
-&lt;li&gt;list不可以随机存取
-      
+&lt;li&gt;list不可以随机存取元素，所以不支持at.(pos)函数与[]操作符。It++(ok) it+5(err)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;头文件 &lt;code&gt;#include &amp;lt;list&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;list对象的默认构造&quot;&gt;&lt;a href=&quot;#list对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;list对象的默认构造&quot;&gt;&lt;/a&gt;list对象的默认构造&lt;/h2&gt;&lt;p&gt;list采用采用模板类实现,对象的默认构造形式：&lt;code&gt;list&amp;lt;T&amp;gt; lstT;&lt;/code&gt;&lt;br&gt;如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;list&amp;lt;int&amp;gt; lstInt;            //定义一个存放int的list容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list&amp;lt;float&amp;gt; lstFloat;     //定义一个存放float的list容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list&amp;lt;string&amp;gt; lstString;     //定义一个存放string的list容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list&amp;lt;xxxx&amp;gt; lstXxxx;     //定义一个存放xxxx的list容器。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;尖括号内还可以设置指针类型或自定义类型。&lt;/p&gt;
+&lt;h2 id=&quot;list头尾的添加移除操作&quot;&gt;&lt;a href=&quot;#list头尾的添加移除操作&quot; class=&quot;headerlink&quot; title=&quot;list头尾的添加移除操作&quot;&gt;&lt;/a&gt;list头尾的添加移除操作&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;list.push_back(elem);       //在容器尾部加入一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list.pop_back();              //删除容器中最后一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list.push_front(elem);     //在容器开头插入一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;list.pop_front();              //从容器开头移除第一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;list&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; lstInt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_back(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_back(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_back(&lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_back(&lt;span class=&quot;number&quot;&gt;7&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_back(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.pop_front();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.pop_front();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_front(&lt;span class=&quot;number&quot;&gt;11&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.push_front(&lt;span class=&quot;number&quot;&gt;13&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.pop_back();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;lstInt.pop_back();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;// lstInt    &amp;#123;13,11,5&amp;#125;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
     
     </summary>
     
@@ -285,12 +435,23 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;Queue简介&quot;&gt;&lt;a href=&quot;#Queue简介&quot; class=&quot;headerlink&quot; title=&quot;Queue简介&quot;&gt;&lt;/a&gt;Queue简介&lt;/h2&gt;&lt;blockquote&gt;
+      &lt;h2 id=&quot;Queue简介&quot;&gt;&lt;a href=&quot;#Queue简介&quot; class=&quot;headerlink&quot; title=&quot;Queue简介&quot;&gt;&lt;/a&gt;Queue简介&lt;/h2&gt;&lt;blockquote&gt;
 &lt;p&gt;queue是队列容器，是一种“先进先出”的容器。&lt;/p&gt;
-&lt;/blockq
-      
+&lt;/blockquote&gt;
+&lt;p&gt;头文件 &lt;code&gt;#include &amp;lt;queue&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;queue对象的默认构造&quot;&gt;&lt;a href=&quot;#queue对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;queue对象的默认构造&quot;&gt;&lt;/a&gt;queue对象的默认构造&lt;/h2&gt;&lt;p&gt;queue采用模板类实现，queue对象的默认构造形式：&lt;code&gt;queue&amp;lt;T&amp;gt; queT;&lt;/code&gt;&lt;br&gt;如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;queue&amp;lt;int&amp;gt; queInt;            //一个存放int的queue容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;queue&amp;lt;float&amp;gt; queFloat;     //一个存放float的queue容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;queue&amp;lt;string&amp;gt; queString;     //一个存放string的queue容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;queue&amp;lt;xxxx&amp;gt; queXxxx;     //一个存放xxxx的queue容器。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;尖括号内还可以设置指针类型或自定义类型。&lt;/p&gt;
+&lt;h2 id=&quot;queue的push-与pop-方法&quot;&gt;&lt;a href=&quot;#queue的push-与pop-方法&quot; class=&quot;headerlink&quot; title=&quot;queue的push()与pop()方法&quot;&gt;&lt;/a&gt;queue的push()与pop()方法&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;queue.push(elem);   //往队尾添加元素&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;queue.pop();   //从队头移除第一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;queue&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; queInt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;queInt.push(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);queInt.push(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;queInt.push(&lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;);queInt.push(&lt;span class=&quot;number&quot;&gt;7&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;queInt.push(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;);queInt.pop();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;queInt.pop();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
     
     </summary>
     
@@ -312,12 +473,24 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;Stack简介&quot;&gt;&lt;a href=&quot;#Stack简介&quot; class=&quot;headerlink&quot; title=&quot;Stack简介&quot;&gt;&lt;/a&gt;Stack简介&lt;/h2&gt;&lt;ul&gt;
+      &lt;h2 id=&quot;Stack简介&quot;&gt;&lt;a href=&quot;#Stack简介&quot; class=&quot;headerlink&quot; title=&quot;Stack简介&quot;&gt;&lt;/a&gt;Stack简介&lt;/h2&gt;&lt;ul&gt;
 &lt;li&gt;stack是堆栈容器，是一种“先进后出”的容器。&lt;/li&gt;
-&lt;li&gt;stack是简单地装
-      
+&lt;li&gt;stack是简单地装饰deque容器而成为另外的一种容器。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;头文件 &lt;code&gt;#include &amp;lt;stack&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;stack对象的默认构造&quot;&gt;&lt;a href=&quot;#stack对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;stack对象的默认构造&quot;&gt;&lt;/a&gt;stack对象的默认构造&lt;/h2&gt;&lt;p&gt;stack采用模板类实现， stack对象的默认构造形式： &lt;code&gt;stack &amp;lt;T&amp;gt; stkT;&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;stack &amp;lt;int&amp;gt; stkInt;            //一个存放int的stack容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stack &amp;lt;float&amp;gt; stkFloat;     //一个存放float的stack容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stack &amp;lt;string&amp;gt; stkString;     //一个存放string的stack容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stack &amp;lt;xxx&amp;gt; xxx;                //尖括号内还可以设置指针类型或自定义类型。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;stack的push-与pop-方法&quot;&gt;&lt;a href=&quot;#stack的push-与pop-方法&quot; class=&quot;headerlink&quot; title=&quot;stack的push()与pop()方法&quot;&gt;&lt;/a&gt;stack的push()与pop()方法&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;stack.push(elem);   //往栈头添加元素&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stack.pop();   //从栈头移除第一个元素&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;stack&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; stkInt;  	&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;stkInt.push(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);stkInt.push(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;);stkInt.pop();   &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;stkInt.push(&lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;);stkInt.push(&lt;span class=&quot;number&quot;&gt;7&lt;/span&gt;);  &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;stkInt.push(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;);stkInt.pop();   	&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;stkInt.pop();&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;此时stkInt存放的元素是1,5  &lt;/p&gt;
     
     </summary>
     
@@ -339,11 +512,23 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;Deque简介&quot;&gt;&lt;a href=&quot;#Deque简介&quot; class=&quot;headerlink&quot; title=&quot;Deque简介&quot;&gt;&lt;/a&gt;Deque简介&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;deque是“double-ended queue”的缩写，和vector一样都是STL
-      
+      &lt;h2 id=&quot;Deque简介&quot;&gt;&lt;a href=&quot;#Deque简介&quot; class=&quot;headerlink&quot; title=&quot;Deque简介&quot;&gt;&lt;/a&gt;Deque简介&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;deque是“double-ended queue”的缩写，和vector一样都是STL的容器，deque是双端数组，而vector是单端的。&lt;/li&gt;
+&lt;li&gt;deque在接口上和vector非常相似，在许多操作的地方可以直接替换。&lt;/li&gt;
+&lt;li&gt;deque可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法，这个等下会详讲）。&lt;/li&gt;
+&lt;li&gt;deque头部和尾部添加或移除元素都非常快速。但是在中部安插元素或移除元素比较费时。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;头文件&lt;code&gt;#include &amp;lt;deque&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;deque对象的默认构造&quot;&gt;&lt;a href=&quot;#deque对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;deque对象的默认构造&quot;&gt;&lt;/a&gt;deque对象的默认构造&lt;/h2&gt;&lt;p&gt;deque采用模板类实现，deque对象的默认构造形式：&lt;code&gt;deque&amp;lt;T&amp;gt; deqT;&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;deque&lt;/span&gt; &amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; deqInt;            &lt;span class=&quot;comment&quot;&gt;//一个存放int的deque容器。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;deque&lt;/span&gt; &amp;lt;&lt;span class=&quot;keyword&quot;&gt;float&lt;/span&gt;&amp;gt; deq Float;     &lt;span class=&quot;comment&quot;&gt;//一个存放float的deque容器。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;deque&lt;/span&gt; &amp;lt;&lt;span class=&quot;built_in&quot;&gt;string&lt;/span&gt;&amp;gt; deq String;     &lt;span class=&quot;comment&quot;&gt;//一个存放string的deque容器。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;deque&lt;/span&gt; &amp;lt;xxx&amp;gt; deq xxx; 		  &lt;span class=&quot;comment&quot;&gt;//尖括号内还可以设置指针类型或自定义类型。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;deque末尾的添加移除操作&quot;&gt;&lt;a href=&quot;#deque末尾的添加移除操作&quot; class=&quot;headerlink&quot; title=&quot;deque末尾的添加移除操作&quot;&gt;&lt;/a&gt;deque末尾的添加移除操作&lt;/h2&gt;&lt;p&gt;理论知识:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;deque.push_back(elem);    //在容器尾部添加一个数据&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;deque.push_front(elem);    //在容器头部插入一个数据&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;deque.pop_back();            //删除容器最后一个数据&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;deque.pop_front();        //删除容器第一个数据&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;deque&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt;&amp;gt; deqInt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_back(&lt;span class=&quot;number&quot;&gt;1&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_back(&lt;span class=&quot;number&quot;&gt;3&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_back(&lt;span class=&quot;number&quot;&gt;5&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_back(&lt;span class=&quot;number&quot;&gt;7&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_back(&lt;span class=&quot;number&quot;&gt;9&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.pop_front();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.pop_front();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_front(&lt;span class=&quot;number&quot;&gt;11&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.push_front(&lt;span class=&quot;number&quot;&gt;13&lt;/span&gt;);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.pop_back();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;deqInt.pop_back();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//deqInt  &amp;#123; 13,11,5&amp;#125;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
     
     </summary>
     
@@ -365,10 +550,25 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;Vector容器&quot;&gt;&lt;a href=&quot;#Vector容器&quot; class=&quot;headerlink&quot; title=&quot;Vector容器&quot;&gt;&lt;/a&gt;Vector容器&lt;/h1&gt;&lt;h2 id=&quot;Vector容器简介&quot;&gt;&lt;a href=&quot;#Vector容器简介&quot; class=&quot;
-      
+      &lt;h1 id=&quot;Vector容器&quot;&gt;&lt;a href=&quot;#Vector容器&quot; class=&quot;headerlink&quot; title=&quot;Vector容器&quot;&gt;&lt;/a&gt;Vector容器&lt;/h1&gt;&lt;h2 id=&quot;Vector容器简介&quot;&gt;&lt;a href=&quot;#Vector容器简介&quot; class=&quot;headerlink&quot; title=&quot;Vector容器简介&quot;&gt;&lt;/a&gt;Vector容器简介&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;vector是将元素置于一个动态数组中加以管理的容器。&lt;/li&gt;
+&lt;li&gt;vector可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法）。&lt;/li&gt;
+&lt;li&gt;vector尾部添加或移除元素非常快速。但是在中部或头部插入元素或移除元素比较费时&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;vector对象的默认构造&quot;&gt;&lt;a href=&quot;#vector对象的默认构造&quot; class=&quot;headerlink&quot; title=&quot;vector对象的默认构造&quot;&gt;&lt;/a&gt;vector对象的默认构造&lt;/h2&gt;&lt;p&gt;vector采用模板类实现，vector对象的默认构造形式&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;T&amp;gt; vecT;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;int&amp;gt; vecInt;            //一个存放int的vector容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;float&amp;gt; vecFloat;         //一个存放float的vector容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;string&amp;gt; vecString;       //一个存放string的vector容器。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector&amp;lt;xxx&amp;gt; vecXxx;            //尖括号内还可以设置指针类型或自定义类型。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Class CA&amp;#123;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;vector&lt;/span&gt;&amp;lt;CA*&amp;gt; vecpCA;	  	&lt;span class=&quot;comment&quot;&gt;//用于存放CA对象的指针的vector容器。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;built_in&quot;&gt;vector&lt;/span&gt;&amp;lt;CA&amp;gt; vecCA;     	&lt;span class=&quot;comment&quot;&gt;//用于存放CA对象的vector容器。由于容器元素的存放是按值复制的方式进行的，所以此时CA必须提供CA的拷贝构造函数，以保证CA对象间拷贝正常。&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;vector对象的带参数构造&quot;&gt;&lt;a href=&quot;#vector对象的带参数构造&quot; class=&quot;headerlink&quot; title=&quot;vector对象的带参数构造&quot;&gt;&lt;/a&gt;vector对象的带参数构造&lt;/h2&gt;&lt;h3 id=&quot;理论知识&quot;&gt;&lt;a href=&quot;#理论知识&quot; class=&quot;headerlink&quot; title=&quot;理论知识&quot;&gt;&lt;/a&gt;理论知识&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;vector(beg,end);    //构造函数将[beg, end)区间中的元素拷贝给本身。注意该区间是左闭右开的区间。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector(n,elem);   //构造函数将n个elem拷贝给本身。&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vector(const vector &amp;amp;vec);  //拷贝构造函数&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
     
     </summary>
     
@@ -390,11 +590,26 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h2 id=&quot;String概念&quot;&gt;&lt;a href=&quot;#String概念&quot; class=&quot;headerlink&quot; title=&quot;String概念&quot;&gt;&lt;/a&gt;String概念&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;string是STL的字符串类型，通常用来表示字符串。而在使用st
-      
+      &lt;h2 id=&quot;String概念&quot;&gt;&lt;a href=&quot;#String概念&quot; class=&quot;headerlink&quot; title=&quot;String概念&quot;&gt;&lt;/a&gt;String概念&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;string是STL的字符串类型，通常用来表示字符串。而在使用string之前，字符串通常是用char&lt;em&gt;表示的。string与char&lt;/em&gt;都可以用来表示字符串，那么二者有什么区别呢。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;string和char*的比较&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;string是一个类, char*是一个指向字符的指针。&lt;/li&gt;
+&lt;li&gt;string封装了char&lt;em&gt;，管理这个字符串，是一个char&lt;/em&gt;型的容器。&lt;/li&gt;
+&lt;li&gt;string不用考虑内存释放和越界。&lt;/li&gt;
+&lt;li&gt;string管理char*所分配的内存。每一次string的复制，取值都由string类负责维护，不用担心复制越界和取值越界等。&lt;/li&gt;
+&lt;li&gt;string提供了一系列的字符串操作函数.查找find，拷贝copy，删除erase，替换replace，插入insert&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;string的构造函数&quot;&gt;&lt;a href=&quot;#string的构造函数&quot; class=&quot;headerlink&quot; title=&quot;string的构造函数&quot;&gt;&lt;/a&gt;string的构造函数&lt;/h2&gt;&lt;p&gt;默认构造函数：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;string();       //构造一个空的字符串string s1。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;拷贝构造函数：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;string(const string &amp;amp;str);    //构造一个与str一样的string。如string s1(s2)。&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;带参数的构造函数&lt;/p&gt;
     
     </summary>
     
@@ -416,10 +631,33 @@
     
     <summary type="html">
     
-      
-      
-        &lt;h1 id=&quot;STL-标准模板库-理论基础&quot;&gt;&lt;a href=&quot;#STL-标准模板库-理论基础&quot; class=&quot;headerlink&quot; title=&quot;STL(标准模板库)理论基础&quot;&gt;&lt;/a&gt;STL(标准模板库)理论基础&lt;/h1&gt;&lt;h2 id=&quot;基本概念&quot;&gt;&lt;a href=&quot;#基
-      
+      &lt;h1 id=&quot;STL-标准模板库-理论基础&quot;&gt;&lt;a href=&quot;#STL-标准模板库-理论基础&quot; class=&quot;headerlink&quot; title=&quot;STL(标准模板库)理论基础&quot;&gt;&lt;/a&gt;STL(标准模板库)理论基础&lt;/h1&gt;&lt;h2 id=&quot;基本概念&quot;&gt;&lt;a href=&quot;#基本概念&quot; class=&quot;headerlink&quot; title=&quot;基本概念&quot;&gt;&lt;/a&gt;基本概念&lt;/h2&gt;&lt;p&gt;STL（Standard Template Library，标准模板库)是惠普实验室开发的一系列软件的统称。现然主要出现在C++中，但在被引入C++之前该技术就已经存在了很长的一段时间。&lt;/p&gt;
+&lt;p&gt;STL的从广义上讲分为三类：algorithm（算法）、container（容器）和iterator（迭代器），容器和算法通过迭代器可以进行无缝地连接。几乎所有的代码都采 用了模板类和模板函数的方式，这相比于传统的由函数和类组成的库来说提供了更好的代码重用机会。在C++标准中，STL被组织为下面的13个头文 件：&lt;code&gt;&amp;lt;algorithm&amp;gt;、&amp;lt;deque&amp;gt;、&amp;lt;functional&amp;gt;、&amp;lt;iterator&amp;gt;、&amp;lt;vector&amp;gt;、&amp;lt;list&amp;gt;、&amp;lt;map&amp;gt;、&amp;lt;memory&amp;gt;、&amp;lt;numeric&amp;gt;、&amp;lt;queue&amp;gt;、&amp;lt;set&amp;gt;、&amp;lt;stack&amp;gt;&lt;/code&gt; 和&lt;code&gt;&amp;lt;utility&amp;gt;&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://ww1.sinaimg.cn/large/007WG9bMly1g7ypx6p5dzj308e07q40i.jpg&quot; alt=&quot;STL.png&quot;&gt;&lt;/p&gt;
+&lt;p&gt;STL详细的说六大组件&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器（Container）&lt;/li&gt;
+&lt;li&gt;算法（Algorithm）&lt;/li&gt;
+&lt;li&gt;迭代器（Iterator）&lt;/li&gt;
+&lt;li&gt;仿函数（Function object）&lt;/li&gt;
+&lt;li&gt;适配器（Adaptor）&lt;/li&gt;
+&lt;li&gt;空间配制器（allocator）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;使用STL的好处&quot;&gt;&lt;a href=&quot;#使用STL的好处&quot; class=&quot;headerlink&quot; title=&quot;使用STL的好处&quot;&gt;&lt;/a&gt;使用STL的好处&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;STL是C++的一部分，因此不用额外安装什么，它被内建在你的编译器之内。&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;STL的一个重要特点是数据结构和算法的分离。尽管这是个简单的概念，但是这种分离确实使得STL变得非常通用。&lt;br&gt;例如，在STL的vector容器中，可以放入元素、基础数据类型变量、元素的地址；&lt;br&gt;STL的sort()函数可以用来操作vector,list等容器。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;程序员可以不用思考STL具体的实现过程，只要能够熟练使用STL就OK了。这样他们就可以把精力放在程序开发的别的方面。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;STL具有高可重用性，高性能，高移植性，跨平台的优点。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;高可重用性：STL中几乎所有的代码都采用了模板类和模版函数的方式实现，这相比于传统的由函数和类组成的库来说提供了更好的代码重用机会。关于模板的知识，已经给大家介绍了。&lt;/li&gt;
+&lt;li&gt;高性能：如map可以高效地从十万条记录里面查找出指定的记录，因为map是采用红黑树的变体实现的。(红黑树是平横二叉树的一种)&lt;/li&gt;
+&lt;li&gt;高移植性：如在项目A上用STL编写的模块，可以直接移植到项目B上。&lt;/li&gt;
+&lt;li&gt;跨平台：如用windows的Visual Studio编写的代码可以在Mac OS的XCode上直接编译。&lt;/li&gt;
+&lt;/ul&gt;
     
     </summary>
     
@@ -441,11 +679,38 @@
     
     <summary type="html">
     
-      
-      
-        &lt;p&gt;说到类型转换我们不得不提起C语言的类型转换,简单粗暴.&lt;br&gt;&lt;code&gt;Type t = (Type) 123&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id=&quot;c-类型转换&quot;&gt;&lt;a href=&quot;#c-类型转换&quot; class=&quot;headerlink&quot; title=&quot;c++ 类型转换&quot;
-      
+      &lt;p&gt;说到类型转换我们不得不提起C语言的类型转换,简单粗暴.&lt;br&gt;&lt;code&gt;Type t = (Type) 123&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;c-类型转换&quot;&gt;&lt;a href=&quot;#c-类型转换&quot; class=&quot;headerlink&quot; title=&quot;c++ 类型转换&quot;&gt;&lt;/a&gt;c++ 类型转换&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;类型&lt;/th&gt;
+&lt;th&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;static_cast&lt;/td&gt;
+&lt;td&gt;一般的转换&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;dynamic_cast&lt;/td&gt;
+&lt;td&gt;通常在基类和派生类之间转换时使用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;const_cast&lt;/td&gt;
+&lt;td&gt;主要针对const的转换&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;reinterpret_cast&lt;/td&gt;
+&lt;td&gt;用于进行没有任何关联之间的转换,比如一个字符指针转换为整形数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&quot;static-cast&quot;&gt;&lt;a href=&quot;#static-cast&quot; class=&quot;headerlink&quot; title=&quot;static_cast&quot;&gt;&lt;/a&gt;static_cast&lt;/h2&gt;&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;32&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;33&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;34&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;35&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;36&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;37&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;38&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;39&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;40&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;41&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;42&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;43&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;44&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;45&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;46&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;47&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;meta-string&quot;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;std&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;// static_cast&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Building&lt;/span&gt;&amp;#123;&lt;/span&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Animal&lt;/span&gt;&amp;#123;&lt;/span&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Cat&lt;/span&gt; :&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; Animal&amp;#123;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;test1&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; a = &lt;span class=&quot;number&quot;&gt;97&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    普通类型&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; c = &lt;span class=&quot;keyword&quot;&gt;static_cast&lt;/span&gt;&amp;lt;&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt;&amp;gt;(a);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;built_in&quot;&gt;cout&lt;/span&gt; &amp;lt;&amp;lt; c &amp;lt;&amp;lt; &lt;span class=&quot;built_in&quot;&gt;endl&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//  转换具有继承关系的对象指针   父转子&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal *ani = &lt;span class=&quot;literal&quot;&gt;NULL&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat *cat1 = &lt;span class=&quot;keyword&quot;&gt;static_cast&lt;/span&gt;&amp;lt;Cat *&amp;gt;(ani);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//  转换具有继承关系的对象指针 子转父&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat * soncat = &lt;span class=&quot;literal&quot;&gt;NULL&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal *ani1 = &lt;span class=&quot;keyword&quot;&gt;static_cast&lt;/span&gt;&amp;lt;Animal *&amp;gt;(soncat);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//  转换具有继承关系的对象引用   父转子&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal aniobj;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal &amp;amp;animal = aniobj;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat &amp;amp;cat = &lt;span class=&quot;keyword&quot;&gt;static_cast&lt;/span&gt;&amp;lt;Cat &amp;amp;&amp;gt;(animal);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//  转换具有继承关系的对象引用   子转父&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat catobj;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat &amp;amp;catref = catobj;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal &amp;amp;ani2 = &lt;span class=&quot;keyword&quot;&gt;static_cast&lt;/span&gt;&amp;lt;Animal &amp;amp;&amp;gt;(catref);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//     基础数据类型指针  错误&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//     error: static_cast from &#39;int *&#39; to &#39;char *&#39; is not allowed&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    int *p = NULL;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    char *sp = static_cast&amp;lt;char*&amp;gt;(p);&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//     对象指针     错误&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//     error: static_cast from &#39;Building *&#39; to &#39;Animal *&#39;, which are not related by inheritance, is not allowed&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Building *bui = NULL;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Animal *ani = static_cast&amp;lt;Animal *&amp;gt;(bui);&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    test1();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;从上面例子可见 &lt;code&gt;static_cast&lt;/code&gt; 用于内置的数据类型,还有具有继承关系的指针或者引用&lt;/p&gt;
+&lt;h2 id=&quot;dynamic-cast&quot;&gt;&lt;a href=&quot;#dynamic-cast&quot; class=&quot;headerlink&quot; title=&quot;dynamic_cast&quot;&gt;&lt;/a&gt;dynamic_cast&lt;/h2&gt;&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;27&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;28&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;29&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;30&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;31&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;32&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;#&lt;span class=&quot;meta-keyword&quot;&gt;include&lt;/span&gt; &lt;span class=&quot;meta-string&quot;&gt;&amp;lt;iostream&amp;gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;using&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;built_in&quot;&gt;std&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;// static_cast&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Building&lt;/span&gt;&amp;#123;&lt;/span&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Animal&lt;/span&gt;&amp;#123;&lt;/span&gt;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Cat&lt;/span&gt; :&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; Animal&amp;#123;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;test2&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; a = &lt;span class=&quot;number&quot;&gt;10&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 基础数据类型&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// error: &#39;char&#39; is not a reference or pointer&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    char c = dynamic_cast&amp;lt;char&amp;gt;(a);&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 非继承关系指针&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// error: &#39;Animal&#39; is not polymorphic&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Animal *ani = NULL;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Building *bui = dynamic_cast&amp;lt;Building *&amp;gt;(ani);&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 具有继承关系指针 父转子&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// error: &#39;Animal&#39; does not refer to a value    父类转子类指针 不安全 禁止转换&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Animal *ani = NULL;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//    Cat *cat = dynamic_cast&amp;lt;Cat *&amp;gt;(Animal);&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;// 具有继承关系指针 子转父&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Cat *cat = &lt;span class=&quot;literal&quot;&gt;NULL&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    Animal *ani = &lt;span class=&quot;keyword&quot;&gt;dynamic_cast&lt;/span&gt;&amp;lt;Animal *&amp;gt;(cat);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    test2();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;number&quot;&gt;0&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;通过上面例子可以看到 dynamic_cast 只能转换具有继承关系的指针或者引用,在转换前会进行对象类型检查.&lt;/p&gt;
+&lt;p&gt;只能转换子转换父,为什么呢?&lt;/p&gt;
     
     </summary>
     
@@ -467,36 +732,16 @@
     
     <summary type="html">
     
-      
-      
-        &lt;p&gt;为了交换不同类型的变量的值，我们通过函数重载定义了四个名字相同、参数列表不同的函数.如下示例:&lt;br&gt;&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;
-      
-    
-    </summary>
-    
-      <category term="程序设计" scheme="http://blog.huixing.org/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
-    
-      <category term="c/c++" scheme="http://blog.huixing.org/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/c-c/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>C语言多态实现</title>
-    <link href="http://blog.huixing.org/c-language-polymorphism-implementation/"/>
-    <id>http://blog.huixing.org/c-language-polymorphism-implementation/</id>
-    <published>2019-10-11T03:23:00.000Z</published>
-    <updated>2019-10-16T11:30:14.698Z</updated>
-    
-    <content type="html"><![CDATA[<p>本实现案例是参考三国诸葛亮锦囊妙计为例写demo:</p><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义拆开锦囊方法的类型 可以作为左值 指向函数 TIPS *tp;</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span><span class="params">(TIPS)</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义tip结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">tip</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 发送人</span></span><br><span class="line">    <span class="keyword">char</span> from[<span class="number">64</span>];</span><br><span class="line">    <span class="comment">// 接受人</span></span><br><span class="line">    <span class="keyword">char</span> to[<span class="number">64</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 锦囊的内容  指向void tip*这些函数</span></span><br><span class="line">    TIPS *tp;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开锦囊</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">open_tips</span><span class="params">(struct tip *tip_p)</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"打开了锦囊"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"此锦囊是由"</span> &lt;&lt; tip_p-&gt;from &lt;&lt; <span class="string">"写给"</span> &lt;&lt; tip_p-&gt;to &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"内容是"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="comment">// 通过指针调用 tip*函数</span></span><br><span class="line">    tip_p-&gt;tp();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建锦囊</span></span><br><span class="line"><span class="function">struct tip* <span class="title">create_tip</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *from, <span class="keyword">char</span> *to, TIPS *tp)</span></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">temp</span> = (<span class="title">struct</span> <span class="title">tip</span>*)<span class="title">malloc</span>(<span class="title">sizeof</span>(<span class="title">struct</span> <span class="title">tip</span>));</span></span><br><span class="line">    <span class="keyword">if</span>(temp == <span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">strcpy</span>(temp-&gt;from, from);</span><br><span class="line">    <span class="built_in">strcpy</span>(temp-&gt;to, to);</span><br><span class="line">    temp-&gt;tp = tp;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> temp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 销毁锦囊</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">destory_tip</span><span class="params">(struct tip * tp)</span></span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(tp);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/////////////  实现层 ///////////////</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip1</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"一到东吴就拜见乔国老"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip2</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"如果主公乐不思蜀,就谎称曹贼来袭.赶快回来"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip3</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"如果被孙权追杀,就向貂蝉求救"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_1</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip1</span>);</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_2</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip2</span>);</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_3</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip3</span>);</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"刚刚来到东吴,赵云打开了第一个锦囊"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_1);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"===================================="</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"刘备乐不思蜀,赵云打开了第二个锦娘"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_2);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"===================================="</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"孙权大军追杀,赵云打开了第三个锦娘"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_3);</span><br><span class="line"></span><br><span class="line">    destory_tip(tp_1);</span><br><span class="line">    destory_tip(tp_2);</span><br><span class="line">    destory_tip(tp_3);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>返回结果:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">刚刚来到东吴,赵云打开了第一个锦囊</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">一到东吴就拜见乔国老</span><br><span class="line">====================================</span><br><span class="line">刘备乐不思蜀,赵云打开了第二个锦娘</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">如果主公乐不思蜀,就谎称曹贼来袭.赶快回来</span><br><span class="line">====================================</span><br><span class="line">孙权大军追杀,赵云打开了第三个锦娘</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">如果被孙权追杀,就向貂蝉求救</span><br></pre></td></tr></table></figure></p><p>剖析:</p><p>通过create_tip函数创建tip 返回一个<code>struct tip</code>的地址,前两个形参我们就不讲了.主要是第三个<code>TIPS *tp</code>.<br>他是通过<code>typedef void(TIPS)(void);</code>定义了左值存储对象可以保持void 函数的指向地址.从而实现了多态调用</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;本实现案例是参考三国诸葛亮锦囊妙计为例写demo:&lt;/p&gt;
-&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class
-      
+      &lt;p&gt;为了交换不同类型的变量的值，我们通过函数重载定义了四个名字相同、参数列表不同的函数.如下示例:&lt;br&gt;&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//交换 int 变量的值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Swap&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; *a, &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; *b)&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; temp = *a;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *a = *b;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *b = temp;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//交换 float 变量的值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Swap&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;float&lt;/span&gt; *a, &lt;span class=&quot;keyword&quot;&gt;float&lt;/span&gt; *b)&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;float&lt;/span&gt; temp = *a;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *a = *b;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *b = temp;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//交换 char 变量的值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Swap&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; *a, &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; *b)&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; temp = *a;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *a = *b;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *b = temp;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;comment&quot;&gt;//交换 bool 变量的值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Swap&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;bool&lt;/span&gt; *a, &lt;span class=&quot;keyword&quot;&gt;bool&lt;/span&gt; *b)&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;char&lt;/span&gt; temp = *a;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *a = *b;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    *b = temp;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+&lt;p&gt;这些函数虽然在调用时方便了一些，但从本质上说还是定义了三个功能相同、函数体相同的函数，只是数据的类型不同而已，这看起来有点繁琐,我们可以通过函数模板降低代码量。&lt;/p&gt;
+&lt;p&gt;我们知道，数据的值可以通过函数参数传递，在函数定义时数据的值是未知的，只有等到函数调用时接收了实参才能确定其值。这就是值的参数化。&lt;/p&gt;
+&lt;p&gt;在C++中，数据的类型也可以通过参数来传递，在函数定义时可以不指明具体的数据类型，当发生函数调用时，编译器可以根据传入的实参自动推断数据类型。这就是类型的参数化。&lt;/p&gt;
+&lt;p&gt;值（Value）和类型（Type）是数据的两个主要特征，它们在C++中都可以被参数化。&lt;/p&gt;
+&lt;p&gt;所谓函数模板，实际上是建立一个通用函数，它所用到的数据的类型（包括返回值类型、形参类型、局部变量类型）可以不具体指定，而是用一个虚拟的类型来代替（实际上是用一个标识符来占位），等发生函数调用时再根据传入的实参来逆推出真正的类型。这个通用函数就称为函数模板（Function Template）。&lt;/p&gt;
+&lt;p&gt;在函数模板中，数据的值和类型都被参数化了，发生函数调用时编译器会根据传入的实参来推演形参的值和类型。换个角度说，函数模板除了支持值的参数化，还支持类型的参数化。&lt;/p&gt;
+&lt;p&gt;一但定义了函数模板，就可以将类型参数用于函数定义和函数声明了。说得直白一点，原来使用 int、float、char 等内置类型的地方，都可以用类型参数来代替。&lt;/p&gt;
+&lt;p&gt;template是定义函数模板的关键字，它后面紧跟尖括号&amp;lt;&amp;gt;，尖括号包围的是类型参数（也可以说是虚拟的类型，或者说是类型占位符）。typename是另外一个关键字，用来声明具体的类型参数，这里的类型参数就是T。从整体上看，template&lt;typename t&gt;被称为模板头。&lt;/typename&gt;&lt;/p&gt;
+&lt;p&gt;函数模板定义的一般形式如下：&lt;/p&gt;
     
     </summary>
     

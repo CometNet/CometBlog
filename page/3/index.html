@@ -174,6 +174,109 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/c-language-polymorphism-implementation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/c-language-polymorphism-implementation/" class="post-title-link" itemprop="url">C语言多态实现</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-11 11:23:00" itemprop="dateCreated datePublished" datetime="2019-10-11T11:23:00+08:00">2019-10-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 19:30:14" itemprop="dateModified" datetime="2019-10-16T19:30:14+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/c-language-polymorphism-implementation/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="c-language-polymorphism-implementation/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本实现案例是参考三国诸葛亮锦囊妙计为例写demo:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义拆开锦囊方法的类型 可以作为左值 指向函数 TIPS *tp;</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span><span class="params">(TIPS)</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义tip结构</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">tip</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 发送人</span></span><br><span class="line">    <span class="keyword">char</span> from[<span class="number">64</span>];</span><br><span class="line">    <span class="comment">// 接受人</span></span><br><span class="line">    <span class="keyword">char</span> to[<span class="number">64</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 锦囊的内容  指向void tip*这些函数</span></span><br><span class="line">    TIPS *tp;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开锦囊</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">open_tips</span><span class="params">(struct tip *tip_p)</span></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"打开了锦囊"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"此锦囊是由"</span> &lt;&lt; tip_p-&gt;from &lt;&lt; <span class="string">"写给"</span> &lt;&lt; tip_p-&gt;to &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"内容是"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="comment">// 通过指针调用 tip*函数</span></span><br><span class="line">    tip_p-&gt;tp();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建锦囊</span></span><br><span class="line"><span class="function">struct tip* <span class="title">create_tip</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *from, <span class="keyword">char</span> *to, TIPS *tp)</span></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">temp</span> = (<span class="title">struct</span> <span class="title">tip</span>*)<span class="title">malloc</span>(<span class="title">sizeof</span>(<span class="title">struct</span> <span class="title">tip</span>));</span></span><br><span class="line">    <span class="keyword">if</span>(temp == <span class="literal">NULL</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">strcpy</span>(temp-&gt;from, from);</span><br><span class="line">    <span class="built_in">strcpy</span>(temp-&gt;to, to);</span><br><span class="line">    temp-&gt;tp = tp;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> temp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 销毁锦囊</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">destory_tip</span><span class="params">(struct tip * tp)</span></span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(tp);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/////////////  实现层 ///////////////</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip1</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"一到东吴就拜见乔国老"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip2</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"如果主公乐不思蜀,就谎称曹贼来袭.赶快回来"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tip3</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"如果被孙权追杀,就向貂蝉求救"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_1</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip1</span>);</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_2</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip2</span>);</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tip</span> *<span class="title">tp_3</span> = <span class="title">create_tip</span>("孔明","赵云",<span class="title">tip3</span>);</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"刚刚来到东吴,赵云打开了第一个锦囊"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_1);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"===================================="</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"刘备乐不思蜀,赵云打开了第二个锦娘"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_2);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"===================================="</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"孙权大军追杀,赵云打开了第三个锦娘"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    open_tips(tp_3);</span><br><span class="line"></span><br><span class="line">    destory_tip(tp_1);</span><br><span class="line">    destory_tip(tp_2);</span><br><span class="line">    destory_tip(tp_3);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>返回结果:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">刚刚来到东吴,赵云打开了第一个锦囊</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">一到东吴就拜见乔国老</span><br><span class="line">====================================</span><br><span class="line">刘备乐不思蜀,赵云打开了第二个锦娘</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">如果主公乐不思蜀,就谎称曹贼来袭.赶快回来</span><br><span class="line">====================================</span><br><span class="line">孙权大军追杀,赵云打开了第三个锦娘</span><br><span class="line">打开了锦囊</span><br><span class="line">此锦囊是由孔明写给赵云</span><br><span class="line">内容是</span><br><span class="line">如果被孙权追杀,就向貂蝉求救</span><br></pre></td></tr></table></figure></p>
+<p>剖析:</p>
+<p>通过create_tip函数创建tip 返回一个<code>struct tip</code>的地址,前两个形参我们就不讲了.主要是第三个<code>TIPS *tp</code>.<br>他是通过<code>typedef void(TIPS)(void);</code>定义了左值存储对象可以保持void 函数的指向地址.从而实现了多态调用</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/warning-iso-c-11-does-not-allow-conversion-from-string-literal-to-char/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1540,164 +1643,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-planned-task-crontab/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/linux-planned-task-crontab/" class="post-title-link" itemprop="url">Linux 计划任务 — crontab</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-08-01 16:24:00" itemprop="dateCreated datePublished" datetime="2018-08-01T16:24:00+08:00">2018-08-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-10-16 14:27:45" itemprop="dateModified" datetime="2019-10-16T14:27:45+08:00">2019-10-16</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/架构/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/架构/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
-                </span>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/linux-planned-task-crontab/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-planned-task-crontab/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1ftuodxvzafj30ey0cewes.jpg" alt="crontab说明图"></p>
-<h2 id="crontab-简介"><a href="#crontab-简介" class="headerlink" title="crontab 简介"></a>crontab 简介</h2><p>crontab 是 UNIX, SOLARIS，LINUX 下的一个十分有用的工具。通过 crontab 脚本能使计划任务定期地在系统后台自动运行。</p>
-<h2 id="crontab-命令"><a href="#crontab-命令" class="headerlink" title="crontab 命令"></a>crontab 命令</h2><ul>
-<li><code>crontab -e</code> – 编辑该用户的 crontab，当指定 crontab 不存在时新建。</li>
-<li><code>crontab -l</code> – 列出该用户的 crontab。</li>
-<li><code>crontab -r</code> – 删除该用户的 crontab。</li>
-<li><code>crontab -u&lt;用户名称&gt;</code> – 指定要设定 crontab 的用户名称。</li>
-</ul>
-<h2 id="Linux-Crontab-格式"><a href="#Linux-Crontab-格式" class="headerlink" title="Linux Crontab 格式"></a>Linux Crontab 格式</h2><blockquote>
-<p>表格: Crontab 字段与允许的值 (Linux Crontab)</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>描述</th>
-<th>允许的值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>分钟</td>
-<td>一小时的第几分</td>
-<td>0-59</td>
-</tr>
-<tr>
-<td>小时</td>
-<td>一天的第几小时</td>
-<td>0-23</td>
-</tr>
-<tr>
-<td>日期</td>
-<td>一个月的的第几天</td>
-<td>1-31</td>
-</tr>
-<tr>
-<td>月份</td>
-<td>一年的第几个月</td>
-<td>1-12</td>
-</tr>
-<tr>
-<td>周几</td>
-<td>一周的第几天</td>
-<td>0-6</td>
-</tr>
-<tr>
-<td>命令</td>
-<td>命令</td>
-<td>可以被执行的任何命令</td>
-</tr>
-</tbody>
-</table>
-<h2 id="crontab-实例"><a href="#crontab-实例" class="headerlink" title="crontab 实例"></a>crontab 实例</h2><h3 id="特定时间执行"><a href="#特定时间执行" class="headerlink" title="特定时间执行"></a>特定时间执行</h3>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/linux-planned-task-crontab/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1767,7 +1712,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

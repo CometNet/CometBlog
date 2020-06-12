@@ -174,6 +174,107 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mysql-gtid/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-gtid/" class="post-title-link" itemprop="url">MySQL GTID详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-10 16:40:44 / 修改时间：17:36:42" itemprop="dateCreated datePublished" datetime="2020-06-10T16:40:44+08:00">2020-06-10</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mysql-gtid/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mysql-gtid/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="GTID介绍"><a href="#GTID介绍" class="headerlink" title="GTID介绍"></a>GTID介绍</h1><h2 id="GTID概念"><a href="#GTID概念" class="headerlink" title="GTID概念"></a>GTID概念</h2><p>GTID（ Global Transaction Identifier）全局事务标识，由主库上生成的与事务绑定的唯一标识，这个标识不仅在主库上是唯一的，在MySQL集群内也是唯一的。GTID是 MySQL 5.6 版本引入的一个有关于主从复制的重大改进，相对于之前版本基于Binlog文件+Position的主从复制，基于GTID的主从复制，数据一致性更高，主从数据复制更健壮，主从切换、故障切换不易出错，很少需要人为介入处理。</p>
+<p>划重点:</p>
+<ol>
+<li>全局事务表示(Global Transaction ID)</li>
+<li>GTID与事务一一对应,并且全局唯一ID.</li>
+<li>一个GTID在一个服务器上执行一次.</li>
+<li>MySQL 5.6.5开始支持GTID.</li>
+</ol>
+<h2 id="GTID特点"><a href="#GTID特点" class="headerlink" title="GTID特点"></a>GTID特点</h2><ol>
+<li>事务提交产生GTID，GTID与事务及事务提交所在的节点绑定，GTID与事务一起写入Binlog，但是从库应用Binlog并不会生成新的GTID。</li>
+<li>集群中的任何一个节点，根据其GTID值就可以知道哪些事务已经执行，哪些事务没有执行，如果发现某个GTID已执行，重复执行该GTID，将会被忽略，即同一个GTID只能被应用一次。</li>
+<li>当一个连接执行一个特定GTID的事务，但是还没有提交，此时有另外一个连接也要执行相同GTID的事务，那么第二个连接的执行将会被阻塞，直到第一个事务提交或者回滚。如果第一个事务成功提交，第二个事务将会被忽略。如果第一个事务回滚，第二个事务正常执行。</li>
+</ol>
+<h3 id="GTID组成"><a href="#GTID组成" class="headerlink" title="GTID组成"></a>GTID组成</h3><p>GTID = server_uuid:transaction+id</p>
+<p>查看server_uuid:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@a84d983d7d50:/var/lib/mysql# more auto.cnf </span><br><span class="line">[auto]</span><br><span class="line">server-uuid=59fd3bd6-a6da-11ea-91d7-0242ac110003</span><br></pre></td></tr></table></figure></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/mysql-gtid/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mysql-master-slave-replication/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1131,136 +1232,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/stl-set-and-multiset-container-details/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/stl-set-and-multiset-container-details/" class="post-title-link" itemprop="url">STL Set和multiset容器详解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-10-24 18:33:00" itemprop="dateCreated datePublished" datetime="2019-10-24T18:33:00+08:00">2019-10-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-10-29 23:52:36" itemprop="dateModified" datetime="2019-10-29T23:52:36+08:00">2019-10-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
-                </span>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/stl-set-and-multiset-container-details/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="stl-set-and-multiset-container-details/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="set-multiset的简介"><a href="#set-multiset的简介" class="headerlink" title="set/multiset的简介"></a>set/multiset的简介</h2><ul>
-<li>set是一个集合容器，其中所包含的元素是唯一的，集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。<br>set采用红黑树变体的数据结构实现，红黑树属于平衡二叉树。在插入操作和删除操作上比vector快。</li>
-<li>set不可以直接存取元素。（不可以使用at.(pos)与[]操作符）。</li>
-<li>multiset与set的区别：set支持唯一键值，每个元素值只能出现一次；而multiset中同一值可以出现多次。</li>
-<li>不可以直接修改set或multiset容器中的元素值，因为该类容器是自动排序的。如果希望修改一个元素值，必须先删除原有的元素，再插入新的元素。</li>
-</ul>
-<p>头文件 <code>#include &lt;set&gt;</code> </p>
-<p><img src="http://tva1.sinaimg.cn/large/007X8olVly1g8fhq4ih5wj31hw0u04j5.jpg" alt="图解"></p>
-<h2 id="set-multiset对象的默认构造"><a href="#set-multiset对象的默认构造" class="headerlink" title="set/multiset对象的默认构造"></a>set/multiset对象的默认构造</h2><ul>
-<li><code>set&lt;int&gt; setInt;            //一个存放int的set容器。</code></li>
-<li><code>set&lt;float&gt; setFloat;     //一个存放float的set容器。</code></li>
-<li><code>set&lt;string&gt; setString;     //一个存放string的set容器。</code></li>
-<li><code>multiset&lt;int&gt; mulsetInt;            //一个存放int的multi set容器。</code></li>
-<li><code>multi set&lt;float&gt; multisetFloat;     //一个存放float的multi set容器。</code></li>
-<li><code>multi set&lt;string&gt; multisetString;     //一个存放string的multi set容器。</code></li>
-</ul>
-<h2 id="set的插入与迭代器"><a href="#set的插入与迭代器" class="headerlink" title="set的插入与迭代器"></a>set的插入与迭代器</h2><ul>
-<li><code>set.insert(elem);     //在容器中插入元素。</code></li>
-<li><code>set.begin();  //返回容器中第一个数据的迭代器。</code></li>
-<li><code>set.end();  //返回容器中最后一个数据之后的迭代器。</code></li>
-<li><code>set.rbegin();  //返回容器中倒数第一个元素的迭代器。</code></li>
-<li><code>set.rend();   //返回容器中倒数最后一个元素的后面的迭代器。</code></li>
-</ul>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span>&lt;<span class="keyword">int</span>&gt; setInt;</span><br><span class="line">setInt.insert(<span class="number">3</span>); setInt.insert(<span class="number">1</span>);setInt.insert(<span class="number">5</span>);setInt.insert(<span class="number">2</span>);</span><br><span class="line"><span class="keyword">for</span>(<span class="built_in">set</span>&lt;<span class="keyword">int</span>&gt;::iterator it=setInt.begin(); it!=setInt.end(); ++it)</span><br><span class="line">&#123;</span><br><span class="line">      <span class="keyword">int</span> iItem = *it;</span><br><span class="line">      <span class="built_in">cout</span> &lt;&lt; iItem;    <span class="comment">//或直接使用cout &lt;&lt; *it</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//这样子便顺序输出  1 2 3 5。</span></span><br></pre></td></tr></table></figure>
-<p><code>set.rbegin()</code>与<code>set.rend()</code>略。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/stl-set-and-multiset-container-details/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1330,7 +1301,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-count">45</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
