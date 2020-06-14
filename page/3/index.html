@@ -174,6 +174,121 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/detailed_explanation_of_c++_function_template/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/detailed_explanation_of_c++_function_template/" class="post-title-link" itemprop="url">C++函数模板详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-11 11:36:00" itemprop="dateCreated datePublished" datetime="2019-10-11T11:36:00+08:00">2019-10-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 19:29:59" itemprop="dateModified" datetime="2019-10-16T19:29:59+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/detailed_explanation_of_c++_function_template/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="detailed_explanation_of_c++_function_template/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>为了交换不同类型的变量的值，我们通过函数重载定义了四个名字相同、参数列表不同的函数.如下示例:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//交换 int 变量的值</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Swap</span><span class="params">(<span class="keyword">int</span> *a, <span class="keyword">int</span> *b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> temp = *a;</span><br><span class="line">    *a = *b;</span><br><span class="line">    *b = temp;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//交换 float 变量的值</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Swap</span><span class="params">(<span class="keyword">float</span> *a, <span class="keyword">float</span> *b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> temp = *a;</span><br><span class="line">    *a = *b;</span><br><span class="line">    *b = temp;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//交换 char 变量的值</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Swap</span><span class="params">(<span class="keyword">char</span> *a, <span class="keyword">char</span> *b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> temp = *a;</span><br><span class="line">    *a = *b;</span><br><span class="line">    *b = temp;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//交换 bool 变量的值</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Swap</span><span class="params">(<span class="keyword">bool</span> *a, <span class="keyword">bool</span> *b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> temp = *a;</span><br><span class="line">    *a = *b;</span><br><span class="line">    *b = temp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这些函数虽然在调用时方便了一些，但从本质上说还是定义了三个功能相同、函数体相同的函数，只是数据的类型不同而已，这看起来有点繁琐,我们可以通过函数模板降低代码量。</p>
+<p>我们知道，数据的值可以通过函数参数传递，在函数定义时数据的值是未知的，只有等到函数调用时接收了实参才能确定其值。这就是值的参数化。</p>
+<p>在C++中，数据的类型也可以通过参数来传递，在函数定义时可以不指明具体的数据类型，当发生函数调用时，编译器可以根据传入的实参自动推断数据类型。这就是类型的参数化。</p>
+<p>值（Value）和类型（Type）是数据的两个主要特征，它们在C++中都可以被参数化。</p>
+<p>所谓函数模板，实际上是建立一个通用函数，它所用到的数据的类型（包括返回值类型、形参类型、局部变量类型）可以不具体指定，而是用一个虚拟的类型来代替（实际上是用一个标识符来占位），等发生函数调用时再根据传入的实参来逆推出真正的类型。这个通用函数就称为函数模板（Function Template）。</p>
+<p>在函数模板中，数据的值和类型都被参数化了，发生函数调用时编译器会根据传入的实参来推演形参的值和类型。换个角度说，函数模板除了支持值的参数化，还支持类型的参数化。</p>
+<p>一但定义了函数模板，就可以将类型参数用于函数定义和函数声明了。说得直白一点，原来使用 int、float、char 等内置类型的地方，都可以用类型参数来代替。</p>
+<p>template是定义函数模板的关键字，它后面紧跟尖括号&lt;&gt;，尖括号包围的是类型参数（也可以说是虚拟的类型，或者说是类型占位符）。typename是另外一个关键字，用来声明具体的类型参数，这里的类型参数就是T。从整体上看，template<typename t>被称为模板头。</typename></p>
+<p>函数模板定义的一般形式如下：</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/detailed_explanation_of_c++_function_template/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/c-language-polymorphism-implementation/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1536,113 +1651,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/dht-protocol/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/dht-protocol/" class="post-title-link" itemprop="url">DHT Protocol：BitTorrent DHT 协议中文翻译</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-08-01 16:42:53" itemprop="dateCreated datePublished" datetime="2018-08-01T16:42:53+08:00">2018-08-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2018-08-02 01:02:12" itemprop="dateModified" datetime="2018-08-02T01:02:12+08:00">2018-08-02</time>
-              </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/dht-protocol/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="dht-protocol/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1ftuoziuhd2j30cf0a5gmo.jpg" alt="BT下载图"></p>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
-<p>最近想做一个磁力链接和BT种子的搜索引擎，因此把 DHT 协议重新看了一遍。</p>
-</blockquote>
-<blockquote>
-<p>BEP: 5<br>Title: DHT Protocol<br>Version: 3dec52cb3ae103ce22358e3894b31cad47a6f22b<br>Last-Modified: Tue Apr 2 16:51:45 2013 -0700<br>Author: Andrew Loewenstern <a href="mailto:drue@bittorrent.com" target="_blank" rel="noopener">drue@bittorrent.com</a>, Arvid Norberg <a href="mailto:arvid@bittorrent.com" target="_blank" rel="noopener">arvid@bittorrent.com</a><br>Status: Draft<br>Type: Standards Track<br>Created: 31-Jan-2008<br>Post-History: 22-March-2013: Add “implied_port” to announce_peer message, to improve NAT support</p>
-</blockquote>
-<p>BitTorrent 使用”分布式哈希表”(DHT)来为无 tracker 的种子(torrents)存储 peer 之间的联系信息。这样每个 peer 都成了 tracker。这个协议基于 Kademila[1] 网络并且在 UDP 上实现。</p>
-<p>请注意本文档中使用的术语，以免混乱。</p>
-<ul>
-<li>“peer” 是在一个 TCP 端口上监听的客户端/服务器，它实现了 BitTorrent 协议。</li>
-<li>“节点” 是在一个 UDP 端口上监听的客户端/服务器，它实现了 DHT(分布式哈希表) 协议。<br>DHT 由节点组成，它存储了 peer 的位置。BitTorrent 客户端包含一个 DHT 节点，这个节点用来联系 DHT 中其他节点，从而得到 peer 的位置，进而通过 BitTorrent 协议下载。</li>
-</ul>
-<h2 id="概述-Overview"><a href="#概述-Overview" class="headerlink" title="概述 Overview"></a>概述 Overview</h2><p>每个节点有一个全局唯一的标识符，作为 “node ID”。节点 ID 是一个随机选择的 160bit 空间，BitTorrent infohash[2] 也使用这样的 160bit 空间。 “距离”用来比较两个节点 ID 之间或者节点 ID 和 infohash 之间的”远近”。节点必须维护一个路由表，路由表中含有一部分其它节点的联系信息。其它节点距离自己越近时，路由表信息越详细。因此每个节点都知道 DHT 中离自己很”近”的节点的联系信息，而离自己非常远的 ID 的联系信息却知道的很少。</p>
-<p>在 Kademlia 网络中，距离是通过异或(XOR)计算的，结果为无符号整数。<code>distance(A, B) = |A xor B|</code>，值越小表示越近。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/dht-protocol/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1712,7 +1720,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-count">46</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

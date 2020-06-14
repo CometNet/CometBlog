@@ -174,6 +174,137 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/api-gateway-under-the-architecture-of-micro-service/" class="post-title-link" itemprop="url">微服务架构下的API Gateway</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-19 09:22:00" itemprop="dateCreated datePublished" datetime="2018-07-19T09:22:00+08:00">2018-07-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-07-24 21:23:42" itemprop="dateModified" datetime="2018-07-24T21:23:42+08:00">2018-07-24</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/api-gateway-under-the-architecture-of-micro-service/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="api-gateway-under-the-architecture-of-micro-service/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>最近公司业务要构建一个高性能API网关，所以就整理了市场上的一些产品。</p>
+</blockquote>
+<h2 id="API网关简介"><a href="#API网关简介" class="headerlink" title="API网关简介"></a>API网关简介</h2><p>API网关 顾名思义，是出现在系统边界上的一个面向API的、串行集中式的强管控服务，这里的边界是企业IT系统的边界，主要起到隔离外部访问与内部系统的作用。在微服务概念的流行之前，API网关的实体就已经诞生了，例如银行、证券等领域常见的前置机系统，它也是解决访问认证、报文转换、访问统计等问题的。移动应用、企业互联，使得后台服务支持的对象，从以前单一的Web应用，扩展到多种使用场景，且每种使用场景对后台服务的要求都不尽相同。这不仅增加了后台服务的响应量，还增加了后台服务的复杂性。随着微服务架构概念的提出，API网关成为了微服务架构的一个标配组件。</p>
+<p>API网关网关的价值：</p>
+<ul>
+<li>网关层对外部和内部进行了隔离，保障了后台服务的安全性。</li>
+<li>对外访问控制由网络层面转换成了运维层面，减少变更的流程和错误成本</li>
+<li>减少客户端与服务的耦合，服务可以独立发展。通过网关层来做映射。</li>
+<li>通过网关层聚合，减少外部访问的频次，提升访问效率。</li>
+<li>节约后端服务开发成本，减少上线风险。</li>
+<li>为服务熔断，灰度发布，线上测试提供简单方案。</li>
+<li>便于扩展。</li>
+</ul>
+<p><img src="https://wx2.sinaimg.cn/mw690/0060lm7Tly1ftfb91u0doj30fm0l7wfs.jpg" alt="API Gateway"></p>
+<h2 id="常用的API网关方案"><a href="#常用的API网关方案" class="headerlink" title="常用的API网关方案"></a>常用的API网关方案</h2><p>业界API网关解决方案有很多，包括商业的、开源的。例如</p>
+<ul>
+<li><p><a href="https://aws.amazon.com/cn/api-gateway/" target="_blank" rel="noopener">Amazon API Gateway</a></p>
+</li>
+<li><p><a href="https://tyk.io/" target="_blank" rel="noopener">Tyk</a></p>
+</li>
+<li><p><a href="https://getkong.org/" target="_blank" rel="noopener">Kong</a></p>
+</li>
+<li><p><a href="https://apiumbrella.io/" target="_blank" rel="noopener">api-umbrella</a></p>
+</li>
+<li><p><a href="http://apiaxle.com/" target="_blank" rel="noopener">apiaxle</a></p>
+</li>
+<li><p><a href="https://github.com/Netflix/zuul" target="_blank" rel="noopener">Netflix zuul</a></p>
+</li>
+<li><p><a href="http://wso2.com/api-management/" target="_blank" rel="noopener">WSO2 API Manager</a></p>
+</li>
+<li><p><a href="https://github.com/clydeio" target="_blank" rel="noopener">clydeio</a></p>
+</li>
+<li><p><a href="https://www.aliyun.com/product/apigateway/" target="_blank" rel="noopener">阿里API网关</a></p>
+</li>
+<li><p><a href="https://aws.amazon.com/cn/api-gateway/" target="_blank" rel="noopener">Amazon API Gateway</a></p>
+</li>
+</ul>
+<h2 id="三种常见API网关方案"><a href="#三种常见API网关方案" class="headerlink" title="三种常见API网关方案"></a>三种常见API网关方案</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/api-gateway-under-the-architecture-of-micro-service/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -777,7 +908,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-count">46</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
