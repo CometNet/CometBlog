@@ -174,6 +174,143 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/c++_type_conversion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/c++_type_conversion/" class="post-title-link" itemprop="url">C++类型转换详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-12 15:32:00" itemprop="dateCreated datePublished" datetime="2019-10-12T15:32:00+08:00">2019-10-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 19:29:34" itemprop="dateModified" datetime="2019-10-16T19:29:34+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/c++_type_conversion/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="c++_type_conversion/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>说到类型转换我们不得不提起C语言的类型转换,简单粗暴.<br><code>Type t = (Type) 123</code></p>
+<h2 id="c-类型转换"><a href="#c-类型转换" class="headerlink" title="c++ 类型转换"></a>c++ 类型转换</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>static_cast</td>
+<td>一般的转换</td>
+</tr>
+<tr>
+<td>dynamic_cast</td>
+<td>通常在基类和派生类之间转换时使用</td>
+</tr>
+<tr>
+<td>const_cast</td>
+<td>主要针对const的转换</td>
+</tr>
+<tr>
+<td>reinterpret_cast</td>
+<td>用于进行没有任何关联之间的转换,比如一个字符指针转换为整形数</td>
+</tr>
+</tbody>
+</table>
+<h2 id="static-cast"><a href="#static-cast" class="headerlink" title="static_cast"></a>static_cast</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="comment">// static_cast</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Building</span>&#123;</span>&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span>&#123;</span>&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> :</span> <span class="keyword">public</span> Animal&#123;&#125;;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">97</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//    普通类型</span></span><br><span class="line">    <span class="keyword">char</span> c = <span class="keyword">static_cast</span>&lt;<span class="keyword">char</span>&gt;(a);</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; c &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//  转换具有继承关系的对象指针   父转子</span></span><br><span class="line">    Animal *ani = <span class="literal">NULL</span>;</span><br><span class="line">    Cat *cat1 = <span class="keyword">static_cast</span>&lt;Cat *&gt;(ani);</span><br><span class="line"></span><br><span class="line"><span class="comment">//  转换具有继承关系的对象指针 子转父</span></span><br><span class="line">    Cat * soncat = <span class="literal">NULL</span>;</span><br><span class="line">    Animal *ani1 = <span class="keyword">static_cast</span>&lt;Animal *&gt;(soncat);</span><br><span class="line"></span><br><span class="line"><span class="comment">//  转换具有继承关系的对象引用   父转子</span></span><br><span class="line">    Animal aniobj;</span><br><span class="line">    Animal &amp;animal = aniobj;</span><br><span class="line">    Cat &amp;cat = <span class="keyword">static_cast</span>&lt;Cat &amp;&gt;(animal);</span><br><span class="line">    </span><br><span class="line"><span class="comment">//  转换具有继承关系的对象引用   子转父</span></span><br><span class="line">    Cat catobj;</span><br><span class="line">    Cat &amp;catref = catobj;</span><br><span class="line">    Animal &amp;ani2 = <span class="keyword">static_cast</span>&lt;Animal &amp;&gt;(catref);</span><br><span class="line"></span><br><span class="line"><span class="comment">//     基础数据类型指针  错误</span></span><br><span class="line"><span class="comment">//     error: static_cast from 'int *' to 'char *' is not allowed</span></span><br><span class="line"><span class="comment">//    int *p = NULL;</span></span><br><span class="line"><span class="comment">//    char *sp = static_cast&lt;char*&gt;(p);</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//     对象指针     错误</span></span><br><span class="line"><span class="comment">//     error: static_cast from 'Building *' to 'Animal *', which are not related by inheritance, is not allowed</span></span><br><span class="line"><span class="comment">//    Building *bui = NULL;</span></span><br><span class="line"><span class="comment">//    Animal *ani = static_cast&lt;Animal *&gt;(bui);</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    test1();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面例子可见 <code>static_cast</code> 用于内置的数据类型,还有具有继承关系的指针或者引用</p>
+<h2 id="dynamic-cast"><a href="#dynamic-cast" class="headerlink" title="dynamic_cast"></a>dynamic_cast</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="comment">// static_cast</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Building</span>&#123;</span>&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span>&#123;</span>&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cat</span> :</span> <span class="keyword">public</span> Animal&#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 基础数据类型</span></span><br><span class="line">    <span class="comment">// error: 'char' is not a reference or pointer</span></span><br><span class="line"><span class="comment">//    char c = dynamic_cast&lt;char&gt;(a);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 非继承关系指针</span></span><br><span class="line">    <span class="comment">// error: 'Animal' is not polymorphic</span></span><br><span class="line"><span class="comment">//    Animal *ani = NULL;</span></span><br><span class="line"><span class="comment">//    Building *bui = dynamic_cast&lt;Building *&gt;(ani);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 具有继承关系指针 父转子</span></span><br><span class="line">    <span class="comment">// error: 'Animal' does not refer to a value    父类转子类指针 不安全 禁止转换</span></span><br><span class="line"><span class="comment">//    Animal *ani = NULL;</span></span><br><span class="line"><span class="comment">//    Cat *cat = dynamic_cast&lt;Cat *&gt;(Animal);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 具有继承关系指针 子转父</span></span><br><span class="line">    Cat *cat = <span class="literal">NULL</span>;</span><br><span class="line">    Animal *ani = <span class="keyword">dynamic_cast</span>&lt;Animal *&gt;(cat);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    test2();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过上面例子可以看到 dynamic_cast 只能转换具有继承关系的指针或者引用,在转换前会进行对象类型检查.</p>
+<p>只能转换子转换父,为什么呢?</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/c++_type_conversion/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/detailed_explanation_of_c++_function_template/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1545,112 +1682,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/understanding-java-thread/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/understanding-java-thread/" class="post-title-link" itemprop="url">深入理解Java多线程</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2018-08-03 04:00:00 / 修改时间：17:32:34" itemprop="dateCreated datePublished" datetime="2018-08-03T04:00:00+08:00">2018-08-03</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/JAVA/" itemprop="url" rel="index"><span itemprop="name">JAVA</span></a>
-                </span>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/understanding-java-thread/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="understanding-java-thread/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><img src="https://wx4.sinaimg.cn/mw690/0060lm7Tly1ftwm3r4xi1j30g60bkjrf.jpg" alt="JAVA"></p>
-<h1 id="多线程入门"><a href="#多线程入门" class="headerlink" title="多线程入门"></a>多线程入门</h1><h2 id="多线程的概念"><a href="#多线程的概念" class="headerlink" title="多线程的概念"></a>多线程的概念</h2><h3 id="线程概念"><a href="#线程概念" class="headerlink" title="线程概念"></a>线程概念</h3><p>线程就是程序中单独顺序的流控制。</p>
-<p>线程本身不能运行，它只能用于程序中。</p>
-<p>说明：线程是程序内的顺序控制流，只能使用分配给程序的资源和环境。</p>
-<p>进程：操作系统中执行的程序</p>
-<p>程序是静态的概念，进程是动态的概念。</p>
-<p>一个进程可以包含一个或多个线程。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/understanding-java-thread/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1720,7 +1751,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -21,18 +21,19 @@
     var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="谈浩的个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Haohao Notes">
-<meta property="og:url" content="http://blog.huixing.org/archives/2020/index.html">
+  <meta name="description" content="在Linux下使用PHP连接SqlServer出现以下错误:  1SQLSTATE[08001]: [Microsoft][ODBC Driver 17 for SQL Server]TCP Provider: Error code 0x2746 发现问题https://github.com/microsoft/msphpsql/issues/1021 修复参考思路https://wiki.de">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP MSSQL error code 0x2746 - SQLSTATE[08001]">
+<meta property="og:url" content="http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/index.html">
 <meta property="og:site_name" content="Haohao Notes">
-<meta property="og:description" content="谈浩的个人博客">
+<meta property="og:description" content="在Linux下使用PHP连接SqlServer出现以下错误:  1SQLSTATE[08001]: [Microsoft][ODBC Driver 17 for SQL Server]TCP Provider: Error code 0x2746 发现问题https://github.com/microsoft/msphpsql/issues/1021 修复参考思路https://wiki.de">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-08-08T06:45:23.958Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Haohao Notes">
-<meta name="twitter:description" content="谈浩的个人博客">
+<meta name="twitter:title" content="PHP MSSQL error code 0x2746 - SQLSTATE[08001]">
+<meta name="twitter:description" content="在Linux下使用PHP连接SqlServer出现以下错误:  1SQLSTATE[08001]: [Microsoft][ODBC Driver 17 for SQL Server]TCP Provider: Error code 0x2746 发现问题https://github.com/microsoft/msphpsql/issues/1021 修复参考思路https://wiki.de">
 
-<link rel="canonical" href="http://blog.huixing.org/archives/2020/">
+<link rel="canonical" href="http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/">
 
 
 <script id="page-configurations">
@@ -40,12 +41,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>归档 | Haohao Notes</title>
+  <title>PHP MSSQL error code 0x2746 - SQLSTATE[08001] | Haohao Notes</title>
   
 
 
@@ -168,217 +169,119 @@
         <div class="content-wrap">
           
 
-          <div class="content archive">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP MSSQL error code 0x2746 - SQLSTATE[08001]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-08 14:36:36 / 修改时间：14:45:23" itemprop="dateCreated datePublished" datetime="2020-08-08T14:36:36+08:00">2020-08-08</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        
-        <span class="collection-header">还行! 目前共计 47 篇日志。 继续努力。</span>
-      </div>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2020</span>
+        <blockquote>
+<p>在Linux下使用PHP连接SqlServer出现以下错误:</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SQLSTATE[08001]: [Microsoft][ODBC Driver 17 for SQL Server]TCP Provider: Error code 0x2746</span><br></pre></td></tr></table></figure>
+<h2 id="发现问题"><a href="#发现问题" class="headerlink" title="发现问题"></a>发现问题</h2><p><a href="https://github.com/microsoft/msphpsql/issues/1021" target="_blank" rel="noopener">https://github.com/microsoft/msphpsql/issues/1021</a></p>
+<h2 id="修复参考思路"><a href="#修复参考思路" class="headerlink" title="修复参考思路"></a>修复参考思路</h2><p><a href="https://wiki.debian.org/ContinuousIntegration/TriagingTips/openssl-1.1.1" target="_blank" rel="noopener">https://wiki.debian.org/ContinuousIntegration/TriagingTips/openssl-1.1.1</a></p>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><p>将<code>/etc/ssl/openssl.cnf</code>配置<code>CipherString</code>改为<code>DEFAULT@SECLEVEL=1</code></p>
+<p>原配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[system_default_sect]</span><br><span class="line">MinProtocol = TLSv1.2</span><br><span class="line">CipherString = DEFAULT@SECLEVEL=2</span><br></pre></td></tr></table></figure></p>
+<p>改后配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[system_default_sect]</span><br><span class="line">MinProtocol = TLSv1.2</span><br><span class="line">CipherString = DEFAULT@SECLEVEL=1</span><br></pre></td></tr></table></figure></p>
+<h2 id="通过命令解决"><a href="#通过命令解决" class="headerlink" title="通过命令解决"></a>通过命令解决</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i -E &apos;s/(CipherString\s*=\s*DEFAULT@SECLEVEL=)2/\11/&apos; /etc/ssl/openssl.cnf</span><br></pre></td></tr></table></figure>
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+    
+    
+    
 
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-08-08T14:36:36+08:00"
-              content="2020-08-08">
-          08-08
-        </time>
-      </div>
+      <footer class="post-footer">
 
-      <div class="post-title">
-          <a class="post-title-link" href="/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/" itemprop="url">
-            <span itemprop="name">PHP MSSQL error code 0x2746 - SQLSTATE[08001]</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-06-14T18:57:05+08:00"
-              content="2020-06-14">
-          06-14
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/how-to-make-a-choice/" itemprop="url">
-            <span itemprop="name">如何做选择?</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-06-10T16:40:44+08:00"
-              content="2020-06-10">
-          06-10
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-gtid/" itemprop="url">
-            <span itemprop="name">MySQL GTID详解</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-06-05T14:39:30+08:00"
-              content="2020-06-05">
-          06-05
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/mysql-master-slave-replication/" itemprop="url">
-            <span itemprop="name">MySQL主从复制</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-03-03T19:55:16+08:00"
-              content="2020-03-03">
-          03-03
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/linux-socket/" itemprop="url">
-            <span itemprop="name">Linux系统编程-socket编程</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-02-29T12:03:09+08:00"
-              content="2020-02-29">
-          02-29
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/linux-system-programming-thread-synchronization/" itemprop="url">
-            <span itemprop="name">Linux系统编程-线程同步</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-02-26T11:44:04+08:00"
-              content="2020-02-26">
-          02-26
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/linux-signal/" itemprop="url">
-            <span itemprop="name">Linux系统编程-信号</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-02-15T22:06:26+08:00"
-              content="2020-02-15">
-          02-15
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/linux-process-recycl/" itemprop="url">
-            <span itemprop="name">Linux系统编程-进程回收 </span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2020-02-10T14:11:12+08:00"
-              content="2020-02-10">
-          02-10
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/linux-generates-static-link-library-and-dynamic-link-library/" itemprop="url">
-            <span itemprop="name">Linux 生成静态链接库与动态链接库</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
+        
 
 
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/how-to-make-a-choice/" rel="prev" title="如何做选择?">
+      <i class="fa fa-chevron-left"></i> 如何做选择?
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-  </div>
+      </footer>
+    
+  </article>
   
   
-  
-
   
 
 
 
           </div>
           
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -425,6 +328,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#发现问题"><span class="nav-number">1.</span> <span class="nav-text">发现问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修复参考思路"><span class="nav-number">2.</span> <span class="nav-text">修复参考思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方式"><span class="nav-number">3.</span> <span class="nav-text">解决方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过命令解决"><span class="nav-number">4.</span> <span class="nav-text">通过命令解决</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -574,6 +478,26 @@
   }
   // defer loading until the whole page loading is completed
   window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/";
+    this.page.identifier = "PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/";
+    this.page.title = "PHP MSSQL error code 0x2746 - SQLSTATE[08001]";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
 </script>
 
 </body>

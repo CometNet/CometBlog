@@ -174,6 +174,119 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/api-gateway-of-kong-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/api-gateway-of-kong-install/" class="post-title-link" itemprop="url">API gateway 之 kong 安装</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-20 02:29:55" itemprop="dateCreated datePublished" datetime="2018-07-20T02:29:55+08:00">2018-07-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-07-24 21:22:50" itemprop="dateModified" datetime="2018-07-24T21:22:50+08:00">2018-07-24</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/api-gateway-of-kong-install/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="api-gateway-of-kong-install/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="https://wx3.sinaimg.cn/mw690/0060lm7Tly1ftg71f4jm8j30hs0be3zc.jpg" alt="Kong"></p>
+<blockquote>
+<p>Kong可以说是API的得力助手。对需要从事API管理的广大开发员来说，它是最出色的工具之一。Kong是开源工具，具有可扩展性和模块性，可以在任何一种基础设施上运行。多年来，Kong一直在支持优秀的开发项目，比如Mashape（世界上规模最大的API市场）。最棒的是，Kong得到了强大的Nginx的支持。</p>
+</blockquote>
+<h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><ul>
+<li><p>Kong可灵活扩展：只要增添更多的服务器实例，它就能横向扩展，毫无问题，那样你可以支持更多流量，同时确保网络延迟很短。</p>
+</li>
+<li><p>Kong可在任何地方运行：它可以部署在单个或多个数据中心环境的私有云或公有云上。它还支持大多数流行的操作系统，比如Linux、Mac和Windows。Kong包括许多实用技巧，以便针对大多数现代平台完成安装和配置工作。</p>
+</li>
+<li><p>Kong具有模块性：它可以与新的插件协同运行，扩展基本功能。可将你的API与许多不同的插件整合起来，以增强安全、分析、验证、日志及/或监测机制。最好的例子之一就是Nginx Plus插件（<a href="https://getkong.org/plugins/nginx-plus-monitoring/），该插件提供了服务器实时监测机制，以获得关于负载和请求的度量指标和统计数字。" target="_blank" rel="noopener">https://getkong.org/plugins/nginx-plus-monitoring/），该插件提供了服务器实时监测机制，以获得关于负载和请求的度量指标和统计数字。</a></p>
+</li>
+<li><p>开源及企业：虽然Kong是开源工具，可供每个人免费使用，但你也能获得企业版，企业版通过电子邮件、电话和聊天提供了快速支持，此外还提供初始安装、从第三方API管理工具来迁移、紧急补丁、热修复程序及更多特性。<br><img src="https://wx1.sinaimg.cn/mw690/0060lm7Tly1ftg9wtnzucj30fa09m0th.jpg" alt="Kong Api管理解决方案"></p>
+</li>
+</ul>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p>Kong可与两种不同的组件协同工作：</p>
+<ul>
+<li>Nginx：Kong使用经过修改的Nginx web服务器作为代理服务器，该服务器负责处理API请求。</li>
+<li>Apache Cassandra 或者 Postgresql：这用作数据存储（Datastore）服务器，负载存储来自Kong操作的数据。</li>
+</ul>
+<h2 id="Kong安装"><a href="#Kong安装" class="headerlink" title="Kong安装"></a>Kong安装</h2><p>参考<a href="https://getkong.org/install/centos/" target="_blank" rel="noopener">Kong CentOS Installation</a></p>
+<p>从下载Kong的配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install https://bintray.com/kong/kong-community-edition-rpm/download_file?file_path=centos/7/kong-community-edition-0.14.0.el7.noarch.rpm</span><br></pre></td></tr></table></figure></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/api-gateway-of-kong-install/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -908,7 +1021,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
