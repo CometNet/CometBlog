@@ -174,6 +174,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/" class="post-title-link" itemprop="url">Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-16 10:11:55 / 修改时间：10:48:20" itemprop="dateCreated datePublished" datetime="2020-11-16T10:11:55+08:00">2020-11-16</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>上周开发一个功能使用使用Blob</p>
+<p>Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)</p>
+<p>示例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">function downloadFile(content, filename) &#123;</span><br><span class="line">    var blob = new Blob([content])</span><br><span class="line">    var url = window.URL.createObjectURL(blob)</span><br><span class="line">    var a = document.createElement(&apos;a&apos;)</span><br><span class="line">    a.style.display = &apos;none&apos;;</span><br><span class="line">    a.href = url</span><br><span class="line">    a.download = filename</span><br><span class="line">    document.body.appendChild(a);</span><br><span class="line">    a.click()</span><br><span class="line">    window.URL.revokeObjectURL(url);</span><br><span class="line">    document.body.removeChild(a);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>查询Blob支持 Safari 6以上版本<br><a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/API/Blob</a></p>
+<p>Blob 浏览器兼容性图</p>
+<p><img src="https://i.loli.net/2020/11/16/QgReSIDBvosVTay.png" alt="浏览器兼容性图"></p>
+<p>如果要以编程方式将ancor标记作为解决方案注入DOM，请确保不要过早地清除它。所以延迟一秒清除解决.</p>
+<p>解决示例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">function downloadFile(content, filename) &#123;</span><br><span class="line">    var blob = new Blob([content])</span><br><span class="line">    var url = window.URL.createObjectURL(blob)</span><br><span class="line">    var a = document.createElement(&apos;a&apos;)</span><br><span class="line">    a.style.display = &apos;none&apos;;</span><br><span class="line">    a.href = url</span><br><span class="line">    a.download = filename</span><br><span class="line">    document.body.appendChild(a);</span><br><span class="line">    a.click()</span><br><span class="line">    setTimeout(() =&gt; &#123;</span><br><span class="line">        window.URL.revokeObjectURL(url);</span><br><span class="line">        document.body.removeChild(a);</span><br><span class="line">    &#125;, 1000);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1066,126 +1153,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-system-program-of-thread/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/linux-system-program-of-thread/" class="post-title-link" itemprop="url">Linux系统编程-线程</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2019-11-12 00:05:00 / 修改时间：10:26:49" itemprop="dateCreated datePublished" datetime="2019-11-12T00:05:00+08:00">2019-11-12</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
-                </span>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/linux-system-program-of-thread/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-system-program-of-thread/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="什么是线程"><a href="#什么是线程" class="headerlink" title="什么是线程"></a>什么是线程</h2><p>线程是操作系统能够进行运算调度的最小单位。它被包含在进程之中，是进程中的实际运作单位。一条线程指的是进程中一个单一顺序的控制流，一个进程中可以并发多个线程，每条线程并行执行不同的任务。在Unix System V及SunOS中也被称为轻量进程（lightweight processes），但轻量进程更多指内核线程（kernel thread），而把用户线程（user thread）称为线程。</p>
-<p>线程是独立调度和分派的基本单位。线程可以为操作系统内核调度的内核线程，如Win32线程；由用户进程自行调度的用户线程，如Linux平台的POSIX Thread；或者由内核与用户进程，如Windows 7的线程，进行混合调度。</p>
-<p>同一进程中的多条线程将共享该进程中的全部系统资源，如虚拟地址空间，文件描述符和信号处理等等。但同一进程中的多个线程有各自的调用栈（call stack），自己的寄存器环境（register context），自己的线程本地存储（thread-local storage）。<br>一个进程可以有很多线程，每条线程并行执行不同的任务。</p>
-<p>在多核或多CPU，或支持Hyper-threading的CPU上使用多线程程序设计的好处是显而易见，即提高了程序的执行吞吐率。在单CPU单核的计算机上，使用多线程技术，也可以把进程中负责I/O处理、人机交互而常被阻塞的部分与密集计算的部分分开来执行，编写专门的workhorse线程执行密集计算，从而提高了程序的执行效率。</p>
-<ul>
-<li>LWP：light weight process 轻量级的进程，本质仍是进程(在Linux环境下)</li>
-<li>进程：独立地址空间，拥有PCB</li>
-<li>线程：也有PCB，但没有独立的地址空间(共享)</li>
-<li>区别：在于是否共享地址空间。<ul>
-<li>独居(进程)</li>
-<li>合租(线程)</li>
-</ul>
-</li>
-</ul>
-<p><strong>Linux下：</strong></p>
-<ul>
-<li>线程：最小的执行单位</li>
-<li>进程：最小分配资源单位，可看成是只有一个线程的进程。</li>
-</ul>
-<p><img src="http://ww1.sinaimg.cn/large/a3eed545ly1g8ujxj4xb0j205m02gt8j.jpg" alt="image.png"></p>
-<h2 id="Linux内核线程实现原理"><a href="#Linux内核线程实现原理" class="headerlink" title="Linux内核线程实现原理"></a>Linux内核线程实现原理</h2>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/linux-system-program-of-thread/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1255,7 +1222,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">48</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
