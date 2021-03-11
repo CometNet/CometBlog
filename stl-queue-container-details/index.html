@@ -270,7 +270,7 @@
 <li><code>queue(const queue &amp;que);             //拷贝构造函数</code></li>
 <li><code>queue&amp; operator=(const queue &amp;que);    //重载等号操作符</code></li>
 </ul>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; queIntA;</span><br><span class="line">queIntA.push(<span class="number">1</span>);</span><br><span class="line">queIntA.push(<span class="number">3</span>);</span><br><span class="line">queIntA.push(<span class="number">5</span>);</span><br><span class="line">queIntA.push(<span class="number">7</span>);</span><br><span class="line">queIntA.push(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; queIntB(queIntA);	<span class="comment">//拷贝构造</span></span><br><span class="line"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; queIntC;</span><br><span class="line">queIntC = queIntA;				<span class="comment">//赋值</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; queIntA;</span><br><span class="line">queIntA.push(<span class="number">1</span>);</span><br><span class="line">queIntA.push(<span class="number">3</span>);</span><br><span class="line">queIntA.push(<span class="number">5</span>);</span><br><span class="line">queIntA.push(<span class="number">7</span>);</span><br><span class="line">queIntA.push(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; <span class="title">queIntB</span><span class="params">(queIntA)</span></span>;	<span class="comment">//拷贝构造</span></span><br><span class="line"><span class="built_in">queue</span>&lt;<span class="keyword">int</span>&gt; queIntC;</span><br><span class="line">queIntC = queIntA;				<span class="comment">//赋值</span></span><br></pre></td></tr></table></figure>
 <h2 id="queue的数据存取"><a href="#queue的数据存取" class="headerlink" title="queue的数据存取"></a>queue的数据存取</h2><ul>
 <li><code>queue.back();   //返回最后一个元素</code></li>
 <li><code>queue.front();   //返回第一个元素</code></li>
@@ -381,7 +381,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-count">49</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -431,7 +431,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

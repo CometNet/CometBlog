@@ -275,7 +275,7 @@
 <li><code>vector(n,elem);   //构造函数将n个elem拷贝给本身。</code></li>
 <li><code>vector(const vector &amp;vec);  //拷贝构造函数</code></li>
 </ul>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>  iArray[] = &#123;<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;  vecIntA( iArray,  iArray+<span class="number">5</span> );</span><br><span class="line"></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; vecIntB (  vecIntA.begin() , vecIntA.end()  );   <span class="comment">//用构造函数初始化容器vecIntB </span></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; vecIntB (  vecIntA.begin() , vecIntA.begin()+<span class="number">3</span>  );  </span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; vecIntC(<span class="number">3</span>,<span class="number">9</span>); <span class="comment">//此代码运行后，容器vecIntB就存放3个元素，每个元素的值是9。</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; vecIntD(vecIntA);</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>  iArray[] = &#123;<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;  <span class="title">vecIntA</span><span class="params">( iArray,  iArray+<span class="number">5</span> )</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntB</span> <span class="params">(  vecIntA.begin() , vecIntA.end()  )</span></span>;   <span class="comment">//用构造函数初始化容器vecIntB </span></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntB</span> <span class="params">(  vecIntA.begin() , vecIntA.begin()+<span class="number">3</span>  )</span></span>;  </span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntC</span><span class="params">(<span class="number">3</span>,<span class="number">9</span>)</span></span>; <span class="comment">//此代码运行后，容器vecIntB就存放3个元素，每个元素的值是9。</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntD</span><span class="params">(vecIntA)</span></span>;</span><br></pre></td></tr></table></figure>
 <h2 id="vector的赋值"><a href="#vector的赋值" class="headerlink" title="vector的赋值"></a>vector的赋值</h2><h3 id="理论知识-1"><a href="#理论知识-1" class="headerlink" title="理论知识"></a>理论知识</h3><ul>
 <li><code>vector.assign(beg,end);    //将[beg, end)区间中的数据拷贝赋值给本身。注意该区间是左闭右开的区间。</code></li>
 <li><code>vector.assign(n,elem);  //将n个elem拷贝赋值给本身。</code></li>
@@ -457,7 +457,7 @@ itA&lt;itB,   itA&lt;=itB,  itA&gt;itB,  itA&gt;=itB</code>的功能。</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-count">49</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -507,7 +507,7 @@ itA&lt;itB,   itA&lt;=itB,  itA&gt;itB,  itA&gt;=itB</code>的功能。</p>
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

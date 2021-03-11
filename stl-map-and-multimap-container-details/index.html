@@ -308,7 +308,7 @@
 <li><code>map.swap(mp);                //交换两个集合容器</code></li>
 </ul>
 <p>例如:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span>, <span class="built_in">string</span>&gt; mapA;</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">3</span>,<span class="string">"小张"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">1</span>,<span class="string">"小杨"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">7</span>,<span class="string">"小赵"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">5</span>,<span class="string">"小王"</span>));	</span><br><span class="line"></span><br><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span> ,<span class="built_in">string</span>&gt; mapB(mapA);			<span class="comment">//拷贝构造</span></span><br><span class="line">		</span><br><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span>, <span class="built_in">string</span>&gt; mapC;</span><br><span class="line">mapC = mapA;								<span class="comment">//赋值</span></span><br><span class="line"></span><br><span class="line">mapC[<span class="number">3</span>] = <span class="string">"老张"</span>;</span><br><span class="line">mapC.swap(mapA);			<span class="comment">//交换</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span>, <span class="built_in">string</span>&gt; mapA;</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">3</span>,<span class="string">"小张"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">1</span>,<span class="string">"小杨"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">7</span>,<span class="string">"小赵"</span>));	</span><br><span class="line">mapA.insert(pair&lt;<span class="keyword">int</span>,<span class="built_in">string</span>&gt;(<span class="number">5</span>,<span class="string">"小王"</span>));	</span><br><span class="line"></span><br><span class="line">map&lt;int ,string&gt; mapB(mapA);			//拷贝构造</span><br><span class="line">		</span><br><span class="line"><span class="built_in">map</span>&lt;<span class="keyword">int</span>, <span class="built_in">string</span>&gt; mapC;</span><br><span class="line">mapC = mapA;								<span class="comment">//赋值</span></span><br><span class="line"></span><br><span class="line">mapC[<span class="number">3</span>] = <span class="string">"老张"</span>;</span><br><span class="line">mapC.swap(mapA);			<span class="comment">//交换</span></span><br></pre></td></tr></table></figure>
 <h2 id="map的大小"><a href="#map的大小" class="headerlink" title="map的大小"></a>map的大小</h2><ul>
 <li><code>map.size();    //返回容器中元素的数目</code></li>
 <li><code>map.empty();//判断容器是否为空</code></li>
@@ -438,7 +438,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-count">49</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -488,7 +488,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

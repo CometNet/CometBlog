@@ -174,6 +174,98 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-generates-static-link-library-and-dynamic-link-library/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/linux-generates-static-link-library-and-dynamic-link-library/" class="post-title-link" itemprop="url">Linux 生成静态链接库与动态链接库</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-02-10 14:11:12 / 修改时间：19:30:50" itemprop="dateCreated datePublished" datetime="2020-02-10T14:11:12+08:00">2020-02-10</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux-generates-static-link-library-and-dynamic-link-library/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-generates-static-link-library-and-dynamic-link-library/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="库"><a href="#库" class="headerlink" title="库"></a>库</h2><p>所谓的库就是一种可执行代码的二进制形式，可以被操作系统载入内存执行。</p>
+<h2 id="静态库和动态库"><a href="#静态库和动态库" class="headerlink" title="静态库和动态库"></a>静态库和动态库</h2><h3 id="静态库-a"><a href="#静态库-a" class="headerlink" title="静态库 .a"></a>静态库 .a</h3><p>文件的命名方式：“libxxx.a”,库名前加“lib”，后缀是“.a”,库名是“xxx”</p>
+<p>链接时间：静态库的代码是在编译过程中被载入到程序中的</p>
+<p>链接方式：静态库的链接是将整个函数库的所有数据都合成进了目标代码，优点是编译后的执行程序不需要外部的函数库支持，因为所使用的函数已经被编进去了；缺点是如果所使用的静态库发生更新改变，则需要重新编译生成静态库。</p>
+<h3 id="动态库-so"><a href="#动态库-so" class="headerlink" title="动态库 .so"></a>动态库 .so</h3><p>文件命名方式：“libxxx.so”,库名前加“lib”，后缀是“.so”，库名是“xxx”</p>
+<p>链接时间：动态库在编译时并没有被编译进目标代码，而是当你的程序执行到相关函数的时候才调用该函数库里的相应函数。缺点是函数库并没有整合进程序，所以程序的运行环境必须提供相应的库；优点是动态库的改变不影响程序。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-generates-static-link-library-and-dynamic-link-library/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-system-program-of-thread/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1250,131 +1342,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/stl-string-string-class-details/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="作者">
-      <meta itemprop="description" content="谈浩的个人博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Haohao Notes">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/stl-string-string-class-details/" class="post-title-link" itemprop="url">STL string字符串类详解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-10-15 15:41:00" itemprop="dateCreated datePublished" datetime="2019-10-15T15:41:00+08:00">2019-10-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-10-16 19:28:36" itemprop="dateModified" datetime="2019-10-16T19:28:36+08:00">2019-10-16</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
-                </span>
-            </span>
-
-          
-  <span class="post-meta-item">
-    <span class="post-meta-item-icon">
-      <i class="fa fa-copyright"></i>
-    </span>
-    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
-  </span>
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Disqus：</span>
-    
-    <a title="disqus" href="/stl-string-string-class-details/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="stl-string-string-class-details/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="String概念"><a href="#String概念" class="headerlink" title="String概念"></a>String概念</h2><blockquote>
-<p>string是STL的字符串类型，通常用来表示字符串。而在使用string之前，字符串通常是用char<em>表示的。string与char</em>都可以用来表示字符串，那么二者有什么区别呢。</p>
-</blockquote>
-<p>string和char*的比较</p>
-<ul>
-<li>string是一个类, char*是一个指向字符的指针。</li>
-<li>string封装了char<em>，管理这个字符串，是一个char</em>型的容器。</li>
-<li>string不用考虑内存释放和越界。</li>
-<li>string管理char*所分配的内存。每一次string的复制，取值都由string类负责维护，不用担心复制越界和取值越界等。</li>
-<li>string提供了一系列的字符串操作函数.查找find，拷贝copy，删除erase，替换replace，插入insert</li>
-</ul>
-<h2 id="string的构造函数"><a href="#string的构造函数" class="headerlink" title="string的构造函数"></a>string的构造函数</h2><p>默认构造函数：</p>
-<ul>
-<li><code>string();       //构造一个空的字符串string s1。</code></li>
-</ul>
-<p>拷贝构造函数：</p>
-<ul>
-<li><code>string(const string &amp;str);    //构造一个与str一样的string。如string s1(s2)。</code></li>
-</ul>
-<p>带参数的构造函数</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/stl-string-string-class-details/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1444,7 +1411,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-count">49</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1494,7 +1461,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

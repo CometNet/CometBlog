@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Docker 架构原理及简单使用简介了解docker的前生LXCLXC为Linux Container的简写。可以提供轻量级的虚拟化，以便隔离进程和资源，而且不需要提供指令解释机制以及全虚拟化的其他复杂性。相当于C++中的NameSpace。容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好地在孤立的组之间平衡有冲突的资源使用需求。与传统虚拟化技术相比，它的优势在于：  与宿主机使用同一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 深入浅出">
+<meta property="og:url" content="http://blog.huixing.org/Docker-Head-First/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="Docker 架构原理及简单使用简介了解docker的前生LXCLXC为Linux Container的简写。可以提供轻量级的虚拟化，以便隔离进程和资源，而且不需要提供指令解释机制以及全虚拟化的其他复杂性。相当于C++中的NameSpace。容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好地在孤立的组之间平衡有冲突的资源使用需求。与传统虚拟化技术相比，它的优势在于：  与宿主机使用同一">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://ws1.sinaimg.cn/large/a3eed545ly1gog07gdssfj20k007qdi4.jpg">
+<meta property="og:updated_time" content="2021-03-11T07:48:40.146Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker 深入浅出">
+<meta name="twitter:description" content="Docker 架构原理及简单使用简介了解docker的前生LXCLXC为Linux Container的简写。可以提供轻量级的虚拟化，以便隔离进程和资源，而且不需要提供指令解释机制以及全虚拟化的其他复杂性。相当于C++中的NameSpace。容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好地在孤立的组之间平衡有冲突的资源使用需求。与传统虚拟化技术相比，它的优势在于：  与宿主机使用同一">
+<meta name="twitter:image" content="https://ws1.sinaimg.cn/large/a3eed545ly1gog07gdssfj20k007qdi4.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/Docker-Head-First/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Docker 深入浅出 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ed5074ed8b3d6f94bafa9d6913ef25b4";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/Docker-Head-First/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker 深入浅出
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-11 15:27:27 / 修改时间：15:48:40" itemprop="dateCreated datePublished" datetime="2021-03-11T15:27:27+08:00">2021-03-11</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/Docker-Head-First/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Docker-Head-First/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Docker-架构原理及简单使用"><a href="#Docker-架构原理及简单使用" class="headerlink" title="Docker 架构原理及简单使用"></a>Docker 架构原理及简单使用</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="了解docker的前生LXC"><a href="#了解docker的前生LXC" class="headerlink" title="了解docker的前生LXC"></a>了解docker的前生LXC</h3><p>LXC为Linux Container的简写。可以提供轻量级的虚拟化，以便隔离进程和资源，而且不需要提供指令解释机制以及全虚拟化的其他复杂性。相当于C++中的NameSpace。容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好地在孤立的组之间平衡有冲突的资源使用需求。<br>与传统虚拟化技术相比，它的优势在于：</p>
+<ol>
+<li>与宿主机使用同一个内核，性能损耗小；</li>
+<li>不需要指令级模拟；</li>
+<li>不需要即时(Just-in-time)编译；</li>
+<li>容器可以在CPU核心的本地运行指令，不需要任何专门的解释机制；</li>
+<li>避免了准虚拟化和系统调用替换中的复杂性；</li>
+<li>轻量级隔离，在隔离的同时还提供共享机制，以实现容器与宿主机的资源共享。</li>
+</ol>
+<p>总结：Linux Container是一种轻量级的虚拟化的手段。</p>
+<p>Linux Container提供了在单一可控主机节点上支持多个相互隔离的server container同时执行的机制。Linux Container有点像chroot，提供了一个拥有自己进程和网络空间的虚拟环境，但又有别于虚拟机，因为lxc是一种操作系统层次上的资源的虚拟化。</p>
+<h3 id="LXC与docker什么关系？"><a href="#LXC与docker什么关系？" class="headerlink" title="LXC与docker什么关系？"></a>LXC与docker什么关系？</h3><p>docker并不是LXC替代品，docker底层使用了LXC来实现，LXC将linux进程沙盒化，使得进程之间相互隔离，并且能够控制各进程的资源分配。</p>
+<p>在LXC的基础之上，docker提供了一系列更强大的功能。</p>
+<h3 id="什么是docker"><a href="#什么是docker" class="headerlink" title="什么是docker"></a>什么是docker</h3><p>docker是一个开源的应用容器引擎，基于go语言开发并遵循了apache2.0协议开源。</p>
+<p>docker可以让开发者打包他们的应用以及依赖包到一个轻量级、可移植的容器中，然后发布到任何流行的linux服务器，也可以实现虚拟化。</p>
+<p>容器是完全使用沙箱机制，相互之间不会有任何接口（类iphone的app），并且容器开销极其低。</p>
+<h3 id="为什么docker越来越受欢迎"><a href="#为什么docker越来越受欢迎" class="headerlink" title="为什么docker越来越受欢迎"></a>为什么docker越来越受欢迎</h3><p>容器化越来越受欢迎，因为容器是：</p>
+<ul>
+<li>灵活：即使是最复杂的应用也可以集装箱化。</li>
+<li>轻量级：容器利用并共享主机内核。</li>
+<li>可互换：您可以即时部署更新和升级。</li>
+<li>便携式：您可以在本地构建，部署到云，并在任何地方运行。</li>
+<li>可扩展：您可以增加并自动分发容器副本。</li>
+<li>可堆叠：您可以垂直和即时堆叠服务。</li>
+</ul>
+<p>镜像和容器（contalners）</p>
+<p>通过镜像启动一个容器，一个镜像是一个可执行的包，其中包括运行应用程序所需要的所有内容包含代码，运行时间，库、环境变量、和配置文件。</p>
+<p>容器是镜像的运行实例，当被运行时有镜像状态和用户进程，可以使用docker ps 查看</p>
+<p>容器和虚拟机</p>
+<p>容器时在linux上本机运行，并与其他容器共享主机的内核，它运行的一个独立的进程，不占用其他任何可执行文件的内存，非常轻量</p>
+<p>虚拟机运行的是一个完成的操作系统，通过虚拟机管理程序对主机资源进行虚拟访问，相比之下需要的资源更多</p>
+<p><img src="https://ws1.sinaimg.cn/large/a3eed545ly1gog07gdssfj20k007qdi4.jpg" alt="image.png"></p>
+<h3 id="docker版本"><a href="#docker版本" class="headerlink" title="docker版本"></a>docker版本</h3><ul>
+<li>Docker Community Edition（CE）社区版</li>
+<li>Enterprise Edition(EE) 商业版</li>
+</ul>
+<h3 id="docker和openstack的几项对比"><a href="#docker和openstack的几项对比" class="headerlink" title="docker和openstack的几项对比"></a>docker和openstack的几项对比</h3><h3 id="容器在内核中支持2种重要技术"><a href="#容器在内核中支持2种重要技术" class="headerlink" title="容器在内核中支持2种重要技术"></a>容器在内核中支持2种重要技术</h3><h3 id="了解docker三个重要概念"><a href="#了解docker三个重要概念" class="headerlink" title="了解docker三个重要概念"></a>了解docker三个重要概念</h3><h3 id="docker的主要用途"><a href="#docker的主要用途" class="headerlink" title="docker的主要用途"></a>docker的主要用途</h3><h3 id="docker改变了什么"><a href="#docker改变了什么" class="headerlink" title="docker改变了什么"></a>docker改变了什么</h3><h2 id="docker架构"><a href="#docker架构" class="headerlink" title="docker架构"></a>docker架构</h2><h3 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h3><h3 id="docker架构1"><a href="#docker架构1" class="headerlink" title="docker架构1"></a>docker架构1</h3><h3 id="docker架构2"><a href="#docker架构2" class="headerlink" title="docker架构2"></a>docker架构2</h3><h1 id="Docker-commit方法镜像制作"><a href="#Docker-commit方法镜像制作" class="headerlink" title="Docker commit方法镜像制作"></a>Docker commit方法镜像制作</h1><h1 id="Docker-Dockerfile创建镜像的方法（推荐docker-file这种方法）"><a href="#Docker-Dockerfile创建镜像的方法（推荐docker-file这种方法）" class="headerlink" title="Docker Dockerfile创建镜像的方法（推荐docker file这种方法）"></a>Docker Dockerfile创建镜像的方法（推荐docker file这种方法）</h1><h1 id="Docker私库的搭建及常用方法-docker-registry方式"><a href="#Docker私库的搭建及常用方法-docker-registry方式" class="headerlink" title="Docker私库的搭建及常用方法-docker-registry方式"></a>Docker私库的搭建及常用方法-docker-registry方式</h1><h1 id="Docker私库的搭建及常用方法-harbor-registry方式"><a href="#Docker私库的搭建及常用方法-harbor-registry方式" class="headerlink" title="Docker私库的搭建及常用方法-harbor-registry方式"></a>Docker私库的搭建及常用方法-harbor-registry方式</h1>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/" rel="prev" title="Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)">
+      <i class="fa fa-chevron-left"></i> Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-架构原理及简单使用"><span class="nav-number">1.</span> <span class="nav-text">Docker 架构原理及简单使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#了解docker的前生LXC"><span class="nav-number">1.1.1.</span> <span class="nav-text">了解docker的前生LXC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LXC与docker什么关系？"><span class="nav-number">1.1.2.</span> <span class="nav-text">LXC与docker什么关系？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是docker"><span class="nav-number">1.1.3.</span> <span class="nav-text">什么是docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么docker越来越受欢迎"><span class="nav-number">1.1.4.</span> <span class="nav-text">为什么docker越来越受欢迎</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker版本"><span class="nav-number">1.1.5.</span> <span class="nav-text">docker版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker和openstack的几项对比"><span class="nav-number">1.1.6.</span> <span class="nav-text">docker和openstack的几项对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器在内核中支持2种重要技术"><span class="nav-number">1.1.7.</span> <span class="nav-text">容器在内核中支持2种重要技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#了解docker三个重要概念"><span class="nav-number">1.1.8.</span> <span class="nav-text">了解docker三个重要概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker的主要用途"><span class="nav-number">1.1.9.</span> <span class="nav-text">docker的主要用途</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker改变了什么"><span class="nav-number">1.1.10.</span> <span class="nav-text">docker改变了什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker架构"><span class="nav-number">1.2.</span> <span class="nav-text">docker架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#总体架构"><span class="nav-number">1.2.1.</span> <span class="nav-text">总体架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker架构1"><span class="nav-number">1.2.2.</span> <span class="nav-text">docker架构1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker架构2"><span class="nav-number">1.2.3.</span> <span class="nav-text">docker架构2</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-commit方法镜像制作"><span class="nav-number">2.</span> <span class="nav-text">Docker commit方法镜像制作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-Dockerfile创建镜像的方法（推荐docker-file这种方法）"><span class="nav-number">3.</span> <span class="nav-text">Docker Dockerfile创建镜像的方法（推荐docker file这种方法）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker私库的搭建及常用方法-docker-registry方式"><span class="nav-number">4.</span> <span class="nav-text">Docker私库的搭建及常用方法-docker-registry方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker私库的搭建及常用方法-harbor-registry方式"><span class="nav-number">5.</span> <span class="nav-text">Docker私库的搭建及常用方法-harbor-registry方式</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/Docker-Head-First/";
+    this.page.identifier = "Docker-Head-First/";
+    this.page.title = "Docker 深入浅出";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
