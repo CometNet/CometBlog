@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="谈浩的个人博客">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Haohao Notes">
+<meta property="og:url" content="http://blog.huixing.org/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="谈浩的个人博客">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://blog.huixing.org/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/audio-and-video-development-concept/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/audio-and-video-development-concept/" class="post-title-link" itemprop="url">音视频开发基础概念</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-13 15:01:41 / 修改时间：16:16:11" itemprop="dateCreated datePublished" datetime="2021-10-13T15:01:41+08:00">2021-10-13</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/audio-and-video-development-concept/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="audio-and-video-development-concept/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="什么是声音"><a href="#什么是声音" class="headerlink" title="什么是声音"></a>什么是声音</h2><h3 id="声音是波"><a href="#声音是波" class="headerlink" title="声音是波"></a>声音是波</h3><p>说到声音，爱好音乐的人首先可能会想到优美的音乐或者是劲爆十足的舞曲，这些音乐只是声音的一种。音乐是由乐器弹奏或者歌手演唱而产生的，那么声音是如何产生的呢?回想一下中学物理课本上的定义 </p>
+<p>– 声音是由物体振动而产生的</p>
+<p><img src="https://tva1.sinaimg.cn/large/003088Elly1gvdp7mzv0fj60hs0ewq3u02.jpg" alt="震动是声音的产生原因"></p>
+<p>当小球撞击到音叉的时候，音叉会发生振动，对周围的空气产生挤压，从而产生声音。声音是一种压力波，当演奏乐器、拍打一扇门或者敲击桌面时，它们的振动都会引起空气有节奏的振动，使周围的空气产生疏密变化，形成疏密相间的纵波(可以理解为石头落入水中激起的波纹)，由此就产生了声波，这种现象会一直延续到振动消失为止。</p>
+<h3 id="声波的三要素"><a href="#声波的三要素" class="headerlink" title="声波的三要素"></a>声波的三要素</h3><p>声波的三要素是频率、振幅和波形，频率代表音阶的高低，振幅代表响度，波形代表音色。</p>
+<p>频率(过零率)越高，波长就越短。低频声响的波长则较长，所以其可 以更容易地绕过障碍物，因此能量衰减就小，声音就会传得远，反之则会 得到完全相反的结论。</p>
+<p>响度其实就是能量大小的反映，用不同的力度敲击桌子，声音的大 小势必也会不同。在生活中，分贝常用于描述响度的大小。声音超过一定 的分贝，人类的耳朵就会受不了。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/audio-and-video-development-concept/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/elasticsearch_vs_solr_vs_sphinx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/elasticsearch_vs_solr_vs_sphinx/" class="post-title-link" itemprop="url">ElasticSearch VS. Solr VS. Sphinx：最好的开源搜索引擎比较</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-23 10:39:05" itemprop="dateCreated datePublished" datetime="2021-07-23T10:39:05+08:00">2021-07-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-10-13 16:17:44" itemprop="dateModified" datetime="2021-10-13T16:17:44+08:00">2021-10-13</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/elasticsearch_vs_solr_vs_sphinx/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="elasticsearch_vs_solr_vs_sphinx/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>译者按：本文是来自一家乌克兰技术公司的文章。该文章译者认为着重在应用上，而非单纯的性能对比。给自己的平台选择一个合适的搜索引擎比任何一个吹嘘技术强大的好。虽然最近一两年 ES发展飞速，但sphinx的简单易用性还是赢得很多机构公司的青睐，比如优酷土豆都是用sphinx。所以使用之前，务必先了解自己的业务诉求，再选择合适的搜索引擎，而非一昧跟风。翻译若有误请指正，谢谢查看！</p>
+<p>编译自：<a target="_blank" rel="noopener" href="https://greenice.net/elasticsearch-vs-solr-vs-sphinx-best-open-source-search-platform-comparison/">ELASTICSEARCH VS. SOLR VS. SPHINX: BEST OPEN SOURCE SEARCH PLATFORM COMPARISON</a></p>
+<p>作者：Anna Klimenko</p>
+<p>从业务角度来看，您应该将高效的搜索引擎视为一种强大的工具，能够提高转换率并为网站所有者带来更多利润。如果您的网站搜索机制没有提供相关结果或搜索性能太低，用户将离开网站并转到其竞争对手。</p>
+<p>那么，什么是高效的搜索引擎？</p>
+<p>搜索的主要目的是检索与用户查询最相关的匹配，排除网站上的其他常规内容。</p>
+<p>在当前搜索引擎中可以获得的功能中，最受欢迎的是：</p>
+<ul>
+<li>全文搜索（通过简单的单词和短语或单词或短语的多种形式）</li>
+<li>多字段搜索</li>
+<li>高亮显示（在搜索框中输入的单词的高亮）</li>
+<li>按同义词搜索</li>
+<li>自动填充建议</li>
+</ul>
+<p><img src="https://ww1.sinaimg.cn/large/008j9bnIgy1gsqoqzo5umj30wu06kwhn.jpg" alt="Suggestions and highlighting on Bloomberg"></p>
+<ul>
+<li>多值属性搜索（原文：faceted search，译者改成多值属性或许会更准确）（属性计数。例如，电子商务网站使用构面告诉客户特定型号，大小，颜色和其他属性的项目数量）</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/elasticsearch_vs_solr_vs_sphinx/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/docker-head-first/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/docker-head-first/" class="post-title-link" itemprop="url">Docker 深入浅出</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-11 15:27:27" itemprop="dateCreated datePublished" datetime="2021-03-11T15:27:27+08:00">2021-03-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-26 14:13:51" itemprop="dateModified" datetime="2021-03-26T14:13:51+08:00">2021-03-26</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/docker-head-first/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="docker-head-first/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Docker-架构原理及简单使用"><a href="#Docker-架构原理及简单使用" class="headerlink" title="Docker 架构原理及简单使用"></a>Docker 架构原理及简单使用</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="了解docker的前生LXC"><a href="#了解docker的前生LXC" class="headerlink" title="了解docker的前生LXC"></a>了解docker的前生LXC</h3><p>LXC为Linux Container的简写。可以提供轻量级的虚拟化，以便隔离进程和资源，而且不需要提供指令解释机制以及全虚拟化的其他复杂性。相当于C++中的NameSpace。容器有效地将由单个操作系统管理的资源划分到孤立的组中，以更好地在孤立的组之间平衡有冲突的资源使用需求。<br>与传统虚拟化技术相比，它的优势在于：</p>
+<ol>
+<li>与宿主机使用同一个内核，性能损耗小；</li>
+<li>不需要指令级模拟；</li>
+<li>不需要即时(Just-in-time)编译；</li>
+<li>容器可以在CPU核心的本地运行指令，不需要任何专门的解释机制；</li>
+<li>避免了准虚拟化和系统调用替换中的复杂性；</li>
+<li>轻量级隔离，在隔离的同时还提供共享机制，以实现容器与宿主机的资源共享。</li>
+</ol>
+<p>总结：Linux Container是一种轻量级的虚拟化的手段。</p>
+<p>Linux Container提供了在单一可控主机节点上支持多个相互隔离的server container同时执行的机制。Linux Container有点像chroot，提供了一个拥有自己进程和网络空间的虚拟环境，但又有别于虚拟机，因为lxc是一种操作系统层次上的资源的虚拟化。</p>
+<h3 id="LXC与docker什么关系？"><a href="#LXC与docker什么关系？" class="headerlink" title="LXC与docker什么关系？"></a>LXC与docker什么关系？</h3><p>docker并不是LXC替代品，docker底层使用了LXC来实现，LXC将linux进程沙盒化，使得进程之间相互隔离，并且能够控制各进程的资源分配。</p>
+<p>在LXC的基础之上，docker提供了一系列更强大的功能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/docker-head-first/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/" class="post-title-link" itemprop="url">Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-16 10:11:55 / 修改时间：10:48:19" itemprop="dateCreated datePublished" datetime="2020-11-16T10:11:55+08:00">2020-11-16</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mobile-safari-download-issue-the-operation-couldn-t-be-completed-webkitblobr/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>上周开发一个功能使用使用Blob</p>
+<p>Safari 手机版下载提示 Mobile Safari download issue : The operation couldn’t be completed. (webkitblobresource error 1.)</p>
+<p>示例:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">function downloadFile(content, filename) &#123;</span><br><span class="line">    var blob = new Blob([content])</span><br><span class="line">    var url = window.URL.createObjectURL(blob)</span><br><span class="line">    var a = document.createElement(&#x27;a&#x27;)</span><br><span class="line">    a.style.display = &#x27;none&#x27;;</span><br><span class="line">    a.href = url</span><br><span class="line">    a.download = filename</span><br><span class="line">    document.body.appendChild(a);</span><br><span class="line">    a.click()</span><br><span class="line">    window.URL.revokeObjectURL(url);</span><br><span class="line">    document.body.removeChild(a);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>查询Blob支持 Safari 6以上版本<br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/Blob">https://developer.mozilla.org/en-US/docs/Web/API/Blob</a></p>
+<p>Blob 浏览器兼容性图</p>
+<p><img src="https://i.loli.net/2020/11/16/QgReSIDBvosVTay.png" alt="浏览器兼容性图"></p>
+<p>如果要以编程方式将ancor标记作为解决方案注入DOM，请确保不要过早地清除它。所以延迟一秒清除解决.</p>
+<p>解决示例:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">function downloadFile(content, filename) &#123;</span><br><span class="line">    var blob = new Blob([content])</span><br><span class="line">    var url = window.URL.createObjectURL(blob)</span><br><span class="line">    var a = document.createElement(&#x27;a&#x27;)</span><br><span class="line">    a.style.display = &#x27;none&#x27;;</span><br><span class="line">    a.href = url</span><br><span class="line">    a.download = filename</span><br><span class="line">    document.body.appendChild(a);</span><br><span class="line">    a.click()</span><br><span class="line">    setTimeout(() =&gt; &#123;</span><br><span class="line">        window.URL.revokeObjectURL(url);</span><br><span class="line">        document.body.removeChild(a);</span><br><span class="line">    &#125;, 1000);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/" class="post-title-link" itemprop="url">PHP MSSQL error code 0x2746 - SQLSTATE[08001]</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-08 14:36:36 / 修改时间：14:45:23" itemprop="dateCreated datePublished" datetime="2020-08-08T14:36:36+08:00">2020-08-08</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>在Linux下使用PHP连接SqlServer出现以下错误:</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SQLSTATE[08001]: [Microsoft][ODBC Driver 17 for SQL Server]TCP Provider: Error code 0x2746</span><br></pre></td></tr></table></figure>
+<h2 id="发现问题"><a href="#发现问题" class="headerlink" title="发现问题"></a>发现问题</h2><p><a target="_blank" rel="noopener" href="https://github.com/microsoft/msphpsql/issues/1021">https://github.com/microsoft/msphpsql/issues/1021</a></p>
+<h2 id="修复参考思路"><a href="#修复参考思路" class="headerlink" title="修复参考思路"></a>修复参考思路</h2><p><a target="_blank" rel="noopener" href="https://wiki.debian.org/ContinuousIntegration/TriagingTips/openssl-1.1.1">https://wiki.debian.org/ContinuousIntegration/TriagingTips/openssl-1.1.1</a></p>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><p>将<code>/etc/ssl/openssl.cnf</code>配置<code>CipherString</code>改为<code>DEFAULT@SECLEVEL=1</code></p>
+<p>原配置<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[system_default_sect]</span><br><span class="line">MinProtocol = TLSv1.2</span><br><span class="line">CipherString = DEFAULT@SECLEVEL=2</span><br></pre></td></tr></table></figure><br>改后配置<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[system_default_sect]</span><br><span class="line">MinProtocol = TLSv1.2</span><br><span class="line">CipherString = DEFAULT@SECLEVEL=1</span><br></pre></td></tr></table></figure></p>
+<h2 id="通过命令解决"><a href="#通过命令解决" class="headerlink" title="通过命令解决"></a>通过命令解决</h2>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/PHP-MSSQL-error-code-0x2746-SQLSTATE-08001/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/how-to-make-a-choice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/how-to-make-a-choice/" class="post-title-link" itemprop="url">如何做选择?</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-06-14 18:57:05 / 修改时间：20:21:55" itemprop="dateCreated datePublished" datetime="2020-06-14T18:57:05+08:00">2020-06-14</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/how-to-make-a-choice/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="how-to-make-a-choice/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>首先引用一下美国著名诗人 罗伯特·弗罗斯特的一首诗叫&lt;&lt;未选择的路&gt;&gt;</p>
+<blockquote>
+<p>金黄色的树林里，分出两条路。可是我不能同时涉足啊。我在那久久伫立，我向着其中一条路极目望去，直到它消失在丛林的深处。但是，我却选择了另外一条路，留下一条路，等改日再见。但是我知道，路径延续无尽头的，恐怕我难以再回返。也许多少年后，在某个地方，我将轻声叹息，把往事回顾，一片树林，分出两条路，而我选择了其中人迹更少的一条，从此决定了我一生的道路。 —— 罗伯特 弗罗斯特</p>
+</blockquote>
+<p>在我们人生当中经常会遇到两条路或者多条路的选择,然后你很清楚选了一条其他的就和你没有关系了,你将在也没有机会走了上它了,这就是人生最大的尴尬.</p>
+<p>这种困境是每个人都会遇到的共同困境.</p>
+<p>有历史记载至少有两个人,一个是春秋时期的杨朱,另一个是魏晋南北朝的阮籍.这两个人一看到有分岔的路,一条通往南一条通往北,不知道该如何选择,而后临歧路而痛哭.</p>
+<p>当今社会,一个人光每天吃什么就要面对至少200多种选择.</p>
+<p>老人们,经常拉着我们的手说:男怕入错行,女怕嫁错郎.这种选择才是真真的麻烦,它会随着我们的选择影响我们一生啊!</p>
+<h2 id="终局思维"><a href="#终局思维" class="headerlink" title="终局思维"></a>终局思维</h2><p>很多人说我们做选择要把目光放的够长远,怎么样才算是放的够长远呢?</p>
+<p>阿里巴巴公司参谋长曾鸣教授提出来的叫”终局思维”</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/how-to-make-a-choice/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mysql-gtid/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-gtid/" class="post-title-link" itemprop="url">MySQL GTID详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-10 16:40:44" itemprop="dateCreated datePublished" datetime="2020-06-10T16:40:44+08:00">2020-06-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-11 18:45:41" itemprop="dateModified" datetime="2021-03-11T18:45:41+08:00">2021-03-11</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mysql-gtid/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mysql-gtid/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="GTID介绍"><a href="#GTID介绍" class="headerlink" title="GTID介绍"></a>GTID介绍</h1><h2 id="GTID概念"><a href="#GTID概念" class="headerlink" title="GTID概念"></a>GTID概念</h2><p>GTID（ Global Transaction Identifier）全局事务标识，由主库上生成的与事务绑定的唯一标识，这个标识不仅在主库上是唯一的，在MySQL集群内也是唯一的。GTID是 MySQL 5.6 版本引入的一个有关于主从复制的重大改进，相对于之前版本基于Binlog文件+Position的主从复制，基于GTID的主从复制，数据一致性更高，主从数据复制更健壮，主从切换、故障切换不易出错，很少需要人为介入处理。</p>
+<p>划重点:</p>
+<ol>
+<li>全局事务表示(Global Transaction ID)</li>
+<li>GTID与事务一一对应,并且全局唯一ID.</li>
+<li>一个GTID在一个服务器上执行一次.</li>
+<li>MySQL 5.6.5开始支持GTID.</li>
+</ol>
+<h2 id="GTID特点"><a href="#GTID特点" class="headerlink" title="GTID特点"></a>GTID特点</h2><ol>
+<li>事务提交产生GTID，GTID与事务及事务提交所在的节点绑定，GTID与事务一起写入Binlog，但是从库应用Binlog并不会生成新的GTID。</li>
+<li>集群中的任何一个节点，根据其GTID值就可以知道哪些事务已经执行，哪些事务没有执行，如果发现某个GTID已执行，重复执行该GTID，将会被忽略，即同一个GTID只能被应用一次。</li>
+<li>当一个连接执行一个特定GTID的事务，但是还没有提交，此时有另外一个连接也要执行相同GTID的事务，那么第二个连接的执行将会被阻塞，直到第一个事务提交或者回滚。如果第一个事务成功提交，第二个事务将会被忽略。如果第一个事务回滚，第二个事务正常执行。</li>
+</ol>
+<h3 id="GTID组成"><a href="#GTID组成" class="headerlink" title="GTID组成"></a>GTID组成</h3><p>GTID = server_uuid:transaction+id</p>
+<p>查看server_uuid:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@a84d983d7d50:/var/lib/mysql# more auto.cnf </span><br><span class="line">[auto]</span><br><span class="line">server-uuid=59fd3bd6-a6da-11ea-91d7-0242ac110003</span><br></pre></td></tr></table></figure></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/mysql-gtid/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mysql-master-slave-replication/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/mysql-master-slave-replication/" class="post-title-link" itemprop="url">MySQL主从复制</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-05 14:39:30" itemprop="dateCreated datePublished" datetime="2020-06-05T14:39:30+08:00">2020-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-10 15:58:01" itemprop="dateModified" datetime="2020-06-10T15:58:01+08:00">2020-06-10</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mysql-master-slave-replication/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mysql-master-slave-replication/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="复制概述"><a href="#复制概述" class="headerlink" title="复制概述"></a>复制概述</h1><p>MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库).</p>
+<p>MySQL的复制特性操作很灵活,即可以实现整个服务级别的复制,也可以只复制某一个数据库,甚至某个数据库中的某个表对象;</p>
+<ul>
+<li>主从单向复制(即可以实现从A复制到B)</li>
+<li>单主多从复制(B在复制到C,也可以实现A直接复制到B和C)</li>
+<li>双主复制(甚至是A的数据复制给B,B的数据也复制回A)</li>
+</ul>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfheym1grdj20hj07c3yp.jpg" alt="一主多从架构与双主双从架构"></p>
+<p>服务器间复制数据有很多种解决方案,究竟哪种方案最适合,取决于使用的数据引擎和期望实现的复制需求.一般来说,可以将MySQL的复制特性应用在下来场景上:</p>
+<ul>
+<li>实时灾备,用于故障切换</li>
+<li>读写分离,提供查询服务</li>
+<li>备份</li>
+<li>延时库</li>
+</ul>
+<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><p>由于MySQL安装方式 网上很多教程 这里就不重复写了</p>
+<ul>
+<li>运行环境 CentOS 7.5 </li>
+<li>数据库环境 MySQL 5.7.30</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/mysql-master-slave-replication/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-socket/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/linux-socket/" class="post-title-link" itemprop="url">Linux系统编程-socket编程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-03 19:55:16 / 修改时间：20:43:38" itemprop="dateCreated datePublished" datetime="2020-03-03T19:55:16+08:00">2020-03-03</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux-socket/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-socket/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Socket编程"><a href="#Socket编程" class="headerlink" title="Socket编程"></a>Socket编程</h2><h3 id="套接字概念"><a href="#套接字概念" class="headerlink" title="套接字概念"></a>套接字概念</h3><p>Socket本身有“插座”的意思，在Linux环境下，用于表示进程间网络通信的特殊文件类型。本质为内核借助缓冲区形成的伪文件。</p>
+<p>既然是文件，那么理所当然的，我们可以使用文件描述符引用套接字。与管道类似的，Linux系统将其封装成文件的目的是为了统一接口，使得读写套接字和读写文件的操作一致。区别是管道主要应用于本地进程间通信，而套接字多应用于网络进程间数据的传递。</p>
+<p>套接字的内核实现较为复杂，不宜在学习初期深入学习。</p>
+<p>在TCP/IP协议中，“IP地址+TCP或UDP端口号”唯一标识网络通讯中的一个进程。“IP地址+端口号”就对应一个socket。欲建立连接的两个进程各自有一个socket来标识，那么这两个socket组成的socket pair就唯一标识一个连接。因此可以用Socket来描述网络连接的一对一关系。</p>
+<p>套接字通信原理如下图所示：</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gcgzl1euvlj20eb04l0sx.jpg" alt="套接字通信原理"></p>
+<p><strong>在网络通信中，套接字一定是成对出现的。</strong> 一端的发送缓冲区对应对端的接收缓冲区。我们使用同一个文件描述符索发送缓冲区和接收缓冲区。</p>
+<p>TCP/IP协议最早在BSD UNIX上实现，为TCP/IP协议设计的应用层编程接口称为socket API。本章的主要内容是socket API，主要介绍TCP协议的函数接口，最后介绍UDP协议和UNIX Domain Socket的函数接口。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-socket/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-system-programming-thread-synchronization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/linux-system-programming-thread-synchronization/" class="post-title-link" itemprop="url">Linux系统编程-线程同步</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-02-29 12:03:09 / 修改时间：13:30:41" itemprop="dateCreated datePublished" datetime="2020-02-29T12:03:09+08:00">2020-02-29</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux-system-programming-thread-synchronization/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-system-programming-thread-synchronization/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="同步概念"><a href="#同步概念" class="headerlink" title="同步概念"></a>同步概念</h2><p>所谓同步，即同时起步，协调一致。不同的对象，对“同步”的理解方式略有不同。如，设备同步，是指在两个设备之间规定一个共同的时间参考；数据库同步，是指让两个或多个数据库内容保持一致，或者按需要部分保持一致；文件同步，是指让两个或多个文件夹里的文件保持一致。等等…</p>
+<p>而，编程中、通信中所说的同步与生活中大家印象中的同步概念略有差异。“同”字应是指协同、协助、互相配合。主旨在协同步调，按预定的先后次序运行。</p>
+<h2 id="线程同步"><a href="#线程同步" class="headerlink" title="线程同步"></a>线程同步</h2><p>同步即协同步调，按预定的先后次序运行。</p>
+<p>线程同步，指一个线程发出某一功能调用时，在没有得到结果之前，该调用不返回。同时其它线程为保证数据一致性，不能调用该功能。</p>
+<p>举例1：    银行存款 5000。柜台，折：取3000；提款机，卡：取 3000。剩余：2000</p>
+<p>举例2： 内存中100字节，线程T1欲填入全1， 线程T2欲填入全0。但如果T1执行了50个字节失去cpu，T2执行，会将T1写过的内容覆盖。当T1再次获得cpu继续    从失去cpu的位置向后写入1，当执行结束，内存中的100字节，既不是全1，也不是全0。</p>
+<p>产生的现象叫做“与时间有关的错误”(time related)。为了避免这种数据混乱，线程需要同步。</p>
+<p>“同步”的目的，是为了避免数据混乱，解决与时间有关的错误。实际上，不仅线程间需要同步，进程间、信号间等等都需要同步机制。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/linux-system-programming-thread-synchronization/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+
+</body>
+</html>

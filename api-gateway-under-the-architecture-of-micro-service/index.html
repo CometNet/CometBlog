@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近公司业务要构建一个高性能API网关，所以就整理了市场上的一些产品。  API网关简介API网关 顾名思义，是出现在系统边界上的一个面向API的、串行集中式的强管控服务，这里的边界是企业IT系统的边界，主要起到隔离外部访问与内部系统的作用。在微服务概念的流行之前，API网关的实体就已经诞生了，例如银行、证券等领域常见的前置机系统，它也是解决访问认证、报文转换、访问统计等问题的。移动应用、企业互">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务架构下的API Gateway">
+<meta property="og:url" content="http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="最近公司业务要构建一个高性能API网关，所以就整理了市场上的一些产品。  API网关简介API网关 顾名思义，是出现在系统边界上的一个面向API的、串行集中式的强管控服务，这里的边界是企业IT系统的边界，主要起到隔离外部访问与内部系统的作用。在微服务概念的流行之前，API网关的实体就已经诞生了，例如银行、证券等领域常见的前置机系统，它也是解决访问认证、报文转换、访问统计等问题的。移动应用、企业互">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wx2.sinaimg.cn/mw690/0060lm7Tly1ftfb91u0doj30fm0l7wfs.jpg">
+<meta property="article:published_time" content="2018-07-19T01:22:00.000Z">
+<meta property="article:modified_time" content="2018-07-24T13:23:42.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wx2.sinaimg.cn/mw690/0060lm7Tly1ftfb91u0doj30fm0l7wfs.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微服务架构下的API Gateway | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务架构下的API Gateway
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-19 09:22:00" itemprop="dateCreated datePublished" datetime="2018-07-19T09:22:00+08:00">2018-07-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2018-07-24 21:23:42" itemprop="dateModified" datetime="2018-07-24T21:23:42+08:00">2018-07-24</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/api-gateway-under-the-architecture-of-micro-service/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="api-gateway-under-the-architecture-of-micro-service/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>最近公司业务要构建一个高性能API网关，所以就整理了市场上的一些产品。</p>
+</blockquote>
+<h2 id="API网关简介"><a href="#API网关简介" class="headerlink" title="API网关简介"></a>API网关简介</h2><p>API网关 顾名思义，是出现在系统边界上的一个面向API的、串行集中式的强管控服务，这里的边界是企业IT系统的边界，主要起到隔离外部访问与内部系统的作用。在微服务概念的流行之前，API网关的实体就已经诞生了，例如银行、证券等领域常见的前置机系统，它也是解决访问认证、报文转换、访问统计等问题的。移动应用、企业互联，使得后台服务支持的对象，从以前单一的Web应用，扩展到多种使用场景，且每种使用场景对后台服务的要求都不尽相同。这不仅增加了后台服务的响应量，还增加了后台服务的复杂性。随着微服务架构概念的提出，API网关成为了微服务架构的一个标配组件。</p>
+<p>API网关网关的价值：</p>
+<ul>
+<li>网关层对外部和内部进行了隔离，保障了后台服务的安全性。</li>
+<li>对外访问控制由网络层面转换成了运维层面，减少变更的流程和错误成本</li>
+<li>减少客户端与服务的耦合，服务可以独立发展。通过网关层来做映射。</li>
+<li>通过网关层聚合，减少外部访问的频次，提升访问效率。</li>
+<li>节约后端服务开发成本，减少上线风险。</li>
+<li>为服务熔断，灰度发布，线上测试提供简单方案。</li>
+<li>便于扩展。</li>
+</ul>
+<p><img src="https://wx2.sinaimg.cn/mw690/0060lm7Tly1ftfb91u0doj30fm0l7wfs.jpg" alt="API Gateway"></p>
+<h2 id="常用的API网关方案"><a href="#常用的API网关方案" class="headerlink" title="常用的API网关方案"></a>常用的API网关方案</h2><p>业界API网关解决方案有很多，包括商业的、开源的。例如</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cn/api-gateway/">Amazon API Gateway</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://tyk.io/">Tyk</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://getkong.org/">Kong</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://apiumbrella.io/">api-umbrella</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://apiaxle.com/">apiaxle</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/Netflix/zuul">Netflix zuul</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="http://wso2.com/api-management/">WSO2 API Manager</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/clydeio">clydeio</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.aliyun.com/product/apigateway/">阿里API网关</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://aws.amazon.com/cn/api-gateway/">Amazon API Gateway</a></p>
+</li>
+</ul>
+<h2 id="三种常见API网关方案"><a href="#三种常见API网关方案" class="headerlink" title="三种常见API网关方案"></a>三种常见API网关方案</h2><h3 id="Nginx-Lua"><a href="#Nginx-Lua" class="headerlink" title="Nginx+ Lua"></a>Nginx+ Lua</h3><p>Nginx是由IgorSysoev为俄罗斯访问量第二的Rambler.ru站点开发的，一个高性能的HTTP和反向代理服务器。2012年，Nginx荣获年度云计算开发奖，并成长为世界第二大Web服务器。全世界流量最高的前1000名网站中，超过25%都使用Nginx来处理海量的互联网请求。 </p>
+<h4 id="Nginx基本功能"><a href="#Nginx基本功能" class="headerlink" title="Nginx基本功能"></a>Nginx基本功能</h4><p>静态web资源服务器，能够缓存打开的文件描述符</p>
+<p>支持http/imap/pop3/smtp的反向代理；支持缓存、负载均衡</p>
+<p>支持fastcgi(fpm)</p>
+<p>模块化，非DSO机制，支持过滤器zip压缩，SSI以及图像大小调整</p>
+<p>支持SSL</p>
+<p>Nginx通过插件的扩展功能：</p>
+<p>基于名称和IP的虚拟主机</p>
+<p>支持keepalive的保持机制</p>
+<p>支持平滑升级</p>
+<p>定制访问日志，支持使用日志缓存区提高日志存储性能</p>
+<p>支持url rewrite</p>
+<p>支持路径别名（root或alias指定）</p>
+<p>支持基于IP以及用户的访问控制</p>
+<p>支持传输速率限制，并发限制 </p>
+<h4 id="Nginx在性能和高可用性上的表现"><a href="#Nginx在性能和高可用性上的表现" class="headerlink" title="Nginx在性能和高可用性上的表现"></a>Nginx在性能和高可用性上的表现</h4><p>Nginx性能极高，Nginx先天的事件驱动型设计、全异步的网络I/O处理机制、极少的进程间切换以及许多优化设计，都使得Nginx天生善于处理高并发压力下的互联网请求。Nginx的稳定性也在各大网站得到验证。官方提供的常用模块都非常稳定，每个worker进程相对独立，master进程在1个worker进程出错时可以快速“拉起”新的worker子进程提供服务。支持热部署，可以不停机更新配置文件、更新日志文件、更新服务器程序版本。</p>
+<h4 id="Nginx的扩展性"><a href="#Nginx的扩展性" class="headerlink" title="Nginx的扩展性"></a>Nginx的扩展性</h4><p>Nginx的设计极具扩展性，它完全是由多个不同功能、不同层次、不同类型且耦合度极低的模块组成。因此，当对某一个模块修复Bug或进行升级时，可以专注于模块自身，无须在意其他。    </p>
+<h4 id="Nginx的易用性"><a href="#Nginx的易用性" class="headerlink" title="Nginx的易用性"></a>Nginx的易用性</h4><p>Nginx使用最自由的BSD许可协议，允许用户在自己的项目中直接使用或修改Nginx源码，有大量的插件可以利用。但是，Nginx模块需要用C开发，而且必须符合一系列复杂的规则。虽然通过第三方模块，可以支持Nginx与Perl、Lua等脚本语言集成工作，但对使用者的要求还是很高。 </p>
+<p>Nginx可以说是一款能够工业化API网关，在国内的很多互联网公司，例如阿里、新浪等都得到很好的应用。</p>
+<h3 id="SpringCloud-Zuul"><a href="#SpringCloud-Zuul" class="headerlink" title="SpringCloud Zuul"></a>SpringCloud Zuul</h3><p>Zuul Netflix公司开源的一个API网关组件。提供了认证&amp;鉴权、限流、动态路由，监控，弹性，安全、负载均衡、协助单点压测、静态响应等边缘服务的框架。 </p>
+<h4 id="Zuul的基本功能"><a href="#Zuul的基本功能" class="headerlink" title="Zuul的基本功能"></a>Zuul的基本功能</h4><p>验证与安全保障: 识别面向各类资源的验证要求并拒绝那些与要求不符的请求。</p>
+<p>审查与监控: 在边缘位置追踪有意义数据及统计结果，从而为我们带来准确的生产状态结论。</p>
+<p>动态路由: 以动态方式根据需要将请求路由至不同后端集群处。</p>
+<p>压力测试: 逐渐增加指向集群的负载流量，从而计算性能水平。</p>
+<p>负载分配: 为每一种负载类型分配对应容量，并弃用超出限定值的请求。</p>
+<p>静态响应处理: 在边缘位置直接建立部分响应，从而避免其流入内部集群。</p>
+<p>Netflix公司还利用Zuul的功能通过金丝雀版本实现精确路由与压力测试。</p>
+<p>虽然提供的功能还算丰富，但都比较弱，很难满足高要求的场景。</p>
+<h4 id="Zuul在性能和高可用性上的表现"><a href="#Zuul在性能和高可用性上的表现" class="headerlink" title="Zuul在性能和高可用性上的表现"></a>Zuul在性能和高可用性上的表现</h4><p>Zuul处理每个请求的方式是针对每个请求是用一个线程来处理。通常情况下，为了提高性能，所有请求会被放到处理队列中，从线程池中选取空闲线程来处理该请求。2016年底，Netflix将它们的网关服务Zuul进行了升级，全新的Zuul 2将HTTP请求的处理方式从同步变成了异步，以提升其处理性能。除了Netflix公司，目前Zuul在企业中用的还比较少，性能和稳定性方面还有待进一步观察。</p>
+<h4 id="Zuul的扩展性"><a href="#Zuul的扩展性" class="headerlink" title="Zuul的扩展性"></a>Zuul的扩展性</h4><p>从Zuul的架构图上可以看出，Zuul更像是一个过滤器框架，其自身的路由、日志、反向代理、ddos预防等功能都是通过过滤器实现的。提供了PRE、ROUTING、POST和ERROR四个扩展点，可以很容易的添加自定义的过滤器。  </p>
+<h4 id="Zuul的易用性"><a href="#Zuul的易用性" class="headerlink" title="Zuul的易用性"></a>Zuul的易用性</h4><p>Zuul的搭建非常简便，使用和配置也很简单。Zuul的开源社区比较活跃，一直在更新状态，但版本不算太稳定，在使用的过程中，还有一些坑要踩。例如重定向问题、异常处理问题，还没有解决的很好，需要自己重写一些filter。</p>
+<p>如果从通盘考虑， 这种方案不是最佳方案。但如果自己的团队对整体技术设施把控有限，且团队规模不大，没有专门的网关开发人员的情况下，Zuul是一款快速上手的最佳方案。</p>
+<h3 id="Mashape-Kong"><a href="#Mashape-Kong" class="headerlink" title="Mashape Kong"></a>Mashape Kong</h3><p>Kong是Mashape提供的一款API管理软件，它本身是基于Ngnix+lua的，但比nginx提供了更简单的配置方式，数据采用了 ApacheCassandra/PostgreSQL存储，并且提供了一些优秀的插件，比如验证，日志，调用频次限制等。 </p>
+<p>Kong的一个非常诱人的地方就是提供了大量的插件来扩展应用，通过设置不同的插件可以为服务提供各种增强的功能。Kong默认插件插件包括： </p>
+<p>身份认证：Kong提供了Basic Authentication、Key authentication、OAuth2.0authentication、HMAC authentication、JWT、LDAP authentication认证实现。</p>
+<p>安全：ACL（访问控制）、CORS（跨域资源共享）、动态SSL、IP限制、爬虫检测实现。</p>
+<p>流量控制：请求限流（基于请求计数限流）、上游响应限流（根据upstream响应计数限流）、请求大小限制。限流支持本地、Redis和集群限流模式。</p>
+<p>分析监控：Galileo（记录请求和响应数据，实现API分析）、Datadog（记录API Metric如请求次数、请求大小、响应状态和延迟，可视化API Metric）、Runscope（记录请求和响应数据，实现API性能测试和监控）。</p>
+<p>转换：请求转换、响应转换 </p>
+<p>Kong本身也是基于Nginx的，所以在性能和稳定性上都没有问题。Kong作为一款商业软件，在Nginx上做了很扩展工作，而且还有很多付费的商业插件。Kong本身也有付费的企业版，其中包括技术支持、使用培训服务以及API 分析插件。 </p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从对上面三种方案的比较中可以看到，Spring Cloud Zuul非常适合创业初期的团队，快速搭建一个“基本可用”的API网关。Nginx适合有较强研发团队，自主开发企业自己的API网关。Kong适合于没有自身研发团队，但需要拥有企业级API网关能力的公司。</p>
+<blockquote>
+<p>由于时间产品还在研发迭代阶段时间有限，综合考虑最后我们选择Kong，随后的文章会更新Kong的安装使用。以上仅供参考。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/centos-use-yum-point-plugins-fastestmirror-refresh-packagekit-security-loading-mirror-speeds-from-cached-hostfi/" rel="prev" title="Centos使用yum提示Loaded plugins: fastestmirror, refresh-packagekit, security Loading mirror speeds from cached hostfi">
+      <i class="fa fa-chevron-left"></i> Centos使用yum提示Loaded plugins: fastestmirror, refresh-packagekit, security Loading mirror speeds from cached hostfi
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/api-gateway-of-kong-install/" rel="next" title="API gateway 之 kong 安装">
+      API gateway 之 kong 安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#API%E7%BD%91%E5%85%B3%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">API网关简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84API%E7%BD%91%E5%85%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">常用的API网关方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%B8%B8%E8%A7%81API%E7%BD%91%E5%85%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.</span> <span class="nav-text">三种常见API网关方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx-Lua"><span class="nav-number">3.1.</span> <span class="nav-text">Nginx+ Lua</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD"><span class="nav-number">3.1.1.</span> <span class="nav-text">Nginx基本功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx%E5%9C%A8%E6%80%A7%E8%83%BD%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7%E4%B8%8A%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="nav-number">3.1.2.</span> <span class="nav-text">Nginx在性能和高可用性上的表现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx%E7%9A%84%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-number">3.1.3.</span> <span class="nav-text">Nginx的扩展性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Nginx%E7%9A%84%E6%98%93%E7%94%A8%E6%80%A7"><span class="nav-number">3.1.4.</span> <span class="nav-text">Nginx的易用性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringCloud-Zuul"><span class="nav-number">3.2.</span> <span class="nav-text">SpringCloud Zuul</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Zuul%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD"><span class="nav-number">3.2.1.</span> <span class="nav-text">Zuul的基本功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zuul%E5%9C%A8%E6%80%A7%E8%83%BD%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8%E6%80%A7%E4%B8%8A%E7%9A%84%E8%A1%A8%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">Zuul在性能和高可用性上的表现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zuul%E7%9A%84%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-number">3.2.3.</span> <span class="nav-text">Zuul的扩展性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zuul%E7%9A%84%E6%98%93%E7%94%A8%E6%80%A7"><span class="nav-number">3.2.4.</span> <span class="nav-text">Zuul的易用性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mashape-Kong"><span class="nav-number">3.3.</span> <span class="nav-text">Mashape Kong</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/api-gateway-under-the-architecture-of-micro-service/";
+    this.page.identifier = "api-gateway-under-the-architecture-of-micro-service/";
+    this.page.title = "微服务架构下的API Gateway";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

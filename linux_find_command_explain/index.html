@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Linux系统中的 find 命令在查找文件时非常有用而且方便。它可以根据不同的条件来查找文件，例如权限、拥有者、修改日期&#x2F;时间、文件大小等等。在这篇文章中，我们将学习如何使用 find 命令以及它所提供的选项来查找文件。  在绝大多数Linux发行版中，你都可以直接使用 find 命令而无需进行任何安装操作。如果你想在linux系统的命令行中变得特别高效，那么 find 是你必须掌握的命令之">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Find命令详解">
+<meta property="og:url" content="http://blog.huixing.org/linux_find_command_explain/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="Linux系统中的 find 命令在查找文件时非常有用而且方便。它可以根据不同的条件来查找文件，例如权限、拥有者、修改日期&#x2F;时间、文件大小等等。在这篇文章中，我们将学习如何使用 find 命令以及它所提供的选项来查找文件。  在绝大多数Linux发行版中，你都可以直接使用 find 命令而无需进行任何安装操作。如果你想在linux系统的命令行中变得特别高效，那么 find 是你必须掌握的命令之">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=1dc843d302087bf469e15fbb93ba3c49/6a63f6246b600c338719a2501a4c510fd8f9a1c1.jpg">
+<meta property="article:published_time" content="2018-07-16T07:48:00.000Z">
+<meta property="article:modified_time" content="2019-05-30T06:33:18.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Find">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=1dc843d302087bf469e15fbb93ba3c49/6a63f6246b600c338719a2501a4c510fd8f9a1c1.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/linux_find_command_explain/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux Find命令详解 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux_find_command_explain/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux Find命令详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-16 15:48:00" itemprop="dateCreated datePublished" datetime="2018-07-16T15:48:00+08:00">2018-07-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-05-30 14:33:18" itemprop="dateModified" datetime="2019-05-30T14:33:18+08:00">2019-05-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux_find_command_explain/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux_find_command_explain/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://gss0.bdstatic.com/94o3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=1dc843d302087bf469e15fbb93ba3c49/6a63f6246b600c338719a2501a4c510fd8f9a1c1.jpg" alt="Linux"></p>
+<blockquote>
+<p>Linux系统中的 find 命令在查找文件时非常有用而且方便。它可以根据不同的条件来查找文件，例如权限、拥有者、修改日期/时间、文件大小等等。在这篇文章中，我们将学习如何使用 find 命令以及它所提供的选项来查找文件。</p>
+</blockquote>
+<p>在绝大多数Linux发行版中，你都可以直接使用 find 命令而无需进行任何安装操作。如果你想在linux系统的命令行中变得特别高效，那么 find 是你必须掌握的命令之一。</p>
+<p>find 命令的基本语法如下：</p>
+<p><code>$ find [path] [option] [expression]</code></p>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><h3 id="列出当前目录和子目录下的所有文件"><a href="#列出当前目录和子目录下的所有文件" class="headerlink" title="列出当前目录和子目录下的所有文件"></a>列出当前目录和子目录下的所有文件</h3><p>这个命令会列出当前目录以及子目录下的所有文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ find</span><br><span class="line">.</span><br><span class="line">./abc.txt</span><br><span class="line">./subdir</span><br><span class="line">./subdir/how.php</span><br><span class="line">./cool.php</span><br></pre></td></tr></table></figure><br>该命令与以下命令效果相同<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ find .</span><br><span class="line">$ find . -print</span><br></pre></td></tr></table></figure></p>
+<h3 id="查找特殊的目录或路径"><a href="#查找特殊的目录或路径" class="headerlink" title="查找特殊的目录或路径"></a>查找特殊的目录或路径</h3><p>下面的命令会查找当前目录下 test 文件夹中的文件，默认列出所有文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test</span><br><span class="line">./test</span><br><span class="line">./test/abc.txt</span><br><span class="line">./test/subdir</span><br><span class="line">./test/subdir/how.php</span><br><span class="line">./test/cool.php</span><br></pre></td></tr></table></figure><br>下面的命令用于查找指定名称的文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -name &quot;abc.txt&quot;</span><br><span class="line">./test/abc.txt</span><br></pre></td></tr></table></figure><br>也可以使用通配符<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -name &quot;*.php&quot;</span><br><span class="line">./test/subdir/how.php</span><br><span class="line">./test/cool.php</span><br></pre></td></tr></table></figure><br>请注意，所有的文件夹都会被递归地查找。所以，这是用于查找指定扩展名文件的一种非常强大的方式。</p>
+<p>如果我们尝试搜索 / 文件夹，也就是根目录，就会搜索整个文件系统，包括挂载的设备以及网络存储设备。所以请小心使用。当然，你随时可以通过按 Ctrl + C 来终止命令。</p>
+<p>注意：当指定文件夹的时候（例如示例中的”./test”文件夹），忽略末尾的斜杠是没有问题的。但是，如果文件夹是一个指向其它位置的链接（symlink）时，你必须在末尾写上斜杠才能使find命令正常工作（find ./test/）。</p>
+<p><strong>忽略大小写</strong></p>
+<p>在查找文件名时，忽略大小写往往非常有用。要忽略大小写，只需要使用 iname 选项，而不是 name 选项。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -iname &quot;*.Php&quot;</span><br><span class="line">./test/subdir/how.php</span><br><span class="line">./test/cool.php</span><br></pre></td></tr></table></figure><br>总是用双引号或单引号来包围匹配模式（文件名参数），这非常有用。不这样做的话有时也能正常工作，有时也可能会产生奇怪的结果。</p>
+<h3 id="限制目录查找的深度"><a href="#限制目录查找的深度" class="headerlink" title="限制目录查找的深度"></a>限制目录查找的深度</h3><p>find 命令默认会递归查找整个目录树，而这非常消耗时间和资源。好在目录查找的深度可以手动指定。例如我们只想查找一到两层以内的子目录，可以通过 maxdepth 选项来指定。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -maxdepth 2 -name &quot;*.php&quot;</span><br><span class="line">./test/subdir/how.php</span><br><span class="line">./test/cool.php</span><br><span class="line"></span><br><span class="line">$ find ./test -maxdepth 1 -name *.php</span><br><span class="line">./test/cool.php</span><br></pre></td></tr></table></figure><br>第二个示例中指定了 maxdepth 为1，表明最多只查找一层内的子目录，也就是只查找当前文件夹。</p>
+<p>当我们只想在当前目录下查找，而不是查找整个目录树的时候，这个选项会特别有用。</p>
+<p>与 maxdepth 选项相似，还有一个选项叫做 mindepth ，正如名字所表示的那样，它会至少到达第 N 层子目录后才开始查找文件。</p>
+<h3 id="反向查找"><a href="#反向查找" class="headerlink" title="反向查找"></a>反向查找</h3><p>除了查找满足条件的文件之外，我们还可以查找不满足条件的所有文件。当我们知道要在查找中排除哪些文件时，这个选项就能发挥作用了。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -not -name &quot;*.php&quot;</span><br><span class="line">./test</span><br><span class="line">./test/abc.txt</span><br><span class="line">./test/subdir</span><br></pre></td></tr></table></figure><br>在上面的示例中我们找到了所有扩展名不是 php 的文件和文件夹。我们也可以使用感叹号 ! 来代替 -not。</p>
+<p><code>find ./test ! -name &quot;*.php&quot;</code></p>
+<h3 id="结合多个查找条件"><a href="#结合多个查找条件" class="headerlink" title="结合多个查找条件"></a>结合多个查找条件</h3><p>我们可以同时使用多个查找条件来指定文件名并排除某些文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -name &#x27;abc*&#x27; ! -name &#x27;*.php&#x27;</span><br><span class="line">./test/abc.txt</span><br><span class="line">./test/abc</span><br></pre></td></tr></table></figure><br>上面的命令查找所有以 abc 开头并且不含 .php 扩展名的文件。这个示例展现了 find 命令自带的查找表达式是<br>多么的强大。</p>
+<p><strong>OR 操作符</strong></p>
+<p>当我们使用多个查找条件时， find 命令会将它们通过 AND 操作符结合起来，也就是说，只有满足所有条件的文件才会被列出。不过，如果我们需要进行基于 OR 运算的查找时，可以加上 -o 开关。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ find -name &#x27;*.php&#x27; -o -name &#x27;*.txt&#x27;</span><br><span class="line">./abc.txt</span><br><span class="line">./subdir/how.php</span><br><span class="line">./abc.php</span><br><span class="line">./cool.php</span><br></pre></td></tr></table></figure><br>上面的命令查找所有以 .php 结尾或者以 .txt 结尾的文件。</p>
+<h3 id="只查找文件或目录"><a href="#只查找文件或目录" class="headerlink" title="只查找文件或目录"></a>只查找文件或目录</h3><p>有时我们只想通过某个名字查找对应的文件或对应的目录，我们可以很容易实现这个要求。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -name abc*</span><br><span class="line">./test/abc.txt</span><br><span class="line">./test/abc</span><br></pre></td></tr></table></figure><br><strong>只查找文件</strong><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -type f -name &quot;abc*&quot;</span><br><span class="line">./test/abc.txt</span><br></pre></td></tr></table></figure><br><strong>只查找目录</strong><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test -type d -name &quot;abc*&quot;</span><br><span class="line">./test/abc</span><br></pre></td></tr></table></figure><br>非常有用而且方便！</p>
+<h3 id="同时在多个目录下查找"><a href="#同时在多个目录下查找" class="headerlink" title="同时在多个目录下查找"></a>同时在多个目录下查找</h3><p>如果你想要在两个不同的目录内进行查找，命令非常简单。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ find ./test ./dir2 -type f -name &quot;abc*&quot;</span><br><span class="line">./test/abc.txt</span><br><span class="line">./dir2/abcdefg.txt</span><br></pre></td></tr></table></figure><br>检查一下，它确实列出了来自给定的两个目录的文件。</p>
+<h3 id="查找隐藏文件"><a href="#查找隐藏文件" class="headerlink" title="查找隐藏文件"></a>查找隐藏文件</h3><p>在Linux系统中，隐藏文件的名字以英文的句号开头，即 . 。所以要列出隐藏文件，只需加上简单的文件名过滤条件就行了。</p>
+<p><code>$ find ~ -type f -name &quot;.*&quot;</code></p>
+<h2 id="基于文件权限和属性的查找"><a href="#基于文件权限和属性的查找" class="headerlink" title="基于文件权限和属性的查找"></a>基于文件权限和属性的查找</h2><h3 id="查找指定权限的文件"><a href="#查找指定权限的文件" class="headerlink" title="查找指定权限的文件"></a>查找指定权限的文件</h3><p>通过指定 perm 选项，我们可以查找具有特定权限的文件。下面的示例中查找了所有具有 0664 权限的文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ find . -type f -perm 0664</span><br><span class="line">./abc.txt</span><br><span class="line">./subdir/how.php</span><br><span class="line">./abc.php</span><br><span class="line">./cool.php</span><br></pre></td></tr></table></figure><br>我们可以用这个命令来查找带有错误权限的文件，这些文件可能会产生安全问题。</p>
+<p>可以结合 反向查找 来进行权限检查。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ find . -type f ! -perm 0777</span><br><span class="line">./abc.txt</span><br><span class="line">./subdir/how.php</span><br><span class="line">./abc.php</span><br><span class="line">./cool.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="查找具有-SGID-SUID-属性的文件"><a href="#查找具有-SGID-SUID-属性的文件" class="headerlink" title="查找具有 SGID/SUID 属性的文件"></a>查找具有 SGID/SUID 属性的文件</h3><p>下面的命令查找所有具有 644 权限和 SGID 属性的文件。<br><code># find / -perm 2644</code><br>我们同样可以使用 1664 来查找设置了 粘滞位 （sticky bit）的文件。<br><code># find / -perm 1644</code><br>perm 选项除了接受数值型参数外，同样接受 chmod 命令中的模式串。在下面的查找中，我们用另一种语法来代替数字。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ find / -maxdepth 2 -perm /u=s 2&gt;/dev/null</span><br><span class="line">/bin/mount</span><br><span class="line">/bin/su</span><br><span class="line">/bin/ping6</span><br><span class="line">/bin/fusermount</span><br><span class="line">/bin/ping</span><br><span class="line">/bin/umount</span><br><span class="line">/sbin/mount.ecryptfs_private</span><br></pre></td></tr></table></figure><br>注意：由于权限不足，某些目录会拒接访问。命令中的 2&gt;/dev/null 正是用于清除输出中的错误访问结果。</p>
+<h3 id="查找只读文件"><a href="#查找只读文件" class="headerlink" title="查找只读文件"></a>查找只读文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ find /etc -maxdepth 1 -perm /u=r</span><br><span class="line">/etc</span><br><span class="line">/etc/thunderbird</span><br><span class="line">/etc/brltty</span><br><span class="line">/etc/dkms</span><br><span class="line">/etc/phpmyadmin</span><br><span class="line">... output truncated ...</span><br></pre></td></tr></table></figure>
+<h3 id="查找可执行文件"><a href="#查找可执行文件" class="headerlink" title="查找可执行文件"></a>查找可执行文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ find /bin -maxdepth 2 -perm /a=x</span><br><span class="line">/bin</span><br><span class="line">/bin/preseed_command</span><br><span class="line">/bin/mount</span><br><span class="line">/bin/zfgrep</span><br><span class="line">/bin/tempfile</span><br><span class="line">... output truncated ...</span><br></pre></td></tr></table></figure>
+<h2 id="基于文件拥有者和用户组的查找"><a href="#基于文件拥有者和用户组的查找" class="headerlink" title="基于文件拥有者和用户组的查找"></a>基于文件拥有者和用户组的查找</h2><h3 id="查找属于特定用户的文件"><a href="#查找属于特定用户的文件" class="headerlink" title="查找属于特定用户的文件"></a>查找属于特定用户的文件</h3><p>查找当前目录下，属于 bob 的文件。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ find . -user bob</span><br><span class="line">.</span><br><span class="line">./abc.txt</span><br><span class="line">./abc</span><br><span class="line">./subdir</span><br><span class="line">./subdir/how.php</span><br><span class="line">./abc.php</span><br></pre></td></tr></table></figure><br>在指定所属用户的同时，我们同样可以指定文件名。<br><code>$ find . -user bob -name &#39;*.php&#39;</code><br>很容易看出，我们可以通过增加过滤条件来缩小查找文件的范围。</p>
+<h3 id="查找属于特定用户组的文件"><a href="#查找属于特定用户组的文件" class="headerlink" title="查找属于特定用户组的文件"></a>查找属于特定用户组的文件</h3><p><code># find /var/www -group developer</code></p>
+<h2 id="基于日期和时间的查找"><a href="#基于日期和时间的查找" class="headerlink" title="基于日期和时间的查找"></a>基于日期和时间的查找</h2><p>除了上面介绍的查找条件外，另外一个非常棒的查找条件就是文件的修改和访问时间（日期）。当我们想要找出哪些文件在某段时间内被修改的时候，这个查找条件将会非常方便。我们来看几个例子。</p>
+<h3 id="查找过去的第-N-天被修改过的文件"><a href="#查找过去的第-N-天被修改过的文件" class="headerlink" title="查找过去的第 N 天被修改过的文件"></a>查找过去的第 N 天被修改过的文件</h3><p><code># find / -mtime 50</code></p>
+<h3 id="查找过去的-N-天内被访问过的文件"><a href="#查找过去的-N-天内被访问过的文件" class="headerlink" title="查找过去的 N 天内被访问过的文件"></a>查找过去的 N 天内被访问过的文件</h3><p><code># find / -atime -50</code></p>
+<h3 id="查找某段时间范围内被修改过内容的文件"><a href="#查找某段时间范围内被修改过内容的文件" class="headerlink" title="查找某段时间范围内被修改过内容的文件"></a>查找某段时间范围内被修改过内容的文件</h3><p><code># find / -mtime +50 -mtime -100</code></p>
+<h3 id="查找过去的-N-分钟内状态发生改变的文件"><a href="#查找过去的-N-分钟内状态发生改变的文件" class="headerlink" title="查找过去的 N 分钟内状态发生改变的文件"></a>查找过去的 N 分钟内状态发生改变的文件</h3><p><code>$ find /home/bob -cmin -60</code></p>
+<h3 id="查找过去的-1-小时内被修改过内容的文件"><a href="#查找过去的-1-小时内被修改过内容的文件" class="headerlink" title="查找过去的 1 小时内被修改过内容的文件"></a>查找过去的 1 小时内被修改过内容的文件</h3><p><code># find / -mmin -60</code></p>
+<h3 id="查找过去的-1-小时内被访问过的文件"><a href="#查找过去的-1-小时内被访问过的文件" class="headerlink" title="查找过去的 1 小时内被访问过的文件"></a>查找过去的 1 小时内被访问过的文件</h3><p><code># find / -amin -60</code></p>
+<h2 id="基于文件大小的查找"><a href="#基于文件大小的查找" class="headerlink" title="基于文件大小的查找"></a>基于文件大小的查找</h2><h3 id="查找指定大小的文件"><a href="#查找指定大小的文件" class="headerlink" title="查找指定大小的文件"></a>查找指定大小的文件</h3><p><code>$ find / -size 50M</code></p>
+<h3 id="查找大小在一定范围内的文件"><a href="#查找大小在一定范围内的文件" class="headerlink" title="查找大小在一定范围内的文件"></a>查找大小在一定范围内的文件</h3><p><code>$ find / -size +50M -size -100M</code></p>
+<h3 id="查找最大和最小的文件"><a href="#查找最大和最小的文件" class="headerlink" title="查找最大和最小的文件"></a>查找最大和最小的文件</h3><p>我们可以将 find 命令与 ls 和 sort命令结合，从而找出最大或最小的文件。</p>
+<p>下面的命令使用了 sort 命令的 -r 选项，也就是从大到小降序排列。经过 head 命令的过滤之后，会显示当前目录和子目录下最大的5个文件。命令的执行过程需要一段时间，查找的速度取决于文件的总数。</p>
+<p><code>$ find . -type f -exec ls -s &#123;&#125; \; | sort -n -r | head 5</code></p>
+<p>同样，我们可以去掉 sort 命令的 -r 选项来进行升序排列，从而显示出最小的5个文件。</p>
+<p><code>$ find . -type f -exec ls -s &#123;&#125; \; | sort -n | head 5</code></p>
+<h2 id="查找空文件和空目录"><a href="#查找空文件和空目录" class="headerlink" title="查找空文件和空目录"></a>查找空文件和空目录</h2><p>查找空文件：</p>
+<p><code># find /tmp -type f -empty</code></p>
+<p>查找空目录：</p>
+<p><code>$ find ~/ -type d -empty</code></p>
+<h2 id="高级操作"><a href="#高级操作" class="headerlink" title="高级操作"></a>高级操作</h2><p>find 命令不仅可以通过特定条件来查找文件，还可以对查找到的文件使用任意linux命令进行操作。下面给出两个例子。</p>
+<h3 id="使用-ls-命令列出文件信息"><a href="#使用-ls-命令列出文件信息" class="headerlink" title="使用 ls 命令列出文件信息"></a>使用 ls 命令列出文件信息</h3><p>我们使用 find 命令找到文件后，只能看到文件路径。如果想进一步查看文件信息，可以结合 ls 命令来实现。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ find . -exec ls -ld &#123;&#125; \;</span><br><span class="line">drwxrwxr-x 4 enlightened enlightened 4096 Aug 11 19:01 .</span><br><span class="line">-rw-rw-r-- 1 enlightened enlightened 0 Aug 11 16:25 ./abc.txt</span><br><span class="line">drwxrwxr-x 2 enlightened enlightened 4096 Aug 11 16:48 ./abc</span><br><span class="line">drwxrwxr-x 2 enlightened enlightened 4096 Aug 11 16:26 ./subdir</span><br><span class="line">-rw-rw-r-- 1 enlightened enlightened 0 Aug 11 16:26 ./subdir/how.php</span><br><span class="line">-rw-rw-r-- 1 enlightened enlightened 29 Aug 11 19:13 ./abc.php</span><br><span class="line">-rw-rw-r-- 1 enlightened enlightened 0 Aug 11 16:25 ./cool.php</span><br></pre></td></tr></table></figure></p>
+<h3 id="删除找到的文件"><a href="#删除找到的文件" class="headerlink" title="删除找到的文件"></a>删除找到的文件</h3><p>下面的命令会删除 tmp 目录下扩展名为 .txt 的文件。</p>
+<p><code>$ find /tmp -type f -name &quot;*.txt&quot; -exec rm -f &#123;&#125; \;</code></p>
+<p>我们同样可以删除目录，只要把 -type 后面的 f 改为 d ，并且在 rm 命令后面加上 -r 即可。</p>
+<p><code>$ find /tmp -type d -name &quot;dirToRemove&quot; -exec rm -r -f &#123;&#125; \;</code></p>
+<p>原文：《<a target="_blank" rel="noopener" href="http://www.codebelief.com/article/2017/02/26-examples-of-find-command-on-linux/">[译]Linux 命令行：find 的 26 个用法示例</a>》</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/Find/" rel="tag"># Find</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/resetful-api-specification/" rel="prev" title="RESETful API 设计规范">
+      <i class="fa fa-chevron-left"></i> RESETful API 设计规范
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/php-uses-the-debug-backtrace-method-to-track-code-calls/" rel="next" title="php 利用debug_backtrace方法跟踪代码调用">
+      php 利用debug_backtrace方法跟踪代码调用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%97%E5%87%BA%E5%BD%93%E5%89%8D%E7%9B%AE%E5%BD%95%E5%92%8C%E5%AD%90%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%89%80%E6%9C%89%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">列出当前目录和子目录下的所有文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E7%89%B9%E6%AE%8A%E7%9A%84%E7%9B%AE%E5%BD%95%E6%88%96%E8%B7%AF%E5%BE%84"><span class="nav-number">1.2.</span> <span class="nav-text">查找特殊的目录或路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E5%88%B6%E7%9B%AE%E5%BD%95%E6%9F%A5%E6%89%BE%E7%9A%84%E6%B7%B1%E5%BA%A6"><span class="nav-number">1.3.</span> <span class="nav-text">限制目录查找的深度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E6%9F%A5%E6%89%BE"><span class="nav-number">1.4.</span> <span class="nav-text">反向查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E5%90%88%E5%A4%9A%E4%B8%AA%E6%9F%A5%E6%89%BE%E6%9D%A1%E4%BB%B6"><span class="nav-number">1.5.</span> <span class="nav-text">结合多个查找条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AA%E6%9F%A5%E6%89%BE%E6%96%87%E4%BB%B6%E6%88%96%E7%9B%AE%E5%BD%95"><span class="nav-number">1.6.</span> <span class="nav-text">只查找文件或目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%97%B6%E5%9C%A8%E5%A4%9A%E4%B8%AA%E7%9B%AE%E5%BD%95%E4%B8%8B%E6%9F%A5%E6%89%BE"><span class="nav-number">1.7.</span> <span class="nav-text">同时在多个目录下查找</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E9%9A%90%E8%97%8F%E6%96%87%E4%BB%B6"><span class="nav-number">1.8.</span> <span class="nav-text">查找隐藏文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90%E5%92%8C%E5%B1%9E%E6%80%A7%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">2.</span> <span class="nav-text">基于文件权限和属性的查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%8C%87%E5%AE%9A%E6%9D%83%E9%99%90%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">查找指定权限的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%85%B7%E6%9C%89-SGID-SUID-%E5%B1%9E%E6%80%A7%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">查找具有 SGID&#x2F;SUID 属性的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%8F%AA%E8%AF%BB%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">查找只读文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%8F%AF%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6"><span class="nav-number">2.4.</span> <span class="nav-text">查找可执行文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E6%8B%A5%E6%9C%89%E8%80%85%E5%92%8C%E7%94%A8%E6%88%B7%E7%BB%84%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">3.</span> <span class="nav-text">基于文件拥有者和用户组的查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%B1%9E%E4%BA%8E%E7%89%B9%E5%AE%9A%E7%94%A8%E6%88%B7%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">查找属于特定用户的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%B1%9E%E4%BA%8E%E7%89%B9%E5%AE%9A%E7%94%A8%E6%88%B7%E7%BB%84%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">查找属于特定用户组的文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">4.</span> <span class="nav-text">基于日期和时间的查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%BF%87%E5%8E%BB%E7%9A%84%E7%AC%AC-N-%E5%A4%A9%E8%A2%AB%E4%BF%AE%E6%94%B9%E8%BF%87%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.1.</span> <span class="nav-text">查找过去的第 N 天被修改过的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%BF%87%E5%8E%BB%E7%9A%84-N-%E5%A4%A9%E5%86%85%E8%A2%AB%E8%AE%BF%E9%97%AE%E8%BF%87%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.2.</span> <span class="nav-text">查找过去的 N 天内被访问过的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%9F%90%E6%AE%B5%E6%97%B6%E9%97%B4%E8%8C%83%E5%9B%B4%E5%86%85%E8%A2%AB%E4%BF%AE%E6%94%B9%E8%BF%87%E5%86%85%E5%AE%B9%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.3.</span> <span class="nav-text">查找某段时间范围内被修改过内容的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%BF%87%E5%8E%BB%E7%9A%84-N-%E5%88%86%E9%92%9F%E5%86%85%E7%8A%B6%E6%80%81%E5%8F%91%E7%94%9F%E6%94%B9%E5%8F%98%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.4.</span> <span class="nav-text">查找过去的 N 分钟内状态发生改变的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%BF%87%E5%8E%BB%E7%9A%84-1-%E5%B0%8F%E6%97%B6%E5%86%85%E8%A2%AB%E4%BF%AE%E6%94%B9%E8%BF%87%E5%86%85%E5%AE%B9%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.5.</span> <span class="nav-text">查找过去的 1 小时内被修改过内容的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%BF%87%E5%8E%BB%E7%9A%84-1-%E5%B0%8F%E6%97%B6%E5%86%85%E8%A2%AB%E8%AE%BF%E9%97%AE%E8%BF%87%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">4.6.</span> <span class="nav-text">查找过去的 1 小时内被访问过的文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">5.</span> <span class="nav-text">基于文件大小的查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%8C%87%E5%AE%9A%E5%A4%A7%E5%B0%8F%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">5.1.</span> <span class="nav-text">查找指定大小的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E5%A4%A7%E5%B0%8F%E5%9C%A8%E4%B8%80%E5%AE%9A%E8%8C%83%E5%9B%B4%E5%86%85%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">5.2.</span> <span class="nav-text">查找大小在一定范围内的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%9C%80%E5%A4%A7%E5%92%8C%E6%9C%80%E5%B0%8F%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">5.3.</span> <span class="nav-text">查找最大和最小的文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E7%A9%BA%E6%96%87%E4%BB%B6%E5%92%8C%E7%A9%BA%E7%9B%AE%E5%BD%95"><span class="nav-number">6.</span> <span class="nav-text">查找空文件和空目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E6%93%8D%E4%BD%9C"><span class="nav-number">7.</span> <span class="nav-text">高级操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-ls-%E5%91%BD%E4%BB%A4%E5%88%97%E5%87%BA%E6%96%87%E4%BB%B6%E4%BF%A1%E6%81%AF"><span class="nav-number">7.1.</span> <span class="nav-text">使用 ls 命令列出文件信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%89%BE%E5%88%B0%E7%9A%84%E6%96%87%E4%BB%B6"><span class="nav-number">7.2.</span> <span class="nav-text">删除找到的文件</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/linux_find_command_explain/";
+    this.page.identifier = "linux_find_command_explain/";
+    this.page.title = "Linux Find命令详解";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

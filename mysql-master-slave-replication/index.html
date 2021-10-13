@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="复制概述MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库). MySQL的复制特性操作很灵活,即可以实现整个服务级别的复制,也可以只复制某一个数据库,甚至某个数据库中的某个表对象;  主从单向复制(即可以实现从A复制到B) 单主多从复制(B在复制到C,也可以实现A直接复制到B和C) 双主复制(甚至是A的数据复制给B,B的数据也复制回A)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL主从复制">
+<meta property="og:url" content="http://blog.huixing.org/mysql-master-slave-replication/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="复制概述MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库). MySQL的复制特性操作很灵活,即可以实现整个服务级别的复制,也可以只复制某一个数据库,甚至某个数据库中的某个表对象;  主从单向复制(即可以实现从A复制到B) 单主多从复制(B在复制到C,也可以实现A直接复制到B和C) 双主复制(甚至是A的数据复制给B,B的数据也复制回A)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfheym1grdj20hj07c3yp.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhhepz9r4j20jt03gglj.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgt59cbbj20fg0r975q.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgtjx15ij20j30s5gna.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgkm7wxfj21jg09yjtp.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgmbu1h4j21na0bswhn.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgouuvl3j208v06l3yh.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgpkbolkj207605g0sm.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfhm6k92p5j20ub0bmn27.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfm18gfia3j20h40aqwfn.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfm18z3l64j20db0dtjsp.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfm19bcfouj20h80akq43.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfkz1x7ujnj216e196qe7.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfkz2li4plj20sa0ditaf.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfn1f3jzoaj217y18udo4.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfn24b5ohsj216219246w.jpg">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/a3eed545ly1gfn5irci9aj217g19mwmx.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfn8ev58s2j20yo182n4a.jpg">
+<meta property="article:published_time" content="2020-06-05T06:39:30.000Z">
+<meta property="article:modified_time" content="2020-06-10T07:58:01.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gfheym1grdj20hj07c3yp.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/mysql-master-slave-replication/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL主从复制 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/mysql-master-slave-replication/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL主从复制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-05 14:39:30" itemprop="dateCreated datePublished" datetime="2020-06-05T14:39:30+08:00">2020-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-10 15:58:01" itemprop="dateModified" datetime="2020-06-10T15:58:01+08:00">2020-06-10</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/mysql-master-slave-replication/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="mysql-master-slave-replication/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="复制概述"><a href="#复制概述" class="headerlink" title="复制概述"></a>复制概述</h1><p>MySQL中的主从复制是将数据从一端(通常称为Master,即主库)复制到另一端(通常称为Slave,即从库).</p>
+<p>MySQL的复制特性操作很灵活,即可以实现整个服务级别的复制,也可以只复制某一个数据库,甚至某个数据库中的某个表对象;</p>
+<ul>
+<li>主从单向复制(即可以实现从A复制到B)</li>
+<li>单主多从复制(B在复制到C,也可以实现A直接复制到B和C)</li>
+<li>双主复制(甚至是A的数据复制给B,B的数据也复制回A)</li>
+</ul>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfheym1grdj20hj07c3yp.jpg" alt="一主多从架构与双主双从架构"></p>
+<p>服务器间复制数据有很多种解决方案,究竟哪种方案最适合,取决于使用的数据引擎和期望实现的复制需求.一般来说,可以将MySQL的复制特性应用在下来场景上:</p>
+<ul>
+<li>实时灾备,用于故障切换</li>
+<li>读写分离,提供查询服务</li>
+<li>备份</li>
+<li>延时库</li>
+</ul>
+<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><p>由于MySQL安装方式 网上很多教程 这里就不重复写了</p>
+<ul>
+<li>运行环境 CentOS 7.5 </li>
+<li>数据库环境 MySQL 5.7.30</li>
+</ul>
+<h2 id="1-Master端启用二进制日志-binlog-指定mysql服务全局唯一server-id"><a href="#1-Master端启用二进制日志-binlog-指定mysql服务全局唯一server-id" class="headerlink" title="1. Master端启用二进制日志(binlog),指定mysql服务全局唯一server_id"></a>1. Master端启用二进制日志(binlog),指定mysql服务全局唯一server_id</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">## 设置server_id,注意要唯一</span><br><span class="line">server-id=1</span><br><span class="line">## 开启二进制日志功能</span><br><span class="line">log-bin=mysql-bin</span><br></pre></td></tr></table></figure>
+<h2 id="2-Slave端启用二进制日志-binlog-指定mysql服务全局唯一server-id-指定中继日志文件路径"><a href="#2-Slave端启用二进制日志-binlog-指定mysql服务全局唯一server-id-指定中继日志文件路径" class="headerlink" title="2. Slave端启用二进制日志(binlog),指定mysql服务全局唯一server_id,指定中继日志文件路径"></a>2. Slave端启用二进制日志(binlog),指定mysql服务全局唯一server_id,指定中继日志文件路径</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">## 设置server_id,注意要唯一</span><br><span class="line">server-id=2 </span><br><span class="line">## 开启二进制日志功能，以备Slave作为其它Slave的Master时使用</span><br><span class="line">log-bin=mysql-slave-bin   </span><br><span class="line">## relay_log配置中继日志</span><br><span class="line">relay_log=edu-mysql-relay-bin </span><br></pre></td></tr></table></figure>
+<h2 id="3-创建Slave同步专用账户"><a href="#3-创建Slave同步专用账户" class="headerlink" title="3. 创建Slave同步专用账户"></a>3. 创建Slave同步专用账户</h2><p>在Master数据库创建数据同步用户，授予用户 slave REPLICATION SLAVE权限和REPLICATION CLIENT权限，用于在主从库之间同步数据。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER &#x27;slave&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;root&#x27;;</span><br><span class="line">GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#x27;slave&#x27;@&#x27;%&#x27;;</span><br></pre></td></tr></table></figure>
+<h2 id="4-链接Master-主-和Slave-从"><a href="#4-链接Master-主-和Slave-从" class="headerlink" title="4. 链接Master(主)和Slave(从)"></a>4. 链接Master(主)和Slave(从)</h2><p>在Master进入mysql，执行<code>show master status</code>;</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhhepz9r4j20jt03gglj.jpg" alt="Master Status"></p>
+<p>File和Position字段的值后面将会用到，在后面的操作完成之前，需要保证Master库不能做任何操作，否则将会引起状态变化，File和Position字段的值变化。</p>
+<p>在Slave中进入mysql,执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">change master to master_host=&#x27;172.17.0.2&#x27;, master_user=&#x27;slave&#x27;, master_password=&#x27;root&#x27;, master_port=3306, master_log_file=&#x27;mysql-bin.000003&#x27;, master_log_pos= 804, master_connect_retry=30;</span><br></pre></td></tr></table></figure>
+<p>命令说明：</p>
+<ul>
+<li>master_host：Master MySQL的地址，如果用Docker指的是容器的独立ip,可以通过<code>docker inspect --format=&#39;&#123; &#123;.NetworkSettings.IPAddress&#125;&#125;&#39;</code> 容器名称|容器id查询容器的ip</li>
+<li>master_port：Master的端口号，指的是容器的端口号</li>
+<li>master_user：用于数据同步的用户</li>
+<li>master_password：用于同步的用户的密码</li>
+<li>master_log_file：指定 Slave 从哪个日志文件开始复制数据，即上文中提到的 File 字段的值</li>
+<li>master_log_pos：从哪个 Position 开始读，即上文中提到的 Position 字段的值</li>
+<li>master_connect_retry：如果连接失败，重试的时间间隔，单位是秒，默认是60秒</li>
+</ul>
+<p>在Slave 中的mysql终端执行<code>show slave status \G;</code>用于查看主从同步状态。</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgt59cbbj20fg0r975q.jpg" alt="Slave未同步状态"><br>正常情况下，SlaveIORunning 和 SlaveSQLRunning 都是No，因为我们还没有开启主从复制过程。使用start slave开启主从复制过程，然后再次查询主从同步状态<code>show slave status \G;</code>。<br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgtjx15ij20j30s5gna.jpg" alt="Slave同步状态"><br>SlaveIORunning 和 SlaveSQLRunning 都是Yes，说明主从复制已经开启。此时可以测试数据同步是否成功。</p>
+<p>我们再看一下线程:<br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgkm7wxfj21jg09yjtp.jpg" alt="Master进程"><br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgmbu1h4j21na0bswhn.jpg" alt="Slave进程"></p>
+<h2 id="5-排错"><a href="#5-排错" class="headerlink" title="5. 排错"></a>5. 排错</h2><p>使用start slave开启主从复制过程后，如果SlaveIORunning一直是Connecting，则说明主从复制一直处于连接状态，这种情况一般是下面几种原因造成的，我们可以根据 Last_IO_Error提示予以排除。</p>
+<ol>
+<li>网络不通 检查ip,端口</li>
+<li>密码不对 检查是否创建用于同步的用户和用户密码是否正确</li>
+<li>pos不对 检查Master的 Position</li>
+</ol>
+<h2 id="6-测试主从复制"><a href="#6-测试主从复制" class="headerlink" title="6. 测试主从复制"></a>6. 测试主从复制</h2><p>测试主从复制方式就十分多了，最简单的是在Master创建一个数据库，然后检查Slave是否存在此数据库。</p>
+<p>Master:</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgouuvl3j208v06l3yh.jpg" alt="Master"></p>
+<p>Slave:</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhgpkbolkj207605g0sm.jpg" alt="Slave"></p>
+<h2 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h2><ul>
+<li>show processlist;–显示用户正在运行的线程</li>
+<li>show slave status;–显示slave状态</li>
+<li>show slave hosts;–显示slave地址信息</li>
+<li>start slave;–开始slave同步</li>
+<li>stop slave;–停止slave同步</li>
+<li>start slave io_thread;–开始slave io线程</li>
+<li>start slave sql_thrad;–开始slave sql线程</li>
+<li>stop slave io_thread;–停止slave io线程</li>
+<li>stop slave sql_thrad;–停止slave sql线程</li>
+</ul>
+<h1 id="复制关键因素及原理"><a href="#复制关键因素及原理" class="headerlink" title="复制关键因素及原理"></a>复制关键因素及原理</h1><h2 id="复制格式"><a href="#复制格式" class="headerlink" title="复制格式"></a>复制格式</h2><p>复制格式和二进制日志格式本质上是一个东西,只是在不同场景下称谓不同,都由系统变量binlog_format控制.</p>
+<p>二进制日志格式:</p>
+<ol>
+<li>基于语句记录(Statement-Based Logging, SBL),对应的参数值为statement.二进制日志文件中保存的是执行过的SQL语句.</li>
+<li>基于行格式记录(Row-Based Loging, RBL),对应的参数值为row.二进制日志文件中记录的是变更行的信息.</li>
+<li>混合模式(Mixed-Based Loging. MBL),对应的参数值为mixed.在记录事件到二进制日志时,MySQL服务根据需要,动态修改日志记录的格式.</li>
+</ol>
+<p>复制格式:</p>
+<ol>
+<li>基于语句复制(Statement-Based Replication, SBR)</li>
+<li>基于行复制(Row-Based Replication, RBR)</li>
+<li>混合记录模式(Mixed-Based Replication. MBR)</li>
+</ol>
+<p>SBR优点:</p>
+<ol>
+<li>生成日志少.</li>
+<li>可读性高 mysqlbinlog.<br>SBR缺点:</li>
+<li>不严谨,如SQL语句包含new()等函数 复制到从库就会出现时间不一致.</li>
+<li>执行insert select 语句时需要持有更多的锁(相比RBR)锁多相当于并发性低.</li>
+<li>对于InnoDB引擎,insert语句使用AUTO_INCREMENT会阻塞其他insert语句.</li>
+</ol>
+<p>RBR优点:</p>
+<ol>
+<li>所有修改都能被安全的复制到Slave节点.</li>
+<li>Master端执行修改操作时,仅需要极少的锁,可以获得更高的并发性.</li>
+<li>Slave节点执行增删改时也仅需要有少量锁.<br>RBR缺点:</li>
+<li>可能会生成更多的日志.</li>
+<li>日志可读性减低 mysqlbinlog.</li>
+<li>对于非事务存储引擎,比如MyISAM表对象,Slave节点应用insert操作时,使用RBR模式要比使用SBR模式持有更强的锁</li>
+</ol>
+<p>场景1:</p>
+<p>有条复杂的SQL语句,在Master节点执行10分钟,最终成功修改了1一条记录.</p>
+<ul>
+<li>采用SBR模式,二进制日志中记录的事件就是这条SQL语句,那么,这个记录被复制到Slave节点后,也要执行10分钟.</li>
+<li>采用RBR模式,不管Master节点执行了多长时间,最终变更记录只有一条,那么二进制日志中记录的事件就这一条记录的更新,日志被同步到Slave节点后,瞬间就会被执行完.</li>
+</ul>
+<p>场景2:</p>
+<p>有一条简单的SQL语句,在Master节点执行时,要更新一千万条记录.</p>
+<ul>
+<li>采用RBR模式,这一千万条记录会生成较大的二进制日志文件,数据在网络传输过程就要消耗一定时间,Slave接收完数据,还要花费相当长的时间慢慢应用到库中.</li>
+<li>采用SBR模式,二进制日志文件中就记录了该SQL语句,Slave节点可以迅速接收改语句,然后再执行,执行可能消耗一定时间,单总体时间开销还是要比RBR小.</li>
+</ul>
+<p><strong>看完上面两个场景,相信读者已经有自己的选择了.但是在生成环境中强烈建议使用RBR模式(基于行复制),因为稳定.稳定压倒一切</strong></p>
+<p>查看binlog格式<code>show variables like &quot;binlog_format&quot;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;binlog_format&quot;;</span><br><span class="line">+---------------+-------+</span><br><span class="line">| Variable_name | Value |</span><br><span class="line">+---------------+-------+</span><br><span class="line">| binlog_format | ROW   |</span><br><span class="line">+---------------+-------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<h2 id="中继日志文件和状态文件"><a href="#中继日志文件和状态文件" class="headerlink" title="中继日志文件和状态文件"></a>中继日志文件和状态文件</h2><p>MySQL数据中有二进制日志文件,用于记录所有执行的变更事件,复制特性正是基于这类文件实现”复制”操作.Slaves节点中有两个线程,其中IO_THREAD线程用于接收和保存二进制日志,IO_THREAD将接收二进制日志就保存在本端的中继日志中.</p>
+<p>通过<code>show variables like &quot;%relay%&quot;;</code>查看中继日志文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;%relay%&quot;;</span><br><span class="line">+---------------------------+------------------------------------------+</span><br><span class="line">| Variable_name             | Value                                    |</span><br><span class="line">+---------------------------+------------------------------------------+</span><br><span class="line">| max_relay_log_size        | 0                                        |</span><br><span class="line">| relay_log                 | edu-mysql-relay-bin                      |</span><br><span class="line">| relay_log_basename        | /var/lib/mysql/edu-mysql-relay-bin       |</span><br><span class="line">| relay_log_index           | /var/lib/mysql/edu-mysql-relay-bin.index |</span><br><span class="line">| relay_log_info_file       | relay-log.info                           |</span><br><span class="line">| relay_log_info_repository | FILE                                     |</span><br><span class="line">| relay_log_purge           | ON                                       |</span><br><span class="line">| relay_log_recovery        | OFF                                      |</span><br><span class="line">| relay_log_space_limit     | 0                                        |</span><br><span class="line">| sync_relay_log            | 10000                                    |</span><br><span class="line">| sync_relay_log_info       | 10000                                    |</span><br><span class="line">+---------------------------+------------------------------------------+</span><br><span class="line">11 rows in set (0.01 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>relay_log_index 中继日志索引文件</li>
+<li>relay_log_basename 中继日志文件保存路径</li>
+<li>relay_log_info_file 中继日志状态</li>
+<li>max_relay_log_size 中继日志最大值</li>
+</ul>
+<p>中继日志和binlog日志相同可以mysqlbinlog操作</p>
+<p>Slaves节点会在瞒足下列条件时,触发创建新的中继日志文件:</p>
+<ol>
+<li>启动Slaves节点IO线程时</li>
+<li>执行日志刷新命令 <code>flush logs</code></li>
+<li>中继日志文件达到指定最大值时<ul>
+<li>如果max_relay_log_size参数值大于0,则日志文件超过该值后即会重建</li>
+<li>如果max_relay_log_size参数值等于0,则通过max_binlog_size确定单个中继日志文件最大值</li>
+</ul>
+</li>
+</ol>
+<p>通过<code>show variables like &quot;max_binlog_size&quot;;</code>查看binlog文件最大值<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &quot;max_binlog_size&quot;; </span><br><span class="line">+-----------------+------------+</span><br><span class="line">| Variable_name   | Value      |</span><br><span class="line">+-----------------+------------+</span><br><span class="line">| max_binlog_size | 1073741824 |</span><br><span class="line">+-----------------+------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p>状态文件:<br>复制环境中Slave节点会创建两个状态文件:既master.info和relay-log.info,这两个文件默认保存在data目录,可以通过–master-info-file和–relay-log-info-file参数修改文件和保存路径.</p>
+<p>master.info和relay-log.info均来自<code>show slave status</code>里面的信息刷新到这些文件中.</p>
+<ul>
+<li>IO_THREAD会读取master.info信息</li>
+<li>SQL_THREAD会读取relay-log.info信息</li>
+</ul>
+<h2 id="复制原理"><a href="#复制原理" class="headerlink" title="复制原理"></a>复制原理</h2><p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfhm6k92p5j20ub0bmn27.jpg" alt="复制原理"></p>
+<h1 id="高级应用技巧"><a href="#高级应用技巧" class="headerlink" title="高级应用技巧"></a>高级应用技巧</h1><h2 id="复制过滤规则"><a href="#复制过滤规则" class="headerlink" title="复制过滤规则"></a>复制过滤规则</h2><h3 id="Master端"><a href="#Master端" class="headerlink" title="Master端:"></a>Master端:</h3><ul>
+<li><code>binlog-do-db</code> 指定对某数据库的操作事件被记录.</li>
+<li><code>binlog-ignore-db</code> 指定对某数据库的操作事件不被记录</li>
+<li><code>set sql_log_bin=0</code> 会话级别所做操作不被记录</li>
+</ul>
+<p><strong>在Master端进行复制过滤会导致主服务器上的二进制日志记录不完整,一旦主服务器崩溃将无法做到还原所有数据</strong></p>
+<h3 id="Slave端"><a href="#Slave端" class="headerlink" title="Slave端:"></a>Slave端:</h3><p>Slave节点在接收日志时没有选择权,Master节点写过的日志它全部接收到本地,保存在中继日志文件中.但Slave节点在应用哪些数据库哪些表时具有选择器权限.MySQL提供了一系列参数用于Slave节点定义过滤规则.</p>
+<ul>
+<li><code>replicate-do-db=name</code> 执行name表</li>
+<li><code>replicate-ignore-db=name</code> 忽略name表</li>
+<li><code>replicate-do-table=name</code> 执行name库</li>
+<li><code>replicate-ignore-table=name</code> 忽略name库</li>
+<li><code>replicate-wild-do-table=foo%.bar%</code> 执行以foo开头的库以bar开头的表</li>
+<li><code>replicate-wild-ignore-table=foo%.bar%</code> 忽略以foo开头的库以bar开头的表</li>
+</ul>
+<h3 id="配置方式"><a href="#配置方式" class="headerlink" title="配置方式"></a>配置方式</h3><p>配置文件</p>
+<p>按照上面列的<code>replicate-do-db=表名</code>即可</p>
+<p>数据库配置</p>
+<p>指定复制某一个或多个库<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">STOP SLAVE SQL_THREAD; # 停止SQL线程</span><br><span class="line">CHANGE REPLICATION FILTER REPLICATE_DO_BD = (表名1,表名2)</span><br><span class="line">START SLAVE SQL_THREAD; # 启动SQL线程</span><br></pre></td></tr></table></figure><br>通过上面设置方式可以看出 <code>CHANGE REPLICATION FILTER</code> 加上上面列的选项即可实现配置</p>
+<p>取消复制限制</p>
+<p><code>CHANGE REPLICATION FILTER REPLICATE_DO_BD = ();</code>同上</p>
+<p>切记一定要停止SQL线程后再设置</p>
+<h2 id="半同步机制"><a href="#半同步机制" class="headerlink" title="半同步机制"></a>半同步机制</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>MySQL在5.5版本之前,一直采用的是异步复制的方式.主库的事务执行不会管备库的同步进度,如果备库落后,主库不幸crash,那么就会导致数据丢失.</p>
+<p>MySQL在5.5版本中引入了半同步复制,主库在答应客户端提交的事务钱需要保证至少一个从库收到并写到relay log中,但性能比较差.</p>
+<p>MySQL在5.6版本中增强了半同步</p>
+<p>MySQL在5.7版本比较完善(在5.7.2无损复制)</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>默认情况下,MySQL的复制是异步的,主库执行完Commit提交操作后,在主库写入binlog后即可成功返回给客户端,无需等待binlog传给从库.当在主库上写入一个事务并提交成功,而从库尚未得到主库的binlog时,主机宕机了,从而从库可能损失该事务,造成主从库的不一致.</p>
+<p>为了解决这个问题,MySQL引入了半同步复制.半同步复制保证了主库上的每一个binlog都能可靠的复制到从库上,主库在每次事务提交时,并不及时反馈给前端用户,而是等待其中一个从库也接收到binlog并成功写入中继日志后,主库才返回给客户端.此时,至少有两份日志记录,一份在主库binlog上,另一方在至少一个从库的中继日志上,从而保证了数据的完整性.</p>
+<h3 id="半同步复制机制的改进"><a href="#半同步复制机制的改进" class="headerlink" title="半同步复制机制的改进"></a>半同步复制机制的改进</h3><p>MySQL 5.7.2版本增加了<code>rpl_semi_sync_master_wait_point</code>参数,该参数有两个值:<code>AFTER_COMMIT</code>和<code>AFTER_SYNC</code>.</p>
+<h4 id="AFTER-COMMIT-半同步复制-5-6默认该模式"><a href="#AFTER-COMMIT-半同步复制-5-6默认该模式" class="headerlink" title="AFTER_COMMIT 半同步复制(5.6默认该模式)"></a>AFTER_COMMIT 半同步复制(5.6默认该模式)</h4><p>Master将每个事务写入binlog(sync_binlog=1),传递到slave刷新到磁盘(sysnc_relay=1),同时主库提交事务.Master等待Slave反馈收到relay_log,只有收到ACK后Master才将commit ok结果反馈给客户端.<br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfm18gfia3j20h40aqwfn.jpg" alt="After Commit"></p>
+<p>在使用AFTER_COMMIT的模式下,客户端事务在存储引擎成提交后,在得到从库确认的过程中,主库宕机了.此时,既主库在等待Slave ACK的时候,虽然没有返回当前客户端,但是事务已经提交,其他客户端会读取到已提交事务.如果Slave端还没有读取到该事务的events,同时主库发生了crash,然后切换到备库.那么之前读取到的事务就不见了,出现幻读.<br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfm18z3l64j20db0dtjsp.jpg" alt="出现幻读情况图"></p>
+<h4 id="AFTER-SYNC-无损复制-5-7默认该模式-5-6没有该模式"><a href="#AFTER-SYNC-无损复制-5-7默认该模式-5-6没有该模式" class="headerlink" title="AFTER_SYNC 无损复制(5.7默认该模式,5.6没有该模式)"></a>AFTER_SYNC 无损复制(5.7默认该模式,5.6没有该模式)</h4><p>Master将每个事务写入binlog,传递到Slave刷新到磁盘(relay log).Master等待Slave反馈接收到relay log的ACK之后,再提交事务并且返回commit ok 结果给客户端.<br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfm19bcfouj20h80akq43.jpg" alt="After Sync"></p>
+<h3 id="半同步复制与无损复制的对比"><a href="#半同步复制与无损复制的对比" class="headerlink" title="半同步复制与无损复制的对比"></a>半同步复制与无损复制的对比</h3><ol>
+<li>ACK的时间点不同:<ul>
+<li>一个先engine commit后再接收ACK</li>
+<li>一个在接收ACK后在engine commit</li>
+</ul>
+</li>
+<li>主从数据一致性<ul>
+<li>半同步复制意味着在Master节点上,这个刚刚提交的事务对数据库的修改,对其他事务是可见的.因此,如果在等待Slave ACK的时候crash了,那么会对其他事务出现幻读,数据丢失.</li>
+<li>无损复制在write binlog完成后,就传输binlog,但还没有去写commit log,意味着当前这个事务对数据库的修改,其他事务也是不可以见的.因此,不会出现幻读,数据丢失的风险.</li>
+</ul>
+</li>
+</ol>
+<h2 id="半同步配置"><a href="#半同步配置" class="headerlink" title="半同步配置"></a>半同步配置</h2><ul>
+<li><p>查看MySQL系统版本 <code>select version();</code></p>
+</li>
+<li><p>查看安装插件列表 <code>show plugins;</code></p>
+</li>
+</ul>
+<h3 id="Master配置"><a href="#Master配置" class="headerlink" title="Master配置"></a>Master配置</h3><ul>
+<li>安装 <code>install plugin rpl_semi_sync_master soname &#39;semisync_master.so&#39;;</code><br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfkz1x7ujnj216e196qe7.jpg" alt="安装成功"></li>
+<li>启动 <code>set global rpl_semi_sync_master_enabled=on;</code></li>
+<li>查看 <code>show variables like &#39;%semi%&#39;;</code><br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfkz2li4plj20sa0ditaf.jpg" alt="查看状态"><h3 id="Slave配置"><a href="#Slave配置" class="headerlink" title="Slave配置"></a>Slave配置</h3></li>
+</ul>
+<p>图和master配置基本一致 就不放图了</p>
+<ul>
+<li>安装 <code>install plugin rpl_semi_sync_slave soname &#39;semisync_slave.so&#39;;</code></li>
+<li>启动 <code>set global rpl_semi_sync_slave_enabled=on;</code></li>
+<li>查看 <code>show variables like &#39;%semi%&#39;;</code></li>
+<li>重启 <code>stop slave;start slave;</code></li>
+</ul>
+<h3 id="卸载插件"><a href="#卸载插件" class="headerlink" title="卸载插件"></a>卸载插件</h3><p>Slave卸载 </p>
+<ol>
+<li><code>set global rpl_semi_sync_slave_enabled=off;</code> 关闭同步插件</li>
+<li><code>stop slave;</code> 停止Slave同步</li>
+<li><code>uninstall plugin rpl_semi_sync_slave;</code> 卸载插件</li>
+<li><code>start slave;</code> 启动</li>
+</ol>
+<p>Master卸载 </p>
+<ol>
+<li><code>set global rpl_semi_sync_master_enabled=off;</code> 关闭同步插件</li>
+<li><code>uninstall plugin rpl_semi_sync_master;</code> 卸载插件</li>
+</ol>
+<h3 id="关键参数说明"><a href="#关键参数说明" class="headerlink" title="关键参数说明"></a>关键参数说明</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &#x27;%semi%&#x27;;</span><br><span class="line">+-------------------------------------------+------------+</span><br><span class="line">| Variable_name                             | Value      |</span><br><span class="line">+-------------------------------------------+------------+</span><br><span class="line">| rpl_semi_sync_master_enabled              | ON         |</span><br><span class="line">| rpl_semi_sync_master_timeout              | 10000      |</span><br><span class="line">| rpl_semi_sync_master_trace_level          | 32         |</span><br><span class="line">| rpl_semi_sync_master_wait_for_slave_count | 1          |</span><br><span class="line">| rpl_semi_sync_master_wait_no_slave        | ON         |</span><br><span class="line">| rpl_semi_sync_master_wait_point           | AFTER_SYNC |</span><br><span class="line">+-------------------------------------------+------------+</span><br><span class="line">6 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<ul>
+<li>rpl_semi_sync_master_enabled 设置为on表示开启了半同步功能</li>
+<li>rpl_semi_sync_master_timeout 单位是毫秒,表示如果主库等待从库回复消息的时间超过该值,就会自动切换为异步复制模式</li>
+<li>rpl_semi_sync_master_wait_no_slave 默认是on.表示Master每个事务提交后都要等待Slave的接收确认信号</li>
+<li>rpl_semi_sync_master_wait_for_slave_count 它控制主库接收多少个从库写事务成功反馈,才返回成功给客户端</li>
+<li>rpl_semi_sync_master_wait_point 默认值是AFTER_SYNC,含义是主库将每个事务写入binlog,并传递给从库,刷新到中继日志,主库开始等待从库的反馈,接收到从库的回复之后,在提交事务并且返回”commit ok”结果给客户端</li>
+</ul>
+<p><code>set global rpl_semi_sunc_master_wait_point=&#39;AFTER_COMMIT&#39;;</code> 设置同步模式</p>
+<h2 id="手动主从切换"><a href="#手动主从切换" class="headerlink" title="手动主从切换"></a>手动主从切换</h2><h3 id="正常切换"><a href="#正常切换" class="headerlink" title="正常切换"></a>正常切换</h3><ol>
+<li>对主库全库锁定 <code>flush tables with read lock;</code></li>
+<li>在Master执行 <code>执行 show processlist;</code>查看State是否是Master has sent all binlog to slave; waiting for more updates判断是否发送完毕</li>
+<li>在Slave执行 <code>执行 show processlist;</code>查看State是否是Slave has read all relay log; waiting for more updates判断是否同步完成</li>
+<li>停止Slave IO线程 <code>stop slave io_thread;</code></li>
+<li>将Slave提升为Master:<ul>
+<li>停止Slave <code>stop slave;</code></li>
+<li>删除所有的binlog日志文件,并将日志索引文件清空,重新开始所有新的日志文件.<code>reset master;</code></li>
+<li>删除master.info文件和relay-log.info文件以及所有的relay log文件,并重新启用一个新的relay log文件.<code>reset slave;</code></li>
+<li>相对于RESET SLAVE, RESET SLAVE ALL还会删除内存中的连接信息,包括slave账号信息 <code>reset slave all;</code></li>
+</ul>
+</li>
+<li>查看Slave是否是只读模式:<code>show variables like &#39;read_only&#39;;</code><ul>
+<li>只读模式需要修改my.cnf文件,注释read-only=1并重启mysql服务.</li>
+<li>或者不重启使用命令关闭只读,但下次重启后失效:<code>set global read_only=off;</code></li>
+</ul>
+</li>
+<li>将原来Master变为Slave<ul>
+<li>在新的Master上创建同步用户<code>CREATE USER &#39;slave&#39;@&#39;%&#39; IDENTIFIED BY &#39;root&#39;;GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;slave&#39;@&#39;%&#39;; flush privileges;</code></li>
+<li>将新的Slave设置为只读模式<code>set global read_only=on;</code></li>
+<li>将新的Slave上释放全局锁<code>unlock tables;</code></li>
+<li>在新的Slave上重置binlog<code>reset master;</code></li>
+<li>在新的Slave上配置连接信息<code>change master to master_host=&#39;172.17.0.2&#39;, master_user=&#39;slave&#39;, master_password=&#39;root&#39;, master_port=3306, master_log_file=&#39;mysql-bin.000003&#39;, master_log_pos= 804, master_connect_retry=30;</code></li>
+<li>在新的Slave上开启<code>start slave;</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="主机宕机切换"><a href="#主机宕机切换" class="headerlink" title="主机宕机切换"></a>主机宕机切换</h3><ol>
+<li>停止slave<code>stop slave;</code></li>
+<li>删除所有的binlog日志文件,并将日志索引文件清空,重新开始所有新的日志文件.<code>reset master;</code></li>
+<li>删除内存中的连接信息,包括slave账号信息 <code>reset slave all;</code></li>
+<li>查看Slave是否是只读模式:<code>show variables like &#39;read_only&#39;;</code><ul>
+<li>只读模式需要修改my.cnf文件,注释read-only=1并重启mysql服务.</li>
+<li>或者不重启使用命令关闭只读,但下次重启后失效:<code>set global read_only=off;</code></li>
+</ul>
+</li>
+<li>查看新主机状态<code>show master status;</code></li>
+<li>修改中间件的IP</li>
+</ol>
+<h2 id="主从延时分析及解决"><a href="#主从延时分析及解决" class="headerlink" title="主从延时分析及解决"></a>主从延时分析及解决</h2><h3 id="在master上删除一条记录-而slave上找不到"><a href="#在master上删除一条记录-而slave上找不到" class="headerlink" title="在master上删除一条记录,而slave上找不到."></a>在master上删除一条记录,而slave上找不到.</h3><h4 id="模拟故障场景"><a href="#模拟故障场景" class="headerlink" title="模拟故障场景:"></a>模拟故障场景:</h4><p>主库: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#建表</span><br><span class="line">CREATE TABLE t_dell (</span><br><span class="line">	id INT NOT NULL auto_increment PRIMARY KEY,</span><br><span class="line">c1 VARCHAR ( 20 ));</span><br><span class="line">#插入一条数据</span><br><span class="line">INSERT INTO t_dell ( c1 ) VALUES ( &#x27;a&#x27; );</span><br></pre></td></tr></table></figure>
+<p>从库:</p>
+<p><code>DELETE FROM t_dell;</code></p>
+<p>主库:</p>
+<p><code>DELETE FROM t_dell;</code></p>
+<p>接下来我们查看一下Slave的状态;<code>show slave status \G;</code><br><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfn1f3jzoaj217y18udo4.jpg" alt="错误图例1"><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Last_Errno: 1032</span><br><span class="line">Last_Error: Could not execute Delete_rows event on table test.t_dell; Can&#x27;t find record in &#x27;t_dell&#x27;, Error_code: 1032; handler error HA_ERR_KEY_NOT_FOUND; the event&#x27;s master log mysql-slave-bin.000003, end_log_pos 1854</span><br></pre></td></tr></table></figure><br>通过上图我们可以看到 SQL线程已经停止,Last_Error已经出现报错提示.</p>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案:"></a>解决方案:</h4><p>由于master 要删除一条记录,而slave上找不到故此报错,这种情况主上都将其删除了,那么从库可以直接跳过.</p>
+<p>操作命令:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stop slave;</span><br><span class="line">set global sql_slave_skip_counter=1;</span><br><span class="line">start slave;</span><br></pre></td></tr></table></figure><br>或者</p>
+<p><code>slave-skip-errors = 1032;#在MySql配置文件中配置,一旦出现1032错误直接跳过,需要重启服务.</code></p>
+<p>然后在查看同步状态就正常了.<code>show slave status \G;</code></p>
+<h3 id="主键重复-在slave已经有该记录-又在master上插入了同一条记录"><a href="#主键重复-在slave已经有该记录-又在master上插入了同一条记录" class="headerlink" title="主键重复,在slave已经有该记录,又在master上插入了同一条记录."></a>主键重复,在slave已经有该记录,又在master上插入了同一条记录.</h3><h4 id="模拟故障场景-1"><a href="#模拟故障场景-1" class="headerlink" title="模拟故障场景:"></a>模拟故障场景:</h4><p>主库:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 建表</span><br><span class="line">CREATE TABLE t_key (</span><br><span class="line">id INT NOT NULL PRIMARY KEY,</span><br><span class="line">c1 VARCHAR ( 20 ));</span><br><span class="line"># 插入一条数据</span><br><span class="line">INSERT INTO t_key(id,c1) VALUES (1,&#x27;a&#x27;);</span><br><span class="line"># 设置以下操作事件不会被写入binlog</span><br><span class="line">set sql_log_bin=0;</span><br><span class="line"># 删除表</span><br><span class="line">delete from t_key;</span><br><span class="line"># 开启操作事件写入binlog</span><br><span class="line">set sql_log_bin=1;</span><br><span class="line"># 插入一条数据</span><br><span class="line">INSERT INTO t_key(id,c1) VALUES (1,&#x27;a&#x27;); </span><br></pre></td></tr></table></figure>
+<p>从库:</p>
+<p><code>show slave status \G;</code></p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfn24b5ohsj216219246w.jpg" alt="错误状态2"><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Last_Errno: 1062</span><br><span class="line">Last_Error: Could not execute Write_rows event on table test.t_key; Duplicate entry &#x27;1&#x27; for key &#x27;PRIMARY&#x27;, Error_code: 1062; handler error HA_ERR_FOUND_DUPP_KEY; the event&#x27;s master log mysql-slave-bin.000003, end_log_pos 2583</span><br></pre></td></tr></table></figure></p>
+<h4 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法:"></a>解决方法:</h4><p>登录到从库,删除重复数据<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stop slave;</span><br><span class="line">delete from t_key where id=1;</span><br><span class="line">start slave;</span><br></pre></td></tr></table></figure></p>
+<h3 id="在master上更新条记录-而slave上找不到-丢失了数据"><a href="#在master上更新条记录-而slave上找不到-丢失了数据" class="headerlink" title="在master上更新条记录,而slave上找不到,丢失了数据."></a>在master上更新条记录,而slave上找不到,丢失了数据.</h3><h4 id="模拟故障场景-2"><a href="#模拟故障场景-2" class="headerlink" title="模拟故障场景:"></a>模拟故障场景:</h4><p>主库:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 建表</span><br><span class="line">CREATE TABLE t_upd (</span><br><span class="line">	id INT NOT NULL PRIMARY KEY,</span><br><span class="line">	c1 VARCHAR ( 20 ),</span><br><span class="line">c2 VARCHAR ( 20 ));</span><br><span class="line"># 插入两条数据</span><br><span class="line">INSERT INTO t_upd ( id, c1, c2 ) VALUES</span><br><span class="line">( 1, &#x27;a1&#x27;, &#x27;a2&#x27; ),</span><br><span class="line">( 2, &#x27;b1&#x27;, &#x27;b2&#x27; );</span><br></pre></td></tr></table></figure></p>
+<p>从库:</p>
+<p><code>DELETE FROM t_upd WHERE id = 1;</code></p>
+<p>主库:</p>
+<p><code>UPDATE t_upd SET c1 = &#39;aa&#39; WHERE id = 1;</code><br><img src="http://ww1.sinaimg.cn/large/a3eed545ly1gfn5irci9aj217g19mwmx.jpg" alt="错误状态3"><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Last_Errno: 1032</span><br><span class="line">Last_Error: Could not execute Update_rows event on table test.t_upd; Can&#x27;t find record in &#x27;t_upd&#x27;, Error_code: 1032; handler error HA_ERR_KEY_NOT_FOUND; the event&#x27;s master log mysql-slave-bin.000003, end_log_pos 3368</span><br></pre></td></tr></table></figure></p>
+<h4 id="解决方法-1"><a href="#解决方法-1" class="headerlink" title="解决方法:"></a>解决方法:</h4><p>在master上,用mysqlbinlog分析下出错的binlog日志在3368行是什么语句?</p>
+<p><code>mysqlbinlog --no-defaults --base64-output=DECODE-ROWS -v -v mysql-slave-bin.000003 | grep -A 20 &#39;end_log_pos 3368&#39;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">root@c950e5d85a10:/var/lib/mysql# mysqlbinlog --no-defaults --base64-output=DECODE-ROWS -v -v mysql-slave-bin.000003 | grep -A 20 &#x27;end_log_pos 3368&#x27;</span><br><span class="line">#200610  5:53:43 server id 2  end_log_pos 3368 CRC32 0x10aef7b4         Update_rows: table id 120 flags: STMT_END_F</span><br><span class="line">### UPDATE `test`.`t_upd`</span><br><span class="line">### WHERE</span><br><span class="line">###   @1=1 /* INT meta=0 nullable=0 is_null=0 */</span><br><span class="line">###   @2=&#x27;a1&#x27; /* VARSTRING(80) meta=80 nullable=1 is_null=0 */</span><br><span class="line">###   @3=&#x27;a2&#x27; /* VARSTRING(80) meta=80 nullable=1 is_null=0 */</span><br><span class="line">### SET</span><br><span class="line">###   @1=1 /* INT meta=0 nullable=0 is_null=0 */</span><br><span class="line">###   @2=&#x27;aa&#x27; /* VARSTRING(80) meta=80 nullable=1 is_null=0 */</span><br><span class="line">###   @3=&#x27;a2&#x27; /* VARSTRING(80) meta=80 nullable=1 is_null=0 */</span><br><span class="line"># at 3368</span><br><span class="line">#200610  5:53:43 server id 2  end_log_pos 3399 CRC32 0xffe1af2f         Xid = 215</span><br><span class="line">COMMIT/*!*/;</span><br><span class="line">SET @@SESSION.GTID_NEXT= &#x27;AUTOMATIC&#x27; /* added by mysqlbinlog */ /*!*/;</span><br><span class="line">DELIMITER ;</span><br><span class="line"># End of log file</span><br><span class="line">/*!50003 SET COMPLETION_TYPE=@OLD_COMPLETION_TYPE*/;</span><br><span class="line">/*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=0*/;</span><br></pre></td></tr></table></figure>
+<p>通过binlog日志可以看出来正在执行update语句,然后我们在slave插入缺失的数据</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stop slave;</span><br><span class="line">INSERT INTO t_upd(id,c1,c2) VALUES (1,&#x27;aa&#x27;,&#x27;a2&#x27;);</span><br><span class="line">start slave;</span><br></pre></td></tr></table></figure>
+<h3 id="slave的中继日志relay-bin损坏"><a href="#slave的中继日志relay-bin损坏" class="headerlink" title="slave的中继日志relay-bin损坏"></a>slave的中继日志relay-bin损坏</h3><h4 id="模拟故障场景-3"><a href="#模拟故障场景-3" class="headerlink" title="模拟故障场景:"></a>模拟故障场景:</h4><p>从库:<br>停止sql线程<code>stop slave sql_thread;</code><br>主库:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flush logs;</span><br><span class="line">INSERT INTO t_key(id,c1) VALUES (1,&#x27;a&#x27;);</span><br></pre></td></tr></table></figure></p>
+<p>从库:<br>删除中继日志,模拟中继日志损坏.<br><code>start slave sql_thread;</code></p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gfn8ev58s2j20yo182n4a.jpg" alt="错误状态4"><br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Last_Errno: 1593</span><br><span class="line">Last_Error: Error initializing relay log position: Could not open log file</span><br></pre></td></tr></table></figure></p>
+<h4 id="解决方法-2"><a href="#解决方法-2" class="headerlink" title="解决方法:"></a>解决方法:</h4><p>确认同步的binlog和pos点:</p>
+<ul>
+<li>Slave_IO_Running 接收Master的binlog信息</li>
+<li><p>Master_Log_File / Read_Master_Log_Pos 显示当前读取的Master节点binlog文件和位置.</p>
+</li>
+<li><p>Slave_SQL_Running 执行写操作</p>
+</li>
+<li>Relay_Log_File / Relay_Log_Pos 显示当前节点Slave节点正在处理的中继日志文件和位置.</li>
+<li>Relay_Master_Log_File / Exec_Master_Log_Pos 显示当前Slave节点正在处理的中继日志文件和位置</li>
+</ul>
+<p>重新同步:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">stop slave</span><br><span class="line"># 重新通过Master_Log_File文件信息,在Exec_Master_Log_Pos节点处开始生成中继日志文件</span><br><span class="line">CHANGE MASTER TO master_log_file = &#x27;mysql-slave-bin.000003&#x27;,</span><br><span class="line">Master_log_pos = 3399;</span><br><span class="line">start slave;</span><br></pre></td></tr></table></figure></p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html">http://my-replication-life.blogspot.com/2013/09/loss-less-semi-synchronous-replication.html</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/linux-socket/" rel="prev" title="Linux系统编程-socket编程">
+      <i class="fa fa-chevron-left"></i> Linux系统编程-socket编程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/mysql-gtid/" rel="next" title="MySQL GTID详解">
+      MySQL GTID详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">复制概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">搭建环境</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Master%E7%AB%AF%E5%90%AF%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%97%A5%E5%BF%97-binlog-%E6%8C%87%E5%AE%9Amysql%E6%9C%8D%E5%8A%A1%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80server-id"><span class="nav-number">2.1.</span> <span class="nav-text">1. Master端启用二进制日志(binlog),指定mysql服务全局唯一server_id</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Slave%E7%AB%AF%E5%90%AF%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%97%A5%E5%BF%97-binlog-%E6%8C%87%E5%AE%9Amysql%E6%9C%8D%E5%8A%A1%E5%85%A8%E5%B1%80%E5%94%AF%E4%B8%80server-id-%E6%8C%87%E5%AE%9A%E4%B8%AD%E7%BB%A7%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84"><span class="nav-number">2.2.</span> <span class="nav-text">2. Slave端启用二进制日志(binlog),指定mysql服务全局唯一server_id,指定中继日志文件路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%88%9B%E5%BB%BASlave%E5%90%8C%E6%AD%A5%E4%B8%93%E7%94%A8%E8%B4%A6%E6%88%B7"><span class="nav-number">2.3.</span> <span class="nav-text">3. 创建Slave同步专用账户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E9%93%BE%E6%8E%A5Master-%E4%B8%BB-%E5%92%8CSlave-%E4%BB%8E"><span class="nav-number">2.4.</span> <span class="nav-text">4. 链接Master(主)和Slave(从)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%8E%92%E9%94%99"><span class="nav-number">2.5.</span> <span class="nav-text">5. 排错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E6%B5%8B%E8%AF%95%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6"><span class="nav-number">2.6.</span> <span class="nav-text">6. 测试主从复制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">2.7.</span> <span class="nav-text">命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E5%85%B3%E9%94%AE%E5%9B%A0%E7%B4%A0%E5%8F%8A%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">复制关键因素及原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">复制格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E7%BB%A7%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%92%8C%E7%8A%B6%E6%80%81%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">中继日志文件和状态文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">复制原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%BA%94%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="nav-number">4.</span> <span class="nav-text">高级应用技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6%E8%BF%87%E6%BB%A4%E8%A7%84%E5%88%99"><span class="nav-number">4.1.</span> <span class="nav-text">复制过滤规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master%E7%AB%AF"><span class="nav-number">4.1.1.</span> <span class="nav-text">Master端:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Slave%E7%AB%AF"><span class="nav-number">4.1.2.</span> <span class="nav-text">Slave端:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%B9%E5%BC%8F"><span class="nav-number">4.1.3.</span> <span class="nav-text">配置方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8A%E5%90%8C%E6%AD%A5%E6%9C%BA%E5%88%B6"><span class="nav-number">4.2.</span> <span class="nav-text">半同步机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">4.2.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">4.2.2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8A%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6%E6%9C%BA%E5%88%B6%E7%9A%84%E6%94%B9%E8%BF%9B"><span class="nav-number">4.2.3.</span> <span class="nav-text">半同步复制机制的改进</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AFTER-COMMIT-%E5%8D%8A%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6-5-6%E9%BB%98%E8%AE%A4%E8%AF%A5%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.2.3.1.</span> <span class="nav-text">AFTER_COMMIT 半同步复制(5.6默认该模式)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AFTER-SYNC-%E6%97%A0%E6%8D%9F%E5%A4%8D%E5%88%B6-5-7%E9%BB%98%E8%AE%A4%E8%AF%A5%E6%A8%A1%E5%BC%8F-5-6%E6%B2%A1%E6%9C%89%E8%AF%A5%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.2.3.2.</span> <span class="nav-text">AFTER_SYNC 无损复制(5.7默认该模式,5.6没有该模式)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8A%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6%E4%B8%8E%E6%97%A0%E6%8D%9F%E5%A4%8D%E5%88%B6%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">4.2.4.</span> <span class="nav-text">半同步复制与无损复制的对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8A%E5%90%8C%E6%AD%A5%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.</span> <span class="nav-text">半同步配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.1.</span> <span class="nav-text">Master配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Slave%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.2.</span> <span class="nav-text">Slave配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BD%E6%8F%92%E4%BB%B6"><span class="nav-number">4.3.3.</span> <span class="nav-text">卸载插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">4.3.4.</span> <span class="nav-text">关键参数说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2"><span class="nav-number">4.4.</span> <span class="nav-text">手动主从切换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%B8%B8%E5%88%87%E6%8D%A2"><span class="nav-number">4.4.1.</span> <span class="nav-text">正常切换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E6%9C%BA%E5%AE%95%E6%9C%BA%E5%88%87%E6%8D%A2"><span class="nav-number">4.4.2.</span> <span class="nav-text">主机宕机切换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E4%BB%8E%E5%BB%B6%E6%97%B6%E5%88%86%E6%9E%90%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="nav-number">4.5.</span> <span class="nav-text">主从延时分析及解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8master%E4%B8%8A%E5%88%A0%E9%99%A4%E4%B8%80%E6%9D%A1%E8%AE%B0%E5%BD%95-%E8%80%8Cslave%E4%B8%8A%E6%89%BE%E4%B8%8D%E5%88%B0"><span class="nav-number">4.5.1.</span> <span class="nav-text">在master上删除一条记录,而slave上找不到.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E6%95%85%E9%9A%9C%E5%9C%BA%E6%99%AF"><span class="nav-number">4.5.1.1.</span> <span class="nav-text">模拟故障场景:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">4.5.1.2.</span> <span class="nav-text">解决方案:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%94%AE%E9%87%8D%E5%A4%8D-%E5%9C%A8slave%E5%B7%B2%E7%BB%8F%E6%9C%89%E8%AF%A5%E8%AE%B0%E5%BD%95-%E5%8F%88%E5%9C%A8master%E4%B8%8A%E6%8F%92%E5%85%A5%E4%BA%86%E5%90%8C%E4%B8%80%E6%9D%A1%E8%AE%B0%E5%BD%95"><span class="nav-number">4.5.2.</span> <span class="nav-text">主键重复,在slave已经有该记录,又在master上插入了同一条记录.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E6%95%85%E9%9A%9C%E5%9C%BA%E6%99%AF-1"><span class="nav-number">4.5.2.1.</span> <span class="nav-text">模拟故障场景:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">4.5.2.2.</span> <span class="nav-text">解决方法:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8master%E4%B8%8A%E6%9B%B4%E6%96%B0%E6%9D%A1%E8%AE%B0%E5%BD%95-%E8%80%8Cslave%E4%B8%8A%E6%89%BE%E4%B8%8D%E5%88%B0-%E4%B8%A2%E5%A4%B1%E4%BA%86%E6%95%B0%E6%8D%AE"><span class="nav-number">4.5.3.</span> <span class="nav-text">在master上更新条记录,而slave上找不到,丢失了数据.</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E6%95%85%E9%9A%9C%E5%9C%BA%E6%99%AF-2"><span class="nav-number">4.5.3.1.</span> <span class="nav-text">模拟故障场景:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95-1"><span class="nav-number">4.5.3.2.</span> <span class="nav-text">解决方法:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#slave%E7%9A%84%E4%B8%AD%E7%BB%A7%E6%97%A5%E5%BF%97relay-bin%E6%8D%9F%E5%9D%8F"><span class="nav-number">4.5.4.</span> <span class="nav-text">slave的中继日志relay-bin损坏</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9F%E6%95%85%E9%9A%9C%E5%9C%BA%E6%99%AF-3"><span class="nav-number">4.5.4.1.</span> <span class="nav-text">模拟故障场景:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95-2"><span class="nav-number">4.5.4.2.</span> <span class="nav-text">解决方法:</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.6.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/mysql-master-slave-replication/";
+    this.page.identifier = "mysql-master-slave-replication/";
+    this.page.title = "MySQL主从复制";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

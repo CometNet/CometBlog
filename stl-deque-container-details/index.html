@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Deque简介 deque是“double-ended queue”的缩写，和vector一样都是STL的容器，deque是双端数组，而vector是单端的。 deque在接口上和vector非常相似，在许多操作的地方可以直接替换。 deque可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法，这个等下会详讲）。 deque头部和尾部添加或移除元素都非常快速。但是在中部安插元素或移">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STL Deque 容器详解">
+<meta property="og:url" content="http://blog.huixing.org/stl-deque-container-details/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="Deque简介 deque是“double-ended queue”的缩写，和vector一样都是STL的容器，deque是双端数组，而vector是单端的。 deque在接口上和vector非常相似，在许多操作的地方可以直接替换。 deque可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法，这个等下会详讲）。 deque头部和尾部添加或移除元素都非常快速。但是在中部安插元素或移">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-10-15T16:10:00.000Z">
+<meta property="article:modified_time" content="2019-10-16T11:24:42.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://blog.huixing.org/stl-deque-container-details/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>STL Deque 容器详解 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/stl-deque-container-details/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          STL Deque 容器详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-10-16 00:10:00 / 修改时间：19:24:42" itemprop="dateCreated datePublished" datetime="2019-10-16T00:10:00+08:00">2019-10-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/stl-deque-container-details/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="stl-deque-container-details/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Deque简介"><a href="#Deque简介" class="headerlink" title="Deque简介"></a>Deque简介</h2><ul>
+<li>deque是“double-ended queue”的缩写，和vector一样都是STL的容器，deque是双端数组，而vector是单端的。</li>
+<li>deque在接口上和vector非常相似，在许多操作的地方可以直接替换。</li>
+<li>deque可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法，这个等下会详讲）。</li>
+<li>deque头部和尾部添加或移除元素都非常快速。但是在中部安插元素或移除元素比较费时。</li>
+</ul>
+<p>头文件<code>#include &lt;deque&gt;</code></p>
+<h2 id="deque对象的默认构造"><a href="#deque对象的默认构造" class="headerlink" title="deque对象的默认构造"></a>deque对象的默认构造</h2><p>deque采用模板类实现，deque对象的默认构造形式：<code>deque&lt;T&gt; deqT;</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deque &lt;<span class="keyword">int</span>&gt; deqInt;            <span class="comment">//一个存放int的deque容器。</span></span><br><span class="line">deque &lt;<span class="keyword">float</span>&gt; deq Float;     <span class="comment">//一个存放float的deque容器。</span></span><br><span class="line">deque &lt;string&gt; deq String;     <span class="comment">//一个存放string的deque容器。</span></span><br><span class="line">deque &lt;xxx&gt; deq xxx; 		  <span class="comment">//尖括号内还可以设置指针类型或自定义类型。 </span></span><br></pre></td></tr></table></figure>
+<h2 id="deque末尾的添加移除操作"><a href="#deque末尾的添加移除操作" class="headerlink" title="deque末尾的添加移除操作"></a>deque末尾的添加移除操作</h2><p>理论知识:</p>
+<ul>
+<li><code>deque.push_back(elem);    //在容器尾部添加一个数据</code></li>
+<li><code>deque.push_front(elem);    //在容器头部插入一个数据</code></li>
+<li><code>deque.pop_back();            //删除容器最后一个数据</code></li>
+<li><code>deque.pop_front();        //删除容器第一个数据</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqInt;</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line">deqInt.<span class="built_in">pop_front</span>();</span><br><span class="line">deqInt.<span class="built_in">pop_front</span>();</span><br><span class="line">deqInt.<span class="built_in">push_front</span>(<span class="number">11</span>);</span><br><span class="line">deqInt.<span class="built_in">push_front</span>(<span class="number">13</span>);</span><br><span class="line">deqInt.<span class="built_in">pop_back</span>();</span><br><span class="line">deqInt.<span class="built_in">pop_back</span>();</span><br><span class="line"><span class="comment">//deqInt  &#123; 13,11,5&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="deque的数据存取"><a href="#deque的数据存取" class="headerlink" title="deque的数据存取"></a>deque的数据存取</h2><p>理论知识:</p>
+<ul>
+<li><code>deque.at(idx);  //返回索引idx所指的数据，如果idx越界，抛出out_of_range。</code></li>
+<li><code>deque[idx];  //返回索引idx所指的数据，如果idx越界，不抛出异常，直接出错。</code></li>
+<li><code>deque.front();   //返回第一个数据。</code></li>
+<li><code>deque.back();  //返回最后一个数据</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqInt;</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> iA = deqInt.<span class="built_in">at</span>(<span class="number">0</span>);		<span class="comment">//1</span></span><br><span class="line"><span class="keyword">int</span> iB = deqInt[<span class="number">1</span>];			<span class="comment">//3</span></span><br><span class="line">deqInt.<span class="built_in">at</span>(<span class="number">0</span>) = <span class="number">99</span>;			<span class="comment">//99</span></span><br><span class="line">deqInt[<span class="number">1</span>] = <span class="number">88</span>;			<span class="comment">//88</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> iFront = deqInt.<span class="built_in">front</span>();	<span class="comment">//99</span></span><br><span class="line"><span class="keyword">int</span> iBack = deqInt.<span class="built_in">back</span>();	<span class="comment">//9</span></span><br><span class="line">deqInt.<span class="built_in">front</span>() = <span class="number">77</span>;			<span class="comment">//77</span></span><br><span class="line">deqInt.<span class="built_in">back</span>() = <span class="number">66</span>;			<span class="comment">//66</span></span><br></pre></td></tr></table></figure>
+<h2 id="deque与迭代器"><a href="#deque与迭代器" class="headerlink" title="deque与迭代器"></a>deque与迭代器</h2><p>理论知识</p>
+<ul>
+<li><code>deque.begin();  //返回容器中第一个元素的迭代器。</code></li>
+<li><code>deque.end();  //返回容器中最后一个元素之后的迭代器。</code></li>
+<li><code>deque.rbegin();  //返回容器中倒数第一个元素的迭代器。</code></li>
+<li><code>deque.rend();   //返回容器中倒数最后一个元素之后的迭代器。</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqInt;</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqInt.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (deque&lt;<span class="keyword">int</span>&gt;::iterator it=deqInt.<span class="built_in">begin</span>(); it!=deqInt.<span class="built_in">end</span>(); ++it)</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; *it;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 1 3 5 7 9</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (deque&lt;<span class="keyword">int</span>&gt;::reverse_iterator rit=deqInt.<span class="built_in">rbegin</span>(); rit!=deqInt.<span class="built_in">rend</span>(); ++rit)</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; *rit;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//9 7 5 3 1</span></span><br></pre></td></tr></table></figure>
+<h2 id="deque对象的带参数构造"><a href="#deque对象的带参数构造" class="headerlink" title="deque对象的带参数构造"></a>deque对象的带参数构造</h2><p>理论知识</p>
+<ul>
+<li><code>deque(beg,end);    //构造函数将[beg, end)区间中的元素拷贝给本身。注意该区间是左闭右开的区间。</code></li>
+<li><code>deque(n,elem);   //构造函数将n个elem拷贝给本身。</code></li>
+<li><code>deque(const deque  &amp;deq);  //拷贝构造函数。</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqIntA;</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="function">deque&lt;<span class="keyword">int</span>&gt; <span class="title">deqIntB</span><span class="params">(deqIntA.begin(),deqIntA.end())</span></span>;		<span class="comment">//1 3 5 7 9</span></span><br><span class="line"><span class="function">deque&lt;<span class="keyword">int</span>&gt; <span class="title">deqIntC</span><span class="params">(<span class="number">5</span>,<span class="number">8</span>)</span></span>;							<span class="comment">//8 8 8 8 8</span></span><br><span class="line"><span class="function">deque&lt;<span class="keyword">int</span>&gt; <span class="title">deqIntD</span><span class="params">(deqIntA)</span></span>;						<span class="comment">//1 3 5 7 9</span></span><br></pre></td></tr></table></figure>
+<h2 id="deque的赋值"><a href="#deque的赋值" class="headerlink" title="deque的赋值"></a>deque的赋值</h2><p>理论知识</p>
+<ul>
+<li><code>deque.assign(beg,end);    //将[beg, end)区间中的数据拷贝赋值给本身。注意该区间是左闭右开的区间。</code></li>
+<li><code>deque.assign(n,elem);  //将n个elem拷贝赋值给本身。</code></li>
+<li><code>deque&amp; operator=(const deque &amp;deq);    //重载等号操作符</code></li>
+<li><code>deque.swap(deq);  // 将vec与本身的元素互换</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqIntA,deqIntB,deqIntC,deqIntD;</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line">deqIntB.<span class="built_in">assign</span>(deqIntA.<span class="built_in">begin</span>(),deqIntA.<span class="built_in">end</span>());	<span class="comment">// 1 3 5 7 9</span></span><br><span class="line"></span><br><span class="line">deqIntC.<span class="built_in">assign</span>(<span class="number">5</span>,<span class="number">8</span>);						<span class="comment">//8 8 8 8 8</span></span><br><span class="line"></span><br><span class="line">deqIntD = deqIntA;							<span class="comment">//1 3 5 7 9</span></span><br><span class="line"></span><br><span class="line">deqIntC.<span class="built_in">swap</span>(deqIntD);						<span class="comment">//互换</span></span><br></pre></td></tr></table></figure>
+<h2 id="deque的大小"><a href="#deque的大小" class="headerlink" title="deque的大小"></a>deque的大小</h2><p>理论知识</p>
+<ul>
+<li><code>deque.size();       //返回容器中元素的个数</code></li>
+<li><code>deque.empty();       //判断容器是否为空</code></li>
+<li><code>deque.resize(num);   //重新指定容器的长度为num，若容器变长，则以默认值填充新位置。如果容器变短，则末尾超出容器长度的元素被删除。</code></li>
+<li><p><code>deque.resize(num, elem);  //重新指定容器的长度为num，若容器变长，则以elem值填充新位置。如果容器变短，则末尾超出容器长度的元素被删除。</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqIntA;</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqIntA.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> iSize = deqIntA.<span class="built_in">size</span>();  <span class="comment">//3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!deqIntA.<span class="built_in">empty</span>())</span><br><span class="line">&#123;</span><br><span class="line">    deqIntA.<span class="built_in">resize</span>(<span class="number">5</span>);		<span class="comment">//1 3 5 0 0</span></span><br><span class="line">    deqIntA.<span class="built_in">resize</span>(<span class="number">7</span>,<span class="number">1</span>);	<span class="comment">//1 3 5 0 0 1 1</span></span><br><span class="line">    deqIntA.<span class="built_in">resize</span>(<span class="number">2</span>);		<span class="comment">//1 3</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="deque的插入"><a href="#deque的插入" class="headerlink" title="deque的插入"></a>deque的插入</h2><p>理论知识</p>
+</li>
+<li><p><code>deque.insert(pos,elem);   //在pos位置插入一个elem元素的拷贝，返回新数据的位置。</code></p>
+</li>
+<li><code>deque.insert(pos,n,elem);   //在pos位置插入n个elem数据，无返回值。</code></li>
+<li><code>deque.insert(pos,beg,end);   //在pos位置插入[beg,end)区间的数据，无返回值。</code><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqA;</span><br><span class="line">deque&lt;<span class="keyword">int</span>&gt; deqB;</span><br><span class="line"></span><br><span class="line">deqA.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">deqA.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">deqA.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">deqA.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">deqA.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line">deqB.<span class="built_in">push_back</span>(<span class="number">2</span>);</span><br><span class="line">deqB.<span class="built_in">push_back</span>(<span class="number">4</span>);</span><br><span class="line">deqB.<span class="built_in">push_back</span>(<span class="number">6</span>);</span><br><span class="line">deqB.<span class="built_in">push_back</span>(<span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">deqA.<span class="built_in">insert</span>(deqA.<span class="built_in">begin</span>(), <span class="number">11</span>);		<span class="comment">//&#123;11, 1, 3, 5, 7, 9&#125;</span></span><br><span class="line">deqA.<span class="built_in">insert</span>(deqA.<span class="built_in">begin</span>()+<span class="number">1</span>,<span class="number">2</span>,<span class="number">33</span>);		<span class="comment">//&#123;11,33,33,1,3,5,7,9&#125;</span></span><br><span class="line">deqA.<span class="built_in">insert</span>(deqA.<span class="built_in">begin</span>() , deqB.<span class="built_in">begin</span>() , deqB.<span class="built_in">end</span>() );	<span class="comment">//&#123;2,4,6,8,11,33,33,1,3,5,7,9&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="deque的删除"><a href="#deque的删除" class="headerlink" title="deque的删除"></a>deque的删除</h2><p>理论知识</p>
+<ul>
+<li><code>deque.clear();    //移除容器的所有数据</code></li>
+<li><code>deque.erase(beg,end);  //删除[beg,end)区间的数据，返回下一个数据的位置。</code></li>
+<li><code>deque.erase(pos);    //删除pos位置的数据，返回下一个数据的位置。</code></li>
+</ul>
+<p>删除区间内的元素</p>
+<p><code>deqInt</code>是用<code>deque&lt;int&gt;</code>声明的容器，现已包含按顺序的1,3,5,6,9元素。</p>
+<p><code>deque&lt;int&gt;::iterator itBegin=deqInt.begin()+1;</code></p>
+<p><code>deque&lt;int&gt;::iterator itEnd=deqInt.begin()+3;</code></p>
+<p><code>deqInt.erase(itBegin,itEnd);//此时容器deqInt包含按顺序的1,6,9三个元素。</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//假设 deqInt 包含1,3,2,3,3,3,4,3,5,3，删除容器中等于3的元素</span></span><br><span class="line"><span class="keyword">for</span>(deque&lt;<span class="keyword">int</span>&gt;::iterator it=deqInt.<span class="built_in">being</span>(); it!=deqInt.<span class="built_in">end</span>(); )    <span class="comment">//小括号里不需写  ++it</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span>(*it == <span class="number">3</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        it  =  deqInt.<span class="built_in">erase</span>(it);       <span class="comment">//以迭代器为参数，删除元素3，并把数据删除后的下一个元素位置返回给迭代器。</span></span><br><span class="line">        <span class="comment">//此时，不执行  ++it；</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        ++it;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//删除deqInt的所有元素</span></span><br><span class="line">deqInt.<span class="built_in">clear</span>();			<span class="comment">//容器为空</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/stl-vector-container-details/" rel="prev" title="STL Vector 容器详解">
+      <i class="fa fa-chevron-left"></i> STL Vector 容器详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/stl-stack-container-details/" rel="next" title="STL Stack 容器详解">
+      STL Stack 容器详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Deque%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">Deque简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E5%AF%B9%E8%B1%A1%E7%9A%84%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0"><span class="nav-number">2.</span> <span class="nav-text">deque对象的默认构造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E6%9C%AB%E5%B0%BE%E7%9A%84%E6%B7%BB%E5%8A%A0%E7%A7%BB%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="nav-number">3.</span> <span class="nav-text">deque末尾的添加移除操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E7%9A%84%E6%95%B0%E6%8D%AE%E5%AD%98%E5%8F%96"><span class="nav-number">4.</span> <span class="nav-text">deque的数据存取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">deque与迭代器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%B8%A6%E5%8F%82%E6%95%B0%E6%9E%84%E9%80%A0"><span class="nav-number">6.</span> <span class="nav-text">deque对象的带参数构造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E7%9A%84%E8%B5%8B%E5%80%BC"><span class="nav-number">7.</span> <span class="nav-text">deque的赋值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">8.</span> <span class="nav-text">deque的大小</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E7%9A%84%E6%8F%92%E5%85%A5"><span class="nav-number">9.</span> <span class="nav-text">deque的插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#deque%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">10.</span> <span class="nav-text">deque的删除</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/stl-deque-container-details/";
+    this.page.identifier = "stl-deque-container-details/";
+    this.page.title = "STL Deque 容器详解";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="命令总结   命令 描述     mkdir 创建目录的命令(-p 递归创建) make directorys   ls -l(long)d(directory)显示目录或者文件 全称list   cd 切换目录层次change directory   echo 打印输出内容   vi&#x2F;vim 记事本编辑器 命令模式(:wq,:q,:q!,:wq!) 插入模式按esc键   vimdiff 比对文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="运维学习笔记">
+<meta property="og:url" content="http://blog.huixing.org/operation-and-maintenance-notes/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="命令总结   命令 描述     mkdir 创建目录的命令(-p 递归创建) make directorys   ls -l(long)d(directory)显示目录或者文件 全称list   cd 切换目录层次change directory   echo 打印输出内容   vi&#x2F;vim 记事本编辑器 命令模式(:wq,:q,:q!,:wq!) 插入模式按esc键   vimdiff 比对文">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-17T06:40:00.000Z">
+<meta property="article:modified_time" content="2019-10-16T06:26:11.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://blog.huixing.org/operation-and-maintenance-notes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>运维学习笔记 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/operation-and-maintenance-notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          运维学习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-05-17 14:40:00" itemprop="dateCreated datePublished" datetime="2019-05-17T14:40:00+08:00">2019-05-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 14:26:11" itemprop="dateModified" datetime="2019-10-16T14:26:11+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/operation-and-maintenance-notes/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="operation-and-maintenance-notes/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="命令总结"><a href="#命令总结" class="headerlink" title="命令总结"></a>命令总结</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mkdir</td>
+<td>创建目录的命令(-p 递归创建) make directorys</td>
+</tr>
+<tr>
+<td>ls</td>
+<td>-l(long)d(directory)显示目录或者文件 全称list</td>
+</tr>
+<tr>
+<td>cd</td>
+<td>切换目录层次change directory</td>
+</tr>
+<tr>
+<td>echo</td>
+<td>打印输出内容</td>
+</tr>
+<tr>
+<td>vi/vim</td>
+<td>记事本编辑器 命令模式(:wq,:q,:q!,:wq!) 插入模式按esc键</td>
+</tr>
+<tr>
+<td>vimdiff</td>
+<td>比对文件改修</td>
+</tr>
+<tr>
+<td>visudo</td>
+<td>编辑sudo配置文件 vi /etc/sudoers</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>查看文件内容</td>
+</tr>
+<tr>
+<td>cp</td>
+<td>-apr 拷贝文件或者目录(cp -r)</td>
+</tr>
+<tr>
+<td>mv</td>
+<td>移动文件或者目录</td>
+</tr>
+<tr>
+<td>rm</td>
+<td>删除文件或者目录 强制删除(-rf)</td>
+</tr>
+<tr>
+<td>rmdir</td>
+<td>删除空目录</td>
+</tr>
+<tr>
+<td>head</td>
+<td>显示文件头部(-行数 显示行数)默认10行</td>
+</tr>
+<tr>
+<td>tail</td>
+<td>显示文件尾部(-行数 显示行数)默认10行</td>
+</tr>
+<tr>
+<td>grep</td>
+<td>过滤命令,级别为行(-v 是排除)</td>
+</tr>
+<tr>
+<td>egrep</td>
+<td>相当于grep -E过滤多个字符串</td>
+</tr>
+<tr>
+<td>sed</td>
+<td>取文件内容 -n取消默认输出 p=pring d=delete</td>
+</tr>
+<tr>
+<td>tree</td>
+<td>打印文件夹树状结构</td>
+</tr>
+<tr>
+<td>man</td>
+<td>查询命令帮助文档</td>
+</tr>
+<tr>
+<td>touch</td>
+<td>创建空文件/更新已存在文件的时间</td>
+</tr>
+<tr>
+<td>which</td>
+<td>查看命令所在路径</td>
+</tr>
+<tr>
+<td>alias</td>
+<td>别名命令</td>
+</tr>
+<tr>
+<td>unalias</td>
+<td>取消别名</td>
+</tr>
+<tr>
+<td>find</td>
+<td>查找命令 -type(f d) -name 按照名字查找 -mtime按照修改时间</td>
+</tr>
+<tr>
+<td>seq</td>
+<td>用于以指定增量从首数开始打印数字到尾数</td>
+</tr>
+<tr>
+<td>xargs</td>
+<td>将参数列表转换成小块分段传递</td>
+</tr>
+<tr>
+<td>pwd</td>
+<td>显示当前所在路径</td>
+</tr>
+<tr>
+<td>history</td>
+<td>查看命令历史记录</td>
+</tr>
+<tr>
+<td>useradd/adduser</td>
+<td>添加账号</td>
+</tr>
+<tr>
+<td>passwd</td>
+<td>修改密码</td>
+</tr>
+<tr>
+<td>whoami</td>
+<td>查看当前账号</td>
+</tr>
+<tr>
+<td>su</td>
+<td>切换用户 (su - 切换环境变量)</td>
+</tr>
+<tr>
+<td>sudo</td>
+<td>普通用户拥有root权限</td>
+</tr>
+<tr>
+<td>getenforce</td>
+<td>查看当前SELinux的应用模式</td>
+</tr>
+<tr>
+<td>setenforce</td>
+<td>设置当前临时SELinux的应用模式</td>
+</tr>
+<tr>
+<td>runlevel</td>
+<td>查看当前linux运行级别</td>
+</tr>
+<tr>
+<td>init</td>
+<td>切换运行级别</td>
+</tr>
+<tr>
+<td>chkconfig</td>
+<td>查看启动项或设置启动项命令</td>
+</tr>
+<tr>
+<td>netstat</td>
+<td>用于显示与IP、TCP、UDP和ICMP协议相关的统计数据，一般用于检验本机各端口的网络连接情况.</td>
+</tr>
+<tr>
+<td>source</td>
+<td>通常用于重新执行刚修改的初始化文件，使之立即生效，而不必注销并重新登录。</td>
+</tr>
+<tr>
+<td>lsof</td>
+<td>列出当前系统打开文件的工具</td>
+</tr>
+<tr>
+<td>last</td>
+<td>显示最后登录过的用户列表</td>
+</tr>
+<tr>
+<td>lastlog</td>
+<td>显示最近用户登录的信息</td>
+</tr>
+<tr>
+<td>file</td>
+<td>查看文件类型</td>
+</tr>
+<tr>
+<td>stat</td>
+<td>显示 文件/文件系统 的详细信息</td>
+</tr>
+<tr>
+<td>less</td>
+<td>和more类似，但其优点可以往前翻页，而且进行可以搜索字符</td>
+</tr>
+<tr>
+<td>more</td>
+<td>根据窗口大小，一页一页的现实文件内容</td>
+</tr>
+<tr>
+<td>dumpe2fs</td>
+<td>查看格式化之后的文件系统信息</td>
+</tr>
+<tr>
+<td>wc</td>
+<td>(Word Count)命令的功能为统计指定文件中的字节数、字数、行数，并将统计结果显示输出。</td>
+</tr>
+<tr>
+<td>ln</td>
+<td>创建连接文件 -s软连接</td>
+</tr>
+<tr>
+<td>tar</td>
+<td>打包命令,zcvf打包组合,解包组合zxfv,</td>
+</tr>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="符号总结"><a href="#符号总结" class="headerlink" title="符号总结"></a>符号总结</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>;</td>
+<td>多个命令的分隔符</td>
+</tr>
+<tr>
+<td>/</td>
+<td>根或者路径的分隔符</td>
+</tr>
+<tr>
+<td>>或1&gt;</td>
+<td>输出重定向:把前面输出的内容输入到后面的文件中,会删除文件原有内容.</td>
+</tr>
+<tr>
+<td>>&gt;或1&gt;&gt;</td>
+<td>追加重定向:把前面输出的内容追加到后面的文件中,不会删除文件原有内容</td>
+</tr>
+<tr>
+<td>&lt;或&lt;0</td>
+<td>输入重定向:用于改变命令的输入,指定输入内容,后跟文件名.</td>
+</tr>
+<tr>
+<td>&lt;&lt;或&lt;&lt;0</td>
+<td>输入重定向:后跟字符串,用来表示”输入结束”,也可用ctrl+d来结束输入.</td>
+</tr>
+<tr>
+<td>2&gt;</td>
+<td>错误重定向:把错误信息输入到后面文件中,会删除文件原有内容.</td>
+</tr>
+<tr>
+<td>2&gt;&gt;</td>
+<td>错误追加重定向:把错误信息追加到后边的文件中,不会删除文件原有内容</td>
+</tr>
+<tr>
+<td>~</td>
+<td>家目录,类似编程语言中的this</td>
+</tr>
+<tr>
+<td>\</td>
+<td>管道符号 通过管道把前一个命令的输出交给后一个命令继续处理</td>
+</tr>
+<tr>
+<td>{}</td>
+<td>配合echo打印序列 echo {1..6}</td>
+</tr>
+<tr>
+<td>!1~9</td>
+<td>!加history记录行号可以执行history记录中的命令</td>
+</tr>
+<tr>
+<td>!!</td>
+<td>执行最近的命令</td>
+</tr>
+<tr>
+<td>!a~z</td>
+<td>!加字母可以查询history中最近使用过的命令</td>
+</tr>
+<tr>
+<td>PATH</td>
+<td>PATH的值是一系列目录，当您运行一个程序时，Linux在这些目录下进行搜寻。用以下命令可以看到PATH的值。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="快捷键"><a href="#快捷键" class="headerlink" title="快捷键"></a>快捷键</h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tab</td>
+<td>命令或者路径补全</td>
+</tr>
+<tr>
+<td>Ctrl+c</td>
+<td>终止当前任务命令或程序</td>
+</tr>
+<tr>
+<td>Ctrl+d</td>
+<td>退出当前用户环境,相当于exit,logout</td>
+</tr>
+<tr>
+<td>Ctrl+shift+c</td>
+<td>ssh客户端复制命令</td>
+</tr>
+<tr>
+<td>Ctrl+shift+v</td>
+<td>ssh客户端复制粘贴</td>
+</tr>
+</tbody>
+</table>
+<h2 id="LINUX字符集问题"><a href="#LINUX字符集问题" class="headerlink" title="LINUX字符集问题"></a>LINUX字符集问题</h2><p>linux系统下字符集有变量LANG控制<br>echo $LANG</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/c-language-pointer-explanation/" rel="prev" title="C语言指针详解">
+      <i class="fa fa-chevron-left"></i> C语言指针详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/linux_system_hard_link_and_soft_link/" rel="next" title="Linux系统硬链接与软链接详解">
+      Linux系统硬链接与软链接详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">命令总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">符号总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E6%8D%B7%E9%94%AE"><span class="nav-number">3.</span> <span class="nav-text">快捷键</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LINUX%E5%AD%97%E7%AC%A6%E9%9B%86%E9%97%AE%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">LINUX字符集问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/operation-and-maintenance-notes/";
+    this.page.identifier = "operation-and-maintenance-notes/";
+    this.page.title = "运维学习笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

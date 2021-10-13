@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="信号概念信号其实我们也见过，当我们在shell上写出一个死循环退不出来的时候，只需要一个组合键，ctrl+c,就可以解决了，这就是一个信号，但是真正的过程并不是那么简单的。  当用户按下这一对组合键时，这个键盘输入会产生一个硬件中断，如果CPU正在执行这个进程的代码时，则该进程的用户代码先暂停执行，用户从用户态切换到内核态处理硬件中断  终端驱动程序将这一对组合键翻译成一个SIGINT(ctrl+">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux系统编程-信号">
+<meta property="og:url" content="http://blog.huixing.org/linux-signal/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="信号概念信号其实我们也见过，当我们在shell上写出一个死循环退不出来的时候，只需要一个组合键，ctrl+c,就可以解决了，这就是一个信号，但是真正的过程并不是那么简单的。  当用户按下这一对组合键时，这个键盘输入会产生一个硬件中断，如果CPU正在执行这个进程的代码时，则该进程的用户代码先暂停执行，用户从用户态切换到内核态处理硬件中断  终端驱动程序将这一对组合键翻译成一个SIGINT(ctrl+">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gc9why2s0ej20f9050t8s.jpg">
+<meta property="og:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gca1j7mvxzj20dw0bs0vj.jpg">
+<meta property="article:published_time" content="2020-02-26T03:44:04.000Z">
+<meta property="article:modified_time" content="2020-02-29T06:15:11.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ww1.sinaimg.cn/large/a3eed545ly1gc9why2s0ej20f9050t8s.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/linux-signal/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux系统编程-信号 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux-signal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux系统编程-信号
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-26 11:44:04" itemprop="dateCreated datePublished" datetime="2020-02-26T11:44:04+08:00">2020-02-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-29 14:15:11" itemprop="dateModified" datetime="2020-02-29T14:15:11+08:00">2020-02-29</time>
+              </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux-signal/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux-signal/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="信号概念"><a href="#信号概念" class="headerlink" title="信号概念"></a>信号概念</h2><p>信号其实我们也见过，当我们在shell上写出一个死循环退不出来的时候，只需要一个组合键，ctrl+c,就可以解决了，这就是一个信号，但是真正的过程并不是那么简单的。</p>
+<ol>
+<li><p>当用户按下这一对组合键时，这个键盘输入会产生一个硬件中断，如果CPU正在执行这个进程的代码时，则该进程的用户代码先暂停执行，用户从用户态切换到内核态处理硬件中断</p>
+</li>
+<li><p>终端驱动程序将这一对组合键翻译成一个SIGINT(ctrl+c)信号记在该进程的PCB中（也就是发送了一个SIGINT信号给该进程）</p>
+</li>
+<li><p>当某个时刻要从内核态回到该进程的用户·空间代码继续执行之前，首先处理PCB中的信号，发现有一个SIGINT信号需要处理，而这个信号的默认处理方式是终止进程，所以直接终止进程，不再返回用户空间执行代码。</p>
+</li>
+<li><p>shell可以同时运行一个前台进程和多个后台进程，只有前台进程才能收到ctrl+c这种组合键产生的信号</p>
+</li>
+<li><p>前台进程在 运行过程中用户可以随时按下ctrl+c产生一个信号也就是说前台进程的用户空间代码执行到任意一个时刻都可能接收到SIGINT信号而终止，所以信号对于进程的控制流来说是异步的。</p>
+</li>
+</ol>
+<p><strong>注意：ctrl+c只能终止前台进程。一个命令可以加&amp;可以将进程放在后台执行，这样shell就不必等待进程结束就可以接收新的命令，启动新的进程</strong></p>
+<h2 id="信号介绍"><a href="#信号介绍" class="headerlink" title="信号介绍"></a>信号介绍</h2><p>在bash上执行命令kill -l便可看到系统定义的所有信号<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ kill -l</span><br><span class="line">1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL</span><br><span class="line">5) SIGTRAP      6) SIGABRT      7) SIGBUS       8) SIGFPE</span><br><span class="line">9) SIGKILL     10) SIGUSR1     11) SIGSEGV     12) SIGUSR2</span><br><span class="line">13) SIGPIPE     14) SIGALRM     15) SIGTERM     17) SIGCHLD</span><br><span class="line">18) SIGCONT     19) SIGSTOP     20) SIGTSTP     21) SIGTTIN</span><br><span class="line">22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ</span><br><span class="line">26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO</span><br><span class="line">30) SIGPWR      31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1</span><br><span class="line">36) SIGRTMIN+2  37) SIGRTMIN+3  38) SIGRTMIN+4  39) SIGRTMIN+5</span><br><span class="line">40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8  43) SIGRTMIN+9</span><br><span class="line">44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13</span><br><span class="line">48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13</span><br><span class="line">52) SIGRTMAX-12 53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9</span><br><span class="line">56) SIGRTMAX-8  57) SIGRTMAX-7  58) SIGRTMAX-6  59) SIGRTMAX-5</span><br><span class="line">60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2  63) SIGRTMAX-1</span><br><span class="line">64) SIGRTMAX</span><br></pre></td></tr></table></figure><br>列表中，编号为1 ~ 31的信号为传统UNIX支持的信号，是不可靠信号(非实时的)，编号为32 ~ 63的信号是后来扩充的，称做可靠信号(实时信号)。不可靠信号和可靠信号的区别在于前者不支持排队，可能会造成信号丢失，而后者不会。</p>
+<p>每个信号都有一个编号和一个宏定义名称，这些宏定义都可以在signal.h中找到，在man手册中还可以找到各种信号的详细信息</p>
+<p><code>man 7 signal</code></p>
+<p>下面我们对编号小于SIGRTMIN的信号进行讨论。</p>
+<h3 id="SIGHUP"><a href="#SIGHUP" class="headerlink" title="SIGHUP"></a>SIGHUP</h3><p>1) SIGHUP<br>本信号在用户终端连接(正常或非正常)结束时发出, 通常是在终端的控制进程结束时, 通知同一session内的各个作业, 这时它们与控制终端不再关联。</p>
+<p>登录Linux时，系统会分配给登录用户一个终端(Session)。在这个终端运行的所有程序，包括前台进程组和后台进程组，一般都属于这个Session。当用户退出Linux登录时，前台进程组和后台有对终端输出的进程将会收到SIGHUP信号。这个信号的默认操作为终止进程，因此前台进程组和后台有终端输出的进程就会中止。不过可以捕获这个信号，比如wget能捕获SIGHUP信号，并忽略它，这样就算退出了Linux登录，wget也能继续下载。</p>
+<p>此外，对于与终端脱离关系的守护进程，这个信号用于通知它重新读取配置文件。</p>
+<h3 id="SIGINT"><a href="#SIGINT" class="headerlink" title="SIGINT"></a>SIGINT</h3><p>2) SIGINT<br>程序终止(interrupt)信号, 在用户键入INTR字符(通常是Ctrl-C)时发出，用于通知前台进程组终止进程。</p>
+<h3 id="SIGQUIT"><a href="#SIGQUIT" class="headerlink" title="SIGQUIT"></a>SIGQUIT</h3><p>3) SIGQUIT<br>和SIGINT类似, 但由QUIT字符(通常是Ctrl-/)来控制. 进程在因收到SIGQUIT退出时会产生core文件, 在这个意义上类似于一个程序错误信号。</p>
+<h3 id="SIGILL"><a href="#SIGILL" class="headerlink" title="SIGILL"></a>SIGILL</h3><p>4) SIGILL<br>执行了非法指令. 通常是因为可执行文件本身出现错误, 或者试图执行数据段. 堆栈溢出时也有可能产生这个信号。</p>
+<h3 id="SIGTRAP"><a href="#SIGTRAP" class="headerlink" title="SIGTRAP"></a>SIGTRAP</h3><p>5) SIGTRAP<br>由断点指令或其它trap指令产生. 由debugger使用。</p>
+<h3 id="SIGABRT"><a href="#SIGABRT" class="headerlink" title="SIGABRT"></a>SIGABRT</h3><p>6) SIGABRT<br>调用abort函数生成的信号。</p>
+<h3 id="SIGBUS"><a href="#SIGBUS" class="headerlink" title="SIGBUS"></a>SIGBUS</h3><p>7) SIGBUS<br>非法地址, 包括内存地址对齐(alignment)出错。比如访问一个四个字长的整数, 但其地址不是4的倍数。它与SIGSEGV的区别在于后者是由于对合法存储地址的非法访问触发的(如访问不属于自己存储空间或只读存储空间)。</p>
+<h3 id="SIGFPE"><a href="#SIGFPE" class="headerlink" title="SIGFPE"></a>SIGFPE</h3><p>8) SIGFPE<br>在发生致命的算术运算错误时发出. 不仅包括浮点运算错误, 还包括溢出及除数为0等其它所有的算术的错误。</p>
+<h3 id="SIGKILL"><a href="#SIGKILL" class="headerlink" title="SIGKILL"></a>SIGKILL</h3><p>9) SIGKILL<br>用来立即结束程序的运行. 本信号不能被阻塞、处理和忽略。如果管理员发现某个进程终止不了，可尝试发送这个信号。</p>
+<h3 id="SIGUSR1"><a href="#SIGUSR1" class="headerlink" title="SIGUSR1"></a>SIGUSR1</h3><p>10) SIGUSR1<br>留给用户使用</p>
+<h3 id="SIGSEGV"><a href="#SIGSEGV" class="headerlink" title="SIGSEGV"></a>SIGSEGV</h3><p>11) SIGSEGV<br>试图访问未分配给自己的内存, 或试图往没有写权限的内存地址写数据.</p>
+<h3 id="SIGUSR2"><a href="#SIGUSR2" class="headerlink" title="SIGUSR2"></a>SIGUSR2</h3><p>12) SIGUSR2<br>留给用户使用</p>
+<h3 id="SIGPIPE"><a href="#SIGPIPE" class="headerlink" title="SIGPIPE"></a>SIGPIPE</h3><p>13) SIGPIPE<br>管道破裂。这个信号通常在进程间通信产生，比如采用FIFO(管道)通信的两个进程，读管道没打开或者意外终止就往管道写，写进程会收到SIGPIPE信号。此外用Socket通信的两个进程，写进程在写Socket的时候，读进程已经终止。</p>
+<h3 id="SIGALRM"><a href="#SIGALRM" class="headerlink" title="SIGALRM"></a>SIGALRM</h3><p>14) SIGALRM<br>时钟定时信号, 计算的是实际的时间或时钟时间. alarm函数使用该信号.</p>
+<h3 id="SIGTERM"><a href="#SIGTERM" class="headerlink" title="SIGTERM"></a>SIGTERM</h3><p>15) SIGTERM<br>程序结束(terminate)信号, 与SIGKILL不同的是该信号可以被阻塞和处理。通常用来要求程序自己正常退出，shell命令kill缺省产生这个信号。如果进程终止不了，我们才会尝试SIGKILL。</p>
+<h3 id="SIGCHLD"><a href="#SIGCHLD" class="headerlink" title="SIGCHLD"></a>SIGCHLD</h3><p>17) SIGCHLD<br>子进程结束时, 父进程会收到这个信号。</p>
+<p>如果父进程没有处理这个信号，也没有等待(wait)子进程，子进程虽然终止，但是还会在内核进程表中占有表项，这时的子进程称为僵尸进程。这种情况我们应该避免(父进程或者忽略SIGCHILD信号，或者捕捉它，或者wait它派生的子进程，或者父进程先终止，这时子进程的终止自动由init进程来接管)。</p>
+<h3 id="SIGCONT"><a href="#SIGCONT" class="headerlink" title="SIGCONT"></a>SIGCONT</h3><p>18) SIGCONT<br>让一个停止(stopped)的进程继续执行. 本信号不能被阻塞. 可以用一个handler来让程序在由stopped状态变为继续执行时完成特定的工作. 例如, 重新显示提示符</p>
+<h3 id="SIGSTOP"><a href="#SIGSTOP" class="headerlink" title="SIGSTOP"></a>SIGSTOP</h3><p>19) SIGSTOP<br>停止(stopped)进程的执行. 注意它和terminate以及interrupt的区别:该进程还未结束, 只是暂停执行. 本信号不能被阻塞, 处理或忽略.</p>
+<h3 id="SIGTSTP"><a href="#SIGTSTP" class="headerlink" title="SIGTSTP"></a>SIGTSTP</h3><p>20) SIGTSTP<br>停止进程的运行, 但该信号可以被处理和忽略. 用户键入SUSP字符时(通常是Ctrl-Z)发出这个信号</p>
+<h3 id="SIGTTIN"><a href="#SIGTTIN" class="headerlink" title="SIGTTIN"></a>SIGTTIN</h3><p>21) SIGTTIN<br>当后台作业要从用户终端读数据时, 该作业中的所有进程会收到SIGTTIN信号. 缺省时这些进程会停止执行.</p>
+<h3 id="SIGTTOU"><a href="#SIGTTOU" class="headerlink" title="SIGTTOU"></a>SIGTTOU</h3><p>22) SIGTTOU<br>类似于SIGTTIN, 但在写终端(或修改终端模式)时收到.</p>
+<h3 id="SIGURG"><a href="#SIGURG" class="headerlink" title="SIGURG"></a>SIGURG</h3><p>23) SIGURG<br>有”紧急”数据或out-of-band数据到达socket时产生.</p>
+<h3 id="SIGXCPU"><a href="#SIGXCPU" class="headerlink" title="SIGXCPU"></a>SIGXCPU</h3><p>24) SIGXCPU<br>超过CPU时间资源限制. 这个限制可以由getrlimit/setrlimit来读取/改变。</p>
+<h3 id="SIGXFSZ"><a href="#SIGXFSZ" class="headerlink" title="SIGXFSZ"></a>SIGXFSZ</h3><p>25) SIGXFSZ<br>当进程企图扩大文件以至于超过文件大小资源限制。</p>
+<h3 id="SIGVTALRM"><a href="#SIGVTALRM" class="headerlink" title="SIGVTALRM"></a>SIGVTALRM</h3><p>26) SIGVTALRM<br>虚拟时钟信号. 类似于SIGALRM, 但是计算的是该进程占用的CPU时间.</p>
+<h3 id="SIGPROF"><a href="#SIGPROF" class="headerlink" title="SIGPROF"></a>SIGPROF</h3><p>27) SIGPROF<br>类似于SIGALRM/SIGVTALRM, 但包括该进程用的CPU时间以及系统调用的时间.</p>
+<h3 id="SIGWINCH"><a href="#SIGWINCH" class="headerlink" title="SIGWINCH"></a>SIGWINCH</h3><p>28) SIGWINCH<br>窗口大小改变时发出.</p>
+<h3 id="SIGIO"><a href="#SIGIO" class="headerlink" title="SIGIO"></a>SIGIO</h3><p>29) SIGIO<br>文件描述符准备就绪, 可以开始进行输入/输出操作.</p>
+<h3 id="SIGPWR"><a href="#SIGPWR" class="headerlink" title="SIGPWR"></a>SIGPWR</h3><p>30) SIGPWR<br>Power failure</p>
+<h3 id="SIGSYS"><a href="#SIGSYS" class="headerlink" title="SIGSYS"></a>SIGSYS</h3><p>31) SIGSYS<br>非法的系统调用。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在以上列出的信号中，程序不可捕获、阻塞或忽略的信号有：SIGKILL,SIGSTOP<br>不能恢复至默认动作的信号有：SIGILL,SIGTRAP<br>默认会导致进程流产的信号有：SIGABRT,SIGBUS,SIGFPE,SIGILL,SIGIOT,SIGQUIT,SIGSEGV,SIGTRAP,SIGXCPU,SIGXFSZ<br>默认会导致进程退出的信号有：SIGALRM,SIGHUP,SIGINT,SIGKILL,SIGPIPE,SIGPOLL,SIGPROF,SIGSYS,SIGTERM,SIGUSR1,SIGUSR2,SIGVTALRM<br>默认会导致进程停止的信号有：SIGSTOP,SIGTSTP,SIGTTIN,SIGTTOU<br>默认进程忽略的信号有：SIGCHLD,SIGPWR,SIGURG,SIGWINCH</p>
+<p>此外，SIGIO在SVR4是退出，在4.3BSD中是忽略；SIGCONT在进程挂起时是继续，否则是忽略，不能被阻塞。 </p>
+<h2 id="产生信号的方式"><a href="#产生信号的方式" class="headerlink" title="产生信号的方式"></a>产生信号的方式</h2><ol>
+<li><p>通过键盘的组合键产生，比如ctrl+c产生SIGINT信号，ctrl+\产生SIGQUIT信号，ctrl+z产生SIGTSTP信号</p>
+</li>
+<li><p>硬件异常产生信号，这些条件由硬件检测并通知内核，然后内核向进程发送适当的信号，比如执行了除以零的指令，进程访问了非法内存地址，cpu的运算单元都会产生异常，内核将这个异常解释成一个个信号发送给进程</p>
+</li>
+<li><p>一个进程调用kill(2)函数可以发送信号给另一个进程。可以用kill(1)发送信号给某一个进程kill(1)也是用kill(2)实现的如果不清楚指定信号则发送SIGTERM信号，该信号的默认处理动作是终止进程，当内核检测到软件条件发生时也可以通过信号通知进程例如闹钟超时，会产生SIGALRM信号，向读端已经关闭的管道文件写数据时产生SIGPIPE信号，如果不想按照默认动作处理信号，用户可以调用sigaction（2）函数告诉内核如何处理某种信号</p>
+</li>
+<li><p>软件条件产生</p>
+</li>
+</ol>
+<h2 id="信号常见处理方式"><a href="#信号常见处理方式" class="headerlink" title="信号常见处理方式"></a>信号常见处理方式</h2><ol>
+<li><p>忽略该信号</p>
+</li>
+<li><p>执行信号的默认处理动作</p>
+</li>
+<li><p>提供一个信号处理函数，要求内核在处理信号时切换到用户态执行这个处理函数，这种方式称为捕捉一个异常</p>
+</li>
+</ol>
+<h2 id="信号产生具体过程"><a href="#信号产生具体过程" class="headerlink" title="信号产生具体过程"></a>信号产生具体过程</h2><h3 id="通过终端按键来产生信号"><a href="#通过终端按键来产生信号" class="headerlink" title="通过终端按键来产生信号"></a>通过终端按键来产生信号</h3><p>SIGINT (ctrl+c)的默认处理动作是终止进程，SIGQUIT(trl+/)的默认处理动作是终止进程并Core Dump,我们在Linux环境下来验证一下，先来了解一下什么是<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E6%A0%B8%E5%BF%83%E8%BD%AC%E5%82%A8">Core Dump</a>.</p>
+<p>当一个进程要异常终止时，可以选择把进程的用户空间内存数据全部保存在磁盘上，文件名通常是core，这叫做<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E6%A0%B8%E5%BF%83%E8%BD%AC%E5%82%A8">Core Dump</a>。进程异常终止通常是因为有BUG，比如非法访问内存导致段错误，事后可以用调试器检查core文件以查清楚错误原因，这叫做事后调试，一个进程允许产生多大的core文件取决于进程的Resource Limit（这个信息保存在PCB中），默认是不允许改变这个限制，允许产生core文件。首先用ulimit命令来改变shell进程的Resource Limit，允许core文件最大为1024k</p>
+<p><code>ulimit -c 1024</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux ~]# ulimit -c 1024</span><br><span class="line">[root@centos-linux ~]# ulimit -a</span><br><span class="line">core file size          (blocks, -c) 1024</span><br><span class="line">data seg size           (kbytes, -d) unlimited</span><br><span class="line">scheduling priority             (-e) 0</span><br><span class="line">file size               (blocks, -f) unlimited</span><br><span class="line">pending signals                 (-i) 7240</span><br><span class="line">max locked memory       (kbytes, -l) 64</span><br><span class="line">max memory size         (kbytes, -m) unlimited</span><br><span class="line">open files                      (-n) 1024</span><br><span class="line">pipe size            (512 bytes, -p) 8</span><br><span class="line">POSIX message queues     (bytes, -q) 819200</span><br><span class="line">real-time priority              (-r) 0</span><br><span class="line">stack size              (kbytes, -s) 8192</span><br><span class="line">cpu time               (seconds, -t) unlimited</span><br><span class="line">max user processes              (-u) 7240</span><br><span class="line">virtual memory          (kbytes, -v) unlimited</span><br><span class="line">file locks                      (-x) unlimited</span><br></pre></td></tr></table></figure>
+<p>test.c 举例一个死循环程序:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    printf(&quot;get pid = %d \n&quot;,getpid());</span><br><span class="line">    while (1);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>编译并执行程序：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# gcc -o test test.c</span><br><span class="line">[root@centos-linux code]# ./test </span><br><span class="line">get pid = 10427 </span><br><span class="line">^\Quit (core dumped)</span><br><span class="line">[root@centos-linux code]# </span><br></pre></td></tr></table></figure><br>看到的现象是先打印出pid然后一直在死循环，按下组合键ctrl+\后退出并提示core dumped</p>
+<p>test程序也会core  dump的原因是我们先修改了shell的Resource Limit值，而test进程是由shell产生的所以test进程的PCB也是由shell复制而来，所以test进程和shell就具有相同的Resource Limit值，所以就会产生core dump了。</p>
+<p>我们使用ls目录查看一下目录多出来的文件:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# ls</span><br><span class="line">core.10427  test  test.c</span><br></pre></td></tr></table></figure></p>
+<p>我们来使用core文件,通过gdb调试.<code>core-file core.10427</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# gdb test</span><br><span class="line">GNU gdb (GDB) Red Hat Enterprise Linux 7.6.1-115.el7</span><br><span class="line">Copyright (C) 2013 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.  Type &quot;show copying&quot;</span><br><span class="line">and &quot;show warranty&quot; for details.</span><br><span class="line">This GDB was configured as &quot;x86_64-redhat-linux-gnu&quot;.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;http://www.gnu.org/software/gdb/bugs/&gt;...</span><br><span class="line">Reading symbols from /root/code/test...(no debugging symbols found)...done.   </span><br><span class="line">(gdb) core-file core.10427 </span><br><span class="line">[New LWP 10427]</span><br><span class="line">Core was generated by `./test&#x27;.</span><br><span class="line">Program terminated with signal 3, Quit.</span><br><span class="line">#0  0x0000000000400597 in main ()</span><br><span class="line">Missing separate debuginfos, use: debuginfo-install glibc-2.17-292.el7.x86_64</span><br><span class="line">(gdb) </span><br></pre></td></tr></table></figure>
+<h3 id="调用系统函数来向进程发信号"><a href="#调用系统函数来向进程发信号" class="headerlink" title="调用系统函数来向进程发信号"></a>调用系统函数来向进程发信号</h3><p>首先在后台运行一个死循环程序，然后用kill 命令给它发信号<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# ./test &amp;           </span><br><span class="line">[1] 10549</span><br><span class="line">[root@centos-linux code]# get pid = 10549 </span><br><span class="line"></span><br><span class="line">[root@centos-linux code]# kill -SIGSEGV 10549</span><br><span class="line">[root@centos-linux code]# ls</span><br><span class="line">core.10427  core.10549  test  test.c</span><br><span class="line">[1]+  Segmentation fault      (core dumped) ./test</span><br></pre></td></tr></table></figure></p>
+<p>说明：我们之所以要多按一次回车，是因为10549进程终止掉之前已经回到了shell提示符等待用户输入下一条命令，shell不希望错误信息和用户命令混在一起，所以先等用户输入后再显示</p>
+<p>指定发送某种信号的kill命令可以有多种，上面的命令还可以写成kill -11 10549，11是信号SIGSEGV信号的编号。以往遇到的段错误都是由非法内存访问引起的，而这个程序本来也没错误，给它发送一个SIGSEGV信号也能引起段错误</p>
+<p>kill命令是由kill函数实现的，kill函数可以给一个指定的进程发送指定的信号，raise函数可以给当前进程发送指定的信号（自己给自己发信号）</p>
+<h3 id="软件条件产生的信号"><a href="#软件条件产生的信号" class="headerlink" title="软件条件产生的信号"></a>软件条件产生的信号</h3><p>软件条件产生的信号我们已经见过一种，就在我们学习进程间通信的时候，信号SIGPIPE就被我们介绍过，我们在这里不再多加介绍，我们接下来要介绍一种有趣的信号和产生这种信号的函数，我们可以想想，有一种声音我们每个人最不想听到的一种声音是什么，当然是每天的闹钟声了，我们介绍的这个信号就和现实中的闹钟很像，今天要介绍的信号就是SIGALRM信号，以及产生这种信号的函数alarm.</p>
+<h4 id="alarm（设置信号传送闹钟）"><a href="#alarm（设置信号传送闹钟）" class="headerlink" title="alarm（设置信号传送闹钟）"></a>alarm（设置信号传送闹钟）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;unistd.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td>unsigned int alarm(unsigned int seconds);</td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>alarm()用来设置信号SIGALRM在经过参数seconds指定的秒数后传送给目前的进程。如果参数seconds 为0，则之前设置的闹钟会被取消，并将剩下的时间返回。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>返回之前闹钟的剩余秒数，如果之前未设闹钟则返回0。</td>
+</tr>
+</tbody>
+</table>
+<p>范例:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    int count = 1;</span><br><span class="line">    alarm(1);</span><br><span class="line">    for (;1;count++) &#123;</span><br><span class="line">        printf(&quot;count is %d\n&quot;,count);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>执行结果(由于执行结果太长我就贴最后重要部分,详细的结果可以自己试验):<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">count is 184693</span><br><span class="line">count is 184694</span><br><span class="line">count is 184695Alarm clock</span><br><span class="line">[root@centos-linux code]# </span><br></pre></td></tr></table></figure><br>代码中设置一个闹钟和一个计数器，在闹钟响前，count一直++，并输出count值直到闹钟响，接收到SIGALRM信号才结束进程</p>
+<h4 id="kill"><a href="#kill" class="headerlink" title="kill"></a>kill</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;sys/types.h&gt; #include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td>int kill(pid_t pid,int sig);</td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>kill()可以用来送参数sig指定的信号给参数pid指定的进程。参数pid有几种情况:pid&gt;0 将信号传给进程识别码为pid 的进程。pid=0 将信号传给和目前进程相同进程组的所有进程pid=-1 将信号广播传送给系统内所有的进程pid&lt;0 将信号传给进程组识别码为pid绝对值的所有进程,参数sig代表的信号编号可参考上面信号介绍</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EINVAL 参数sig 不合法 ESRCH 参数pid 所指定的进程或进程组不存在 EPERM 权限不够无法传送信号给指定进程</td>
+</tr>
+</tbody>
+</table>
+<h4 id="raise"><a href="#raise" class="headerlink" title="raise"></a>raise</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;sys/types.h&gt; #include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td>int raise(int sig);</td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>用于向进程自身发送信号。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>成功返回0，失败返回-1。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="abort"><a href="#abort" class="headerlink" title="abort"></a>abort</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td>int abort(void);</td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>中止程序执行，直接从调用的地方跳出。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>该函数不返回任何值。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="阻塞信号"><a href="#阻塞信号" class="headerlink" title="阻塞信号"></a>阻塞信号</h2><p>实际执行信号的动作叫做信号递达</p>
+<p>信号从产生到递达过程中的状态叫做信号未决，</p>
+<p>进程可以选择阻塞某个信号</p>
+<p>被阻塞的信号将处于未决状态，直到进程解除对信号的阻塞，才执行递达的动作</p>
+<p>注意：阻塞和忽略是不同的，只要信号被阻塞就不会被递达，而忽略是在递达之后所选择的一种处理动作</p>
+<p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gc9why2s0ej20f9050t8s.jpg" alt="信号在内核中的表示示意图"><br>上图来源: Linux C编程一站式学习 第33章信号</p>
+<p>解释说明：每个信号都有两个标志位分别表示阻塞和未决，还有一个函数指针表示处理动作，信号产生时，内核在进程控制块中设置该信号的未决标志，直到信号递达才会清除该标志。如果进程解除对某信号的阻塞之前该信号产生过很多次，将如何处理？</p>
+<p>OPSIX.1允许递达该信号一次或多次。Linux是这样实现的，常规信号在递达之前产生多次只记一次，而实时信号在递达之前产生多次可以依次放在一个队列里。在这里，不讨论实时信号。</p>
+<h3 id="sigset-t"><a href="#sigset-t" class="headerlink" title="sigset_t"></a>sigset_t</h3><p>由上图可知每个信号都只有一个bit的未决状态，不是0就是1，阻塞标志也是一样。因此阻塞和未决可以用相同的数据类型sigset_t来存储,sigset_t称为信号集，这个类型可以用来表示信号的有效和无效状态，阻塞信号集也叫作当前进程的信号屏蔽字，这里的屏蔽应理解为阻塞而不是忽略。</p>
+<h3 id="信号集操作函数"><a href="#信号集操作函数" class="headerlink" title="信号集操作函数"></a>信号集操作函数</h3><p>以下就是我们常用的信号集操作函数:</p>
+<h4 id="sigemptyset-初始化信号集"><a href="#sigemptyset-初始化信号集" class="headerlink" title="sigemptyset (初始化信号集)"></a>sigemptyset (初始化信号集)</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigemptyset(sigset_t *set);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigemptyset()用来将参数set信号集初始化并清空。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set指针地址无法存取</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sigfillset（将所有信号加入至信号集）"><a href="#sigfillset（将所有信号加入至信号集）" class="headerlink" title="sigfillset（将所有信号加入至信号集）"></a>sigfillset（将所有信号加入至信号集）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigfillset(sigset_t * set);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigfillset()用来将参数set信号集初始化，然后把所有的信号加入到此信号集里。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>附加说明</td>
+<td>EFAULT 参数set指针地址无法存取</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sigaddset（增加一个信号至信号集）"><a href="#sigaddset（增加一个信号至信号集）" class="headerlink" title="sigaddset（增加一个信号至信号集）"></a>sigaddset（增加一个信号至信号集）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigaddset(sigset_t *set,int signum);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigaddset()用来将参数signum 代表的信号加入至参数set 信号集里。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set指针地址无法存取 EINVAL 参数signum非合法的信号编号</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sigdelset（从信号集里删除一个信号）"><a href="#sigdelset（从信号集里删除一个信号）" class="headerlink" title="sigdelset（从信号集里删除一个信号）"></a>sigdelset（从信号集里删除一个信号）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigdelset(sigset_t * set,int signum);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigdelset()用来将参数signum代表的信号从参数set信号集里删除。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set指针地址无法存取 EINVAL 参数signum非合法的信号编号</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sigismember（测试某个信号是否已加入至信号集里）"><a href="#sigismember（测试某个信号是否已加入至信号集里）" class="headerlink" title="sigismember（测试某个信号是否已加入至信号集里）"></a>sigismember（测试某个信号是否已加入至信号集里）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigismember(const sigset_t *set,int signum);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigismember()用来测试参数signum 代表的信号是否已加入至参数set信号集里。如果信号集里已有该信号则返回1，否则返回0。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>信号集已有该信号则返回1，没有则返回0。如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set指针地址无法存取 EINVAL 参数signum 非合法的信号编号</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sigprocmask（查询或设置信号遮罩）"><a href="#sigprocmask（查询或设置信号遮罩）" class="headerlink" title="sigprocmask（查询或设置信号遮罩）"></a>sigprocmask（查询或设置信号遮罩）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigprocmask(int how,const sigset_t *set,sigset_t * oldset);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigprocmask()可以用来改变目前的信号遮罩，其操作依参数how来决定<br>SIG_BLOCK 新的信号遮罩由目前的信号遮罩和参数set 指定的信号遮罩作联集<br>SIG_UNBLOCK 将目前的信号遮罩删除掉参数set指定的信号遮罩<br>SIG_SETMASK 将目前的信号遮罩设成参数set指定的信号遮罩。<br>如果参数oldset不是NULL指针，那么目前的信号遮罩会由此指针返回。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set，oldset指针地址无法存取。EINTR 此调用被中断</td>
+</tr>
+</tbody>
+</table>
+<p>注意：在使用sigset_t类型的变量之前一定要用sigemptyset函数和sigfillset函数初始化是信号集处于确定的状态，初始化之后就可以使用sigaddset函数和sigdelset函数在该信号集中增加或者删除有效信号。</p>
+<h4 id="sigpending（查询被搁置的信号）"><a href="#sigpending（查询被搁置的信号）" class="headerlink" title="sigpending（查询被搁置的信号）"></a>sigpending（查询被搁置的信号）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigpending(sigset_t *set);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigpending()会将被搁置的信号集合由参数set指针返回。</td>
+</tr>
+<tr>
+<td>返回值执</td>
+<td>行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EFAULT 参数set指针地址无法存取 EINTR 此调用被中断。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="案例-打印当前未决信号集"><a href="#案例-打印当前未决信号集" class="headerlink" title="案例(打印当前未决信号集)"></a>案例(打印当前未决信号集)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line"></span><br><span class="line">int showsigset(sigset_t *sigset)&#123;</span><br><span class="line">    int i = 0;</span><br><span class="line">    for (;i &lt;= 32;i++) &#123;</span><br><span class="line">        if (sigismember(sigset, i))&#123;</span><br><span class="line">            printf(&quot;%d&quot;, 1);</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            printf(&quot;%d&quot;, 0);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    puts(&quot;&quot;);</span><br><span class="line">&#125;</span><br><span class="line">int main(void)&#123;</span><br><span class="line">    sigset_t s,p;</span><br><span class="line">    sigemptyset(&amp;s);</span><br><span class="line">    sigaddset(&amp;s,SIGINT);</span><br><span class="line">    sigprocmask(SIG_BLOCK,&amp;s,NULL);</span><br><span class="line">    while (1)&#123;</span><br><span class="line">        sigpending(&amp;p);</span><br><span class="line">        showsigset(&amp;p);</span><br><span class="line">        sleep(2);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# ./test            </span><br><span class="line">10000000000000000000000000000000</span><br><span class="line">10000000000000000000000000000000</span><br><span class="line">^\Quit (core dumped)</span><br><span class="line">[root@centos-linux code]# </span><br></pre></td></tr></table></figure></p>
+<h2 id="捕捉信号"><a href="#捕捉信号" class="headerlink" title="捕捉信号"></a>捕捉信号</h2><p><img src="https://ww1.sinaimg.cn/large/a3eed545ly1gca1j7mvxzj20dw0bs0vj.jpg" alt="捕捉信号"></p>
+<h3 id="内核如何实现信号的捕捉呢？"><a href="#内核如何实现信号的捕捉呢？" class="headerlink" title="内核如何实现信号的捕捉呢？"></a>内核如何实现信号的捕捉呢？</h3><ol>
+<li>首先在用户正常执行主控制流程由于中断，异常或系统调用而直接进入内核态进行处理处理这种异常，</li>
+<li>内核处理完异常就准备返回用户态了，在这之前会看当前进程有没有可以抵达的信号，如果有就对可递达的信号进行处理，</li>
+<li>如果信号的处理函数是用户自定义的就返回用户态去执行用户自定义的信号处理函数</li>
+<li>信号处理函数执行完之后，会调用一个特殊的系统调用函数sigreturn而再一次进入内核态，执行这个系统调用</li>
+<li>这个系统调用完成之后，就会返回主控制流程被中断的地方继续执行下面的代码</li>
+<li>执行主控制流程的时候如果再次遇到异常、中断或系统调用就继续回到1，继续执行下面的流程</li>
+</ol>
+<h3 id="捕捉信号的函数"><a href="#捕捉信号的函数" class="headerlink" title="捕捉信号的函数"></a>捕捉信号的函数</h3><h4 id="sigaction（查询或设置信号处理方式）"><a href="#sigaction（查询或设置信号处理方式）" class="headerlink" title="sigaction（查询或设置信号处理方式）"></a>sigaction（查询或设置信号处理方式）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigaction(int signum,const struct sigaction *act ,struct sigaction *oldact);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>sigaction()会依参数signum指定的信号编号来设置该信号的处理函数。参数signum可以指定SIGKILL和SIGSTOP以外的所有信号。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>执行成功则返回0，如果有错误则返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EINVAL 参数signum 不合法， 或是企图拦截SIGKILL/SIGSTOPSIGKILL信号 EFAULT 参数act，oldact指针地址无法存取。EINTR 此调用被中断</td>
+</tr>
+</tbody>
+</table>
+<p>如参数结构sigaction定义如下<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">struct sigaction</span><br><span class="line">&#123;</span><br><span class="line">void (*sa_handler) (int);</span><br><span class="line">sigset_t sa_mask;</span><br><span class="line">int sa_flags;</span><br><span class="line">void (*sa_restorer) (void);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>sa_handler此参数和signal()的参数handler相同，代表新的信号处理函数，其他意义请参考signal()。</li>
+<li>sa_mask 用来设置在处理该信号时暂时将sa_mask 指定的信号搁置。</li>
+<li>sa_restorer 此参数没有使用。</li>
+<li>sa_flags 用来设置信号处理的其他相关操作，下列的数值可用。<br>OR 运算（|）组合<br>A_NOCLDSTOP : 如果参数signum为SIGCHLD，则当子进程暂停时并不会通知父进程<br>SA_ONESHOT/SA_RESETHAND:当调用新的信号处理函数前，将此信号处理方式改为系统预设的方式。<br>SA_RESTART:被信号中断的系统调用会自行重启<br>SA_NOMASK/SA_NODEFER:在处理此信号未结束前不理会此信号的再次到来。<br>如果参数oldact不是NULL指针，则原来的信号处理方式会由此结构sigaction 返回。</li>
+</ul>
+<h4 id="pause（让进程暂停直到信号出现）"><a href="#pause（让进程暂停直到信号出现）" class="headerlink" title="pause（让进程暂停直到信号出现）"></a>pause（让进程暂停直到信号出现）</h4><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;unistd.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int pause(void);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>pause()会令目前的进程暂停（进入睡眠状态），直到被信号(signal)所中断。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>只返回-1。</td>
+</tr>
+<tr>
+<td>错误代码</td>
+<td>EINTR 有信号到达中断了此函数。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="案例-完成自己的sleep函数"><a href="#案例-完成自己的sleep函数" class="headerlink" title="案例(完成自己的sleep函数)"></a>案例(完成自己的sleep函数)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;signal.h&gt;</span><br><span class="line"></span><br><span class="line">void sig_alrm(int signo)&#123;</span><br><span class="line">    printf(&quot;signo = %d\n&quot;,signo);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">unsigned int mysleep(unsigned int nsecs)&#123;</span><br><span class="line">    struct sigaction new,old;</span><br><span class="line">    unsigned int unslept = 0;</span><br><span class="line">    new.sa_handler = sig_alrm;</span><br><span class="line">    // 首先进程初始化,以保证信号有一个确定的状态</span><br><span class="line">    sigemptyset(&amp;new.sa_mask);</span><br><span class="line">    new.sa_flags = 0;</span><br><span class="line">    // 注册信号处理函数</span><br><span class="line">    sigaction(SIGALRM,&amp;new,&amp;old);</span><br><span class="line">    // 设定一个闹钟</span><br><span class="line">    alarm(nsecs);</span><br><span class="line">    // 将进程挂起</span><br><span class="line">    pause();</span><br><span class="line">    // 清空闹钟</span><br><span class="line">    unslept = alarm(0);</span><br><span class="line">    // 信号继续执行默认动作</span><br><span class="line">    sigaction(SIGALRM,&amp;old,NULL);</span><br><span class="line">    return unslept;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(void)&#123;</span><br><span class="line">    while (1)&#123;</span><br><span class="line">        mysleep(5);</span><br><span class="line">        fflush(stdout);</span><br><span class="line">        printf(&quot;已经过了5秒咯\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos-linux code]# gcc -o test test.c</span><br><span class="line">[root@centos-linux code]# ./test            </span><br><span class="line">signo = 14</span><br><span class="line">已经过了5秒咯</span><br><span class="line">signo = 14</span><br><span class="line">已经过了5秒咯</span><br></pre></td></tr></table></figure></p>
+<h2 id="竞态条件与sigsuspend函数"><a href="#竞态条件与sigsuspend函数" class="headerlink" title="竞态条件与sigsuspend函数"></a>竞态条件与sigsuspend函数</h2><p>我们再来考虑一下以前写的mysleep函数，我们使用alarm函数设定闹钟之后调用pause函数进行等待，可是SIGALRM信号已经处理完了还在等什么呢？</p>
+<p>出现这个问题的根本原因是系统运行的时序并不像我们写程序时想得那样，虽然alarm函数设定闹钟后，后面紧跟的是pause函数，但是不能保证pause函数一定会在nsecs秒之内被调用。由于异步事件在任何时候都可能发生（异步指出现更高优先级的进程），如果我们写程序的时候考虑不周，就有可能会产生时序问题而导致错误，这就叫做竞态条件。</p>
+<p>解决这种问题一般有两种思路，一种是在调用pause之前屏蔽SIGALRM信号使它不能提前递达就好了</p>
+<p>我们将代码执行过程分为四步</p>
+<ol>
+<li>屏蔽SIGALRM信号</li>
+<li>alarm(nsecs)设定闹钟</li>
+<li>解除屏蔽</li>
+<li>pause();</li>
+</ol>
+<p>这样的话SIGALRM信号也可能在解除屏蔽和调用pause之间的时间间隔内递达</p>
+<p>我们又可以设想将解除信号屏蔽放在pause()函数调用之后，执行过程就变为：</p>
+<ol>
+<li>屏蔽SIGALRM信号</li>
+<li>alarm(nsecs)设置闹钟</li>
+<li>pause();</li>
+<li>解除屏蔽</li>
+</ol>
+<p>这样更不行还没有解除屏蔽就调用pause，pause根本不可能等到SIGALRM信号，经过这两步的分析我，我们最想得到的就是将解除屏蔽和等待放在一起，让他们中间不要间断的执行，也就是这两条代码的执行是原子的。sigsuspend函数的功能就是这个</p>
+<p>对时序要求严格的都应该调用sigsuspend函数而不是pause</p>
+<h3 id="sigsuspend-屏蔽新的信号，原来屏蔽的信号失效"><a href="#sigsuspend-屏蔽新的信号，原来屏蔽的信号失效" class="headerlink" title="sigsuspend (屏蔽新的信号，原来屏蔽的信号失效)"></a>sigsuspend (屏蔽新的信号，原来屏蔽的信号失效)</h3><table>
+<thead>
+<tr>
+<th>描述</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表头文件</td>
+<td><code>#include&lt;signal.h&gt;</code></td>
+</tr>
+<tr>
+<td>定义函数</td>
+<td><code>int sigsuspend(const sigset_t *mask);</code></td>
+</tr>
+<tr>
+<td>函数说明</td>
+<td>进程执行到sigsuspend时，sigsuspend并不会立刻返回，进程处于TASK_INTERRUPTIBLE状态并立刻放弃CPU，等待UNBLOCK（mask之外的）信号的唤醒。进程在接收到UNBLOCK（mask之外）信号后，调用处理函数，然后还原信号集，sigsuspend返回，进程恢复执行。</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>sigsuspend返回后将恢复调用之前的的信号掩码。信号处理函数完成后，进程将继续执行。该系统调用始终返回-1，并将errno设置为EINTR.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="SIGCHILD信号"><a href="#SIGCHILD信号" class="headerlink" title="SIGCHILD信号"></a>SIGCHILD信号</h2><p>前面我们知道清除僵尸进程的方法就是使用wait和waitpid函数父进程可以阻塞等待子进程结束，也可以非阻塞的查询是否有子进程需要被清理（轮询）,第一种方式父进程阻塞就不能做其他事情了，第二种，父进程不断去询问，代码实现比较复杂</p>
+<p>其实子进程在终止时会给父进程发一个SIGCHILD信号，默认处理动作是忽略，用户可以自定义SIGCHILD的处理函数，这样父进程就可以专心处理自己的事情，不用关心子进程了，子进程退出时会通知父进程，父进程在信号处理函数中调用wait来处理子进程就可以了    </p>
+<p>补充：想不产生僵尸进程还有另外一种方法：父进程调用sigaction将SIGCHILD处理动作置为SIG_IGN这样fork出的子进程在终止时会自动清理掉也不会通知父进程系统默认的忽略和用户自定义的忽略一般是没有区别的，但这是一个特例，对于Linux可以用，在其他unix系统上不一定能用。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/linux-process-recycl/" rel="prev" title="Linux系统编程-进程回收 ">
+      <i class="fa fa-chevron-left"></i> Linux系统编程-进程回收 
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/linux-system-programming-thread-synchronization/" rel="next" title="Linux系统编程-线程同步">
+      Linux系统编程-线程同步 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">信号概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">信号介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGHUP"><span class="nav-number">2.1.</span> <span class="nav-text">SIGHUP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGINT"><span class="nav-number">2.2.</span> <span class="nav-text">SIGINT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGQUIT"><span class="nav-number">2.3.</span> <span class="nav-text">SIGQUIT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGILL"><span class="nav-number">2.4.</span> <span class="nav-text">SIGILL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGTRAP"><span class="nav-number">2.5.</span> <span class="nav-text">SIGTRAP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGABRT"><span class="nav-number">2.6.</span> <span class="nav-text">SIGABRT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGBUS"><span class="nav-number">2.7.</span> <span class="nav-text">SIGBUS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGFPE"><span class="nav-number">2.8.</span> <span class="nav-text">SIGFPE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGKILL"><span class="nav-number">2.9.</span> <span class="nav-text">SIGKILL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGUSR1"><span class="nav-number">2.10.</span> <span class="nav-text">SIGUSR1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGSEGV"><span class="nav-number">2.11.</span> <span class="nav-text">SIGSEGV</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGUSR2"><span class="nav-number">2.12.</span> <span class="nav-text">SIGUSR2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGPIPE"><span class="nav-number">2.13.</span> <span class="nav-text">SIGPIPE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGALRM"><span class="nav-number">2.14.</span> <span class="nav-text">SIGALRM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGTERM"><span class="nav-number">2.15.</span> <span class="nav-text">SIGTERM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGCHLD"><span class="nav-number">2.16.</span> <span class="nav-text">SIGCHLD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGCONT"><span class="nav-number">2.17.</span> <span class="nav-text">SIGCONT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGSTOP"><span class="nav-number">2.18.</span> <span class="nav-text">SIGSTOP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGTSTP"><span class="nav-number">2.19.</span> <span class="nav-text">SIGTSTP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGTTIN"><span class="nav-number">2.20.</span> <span class="nav-text">SIGTTIN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGTTOU"><span class="nav-number">2.21.</span> <span class="nav-text">SIGTTOU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGURG"><span class="nav-number">2.22.</span> <span class="nav-text">SIGURG</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGXCPU"><span class="nav-number">2.23.</span> <span class="nav-text">SIGXCPU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGXFSZ"><span class="nav-number">2.24.</span> <span class="nav-text">SIGXFSZ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGVTALRM"><span class="nav-number">2.25.</span> <span class="nav-text">SIGVTALRM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGPROF"><span class="nav-number">2.26.</span> <span class="nav-text">SIGPROF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGWINCH"><span class="nav-number">2.27.</span> <span class="nav-text">SIGWINCH</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGIO"><span class="nav-number">2.28.</span> <span class="nav-text">SIGIO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGPWR"><span class="nav-number">2.29.</span> <span class="nav-text">SIGPWR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SIGSYS"><span class="nav-number">2.30.</span> <span class="nav-text">SIGSYS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.31.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A7%E7%94%9F%E4%BF%A1%E5%8F%B7%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">产生信号的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E5%B8%B8%E8%A7%81%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">信号常见处理方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E4%BA%A7%E7%94%9F%E5%85%B7%E4%BD%93%E8%BF%87%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">信号产生具体过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%BB%88%E7%AB%AF%E6%8C%89%E9%94%AE%E6%9D%A5%E4%BA%A7%E7%94%9F%E4%BF%A1%E5%8F%B7"><span class="nav-number">5.1.</span> <span class="nav-text">通过终端按键来产生信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%87%BD%E6%95%B0%E6%9D%A5%E5%90%91%E8%BF%9B%E7%A8%8B%E5%8F%91%E4%BF%A1%E5%8F%B7"><span class="nav-number">5.2.</span> <span class="nav-text">调用系统函数来向进程发信号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E6%9D%A1%E4%BB%B6%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BF%A1%E5%8F%B7"><span class="nav-number">5.3.</span> <span class="nav-text">软件条件产生的信号</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#alarm%EF%BC%88%E8%AE%BE%E7%BD%AE%E4%BF%A1%E5%8F%B7%E4%BC%A0%E9%80%81%E9%97%B9%E9%92%9F%EF%BC%89"><span class="nav-number">5.3.1.</span> <span class="nav-text">alarm（设置信号传送闹钟）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kill"><span class="nav-number">5.3.2.</span> <span class="nav-text">kill</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#raise"><span class="nav-number">5.3.3.</span> <span class="nav-text">raise</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#abort"><span class="nav-number">5.3.4.</span> <span class="nav-text">abort</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E4%BF%A1%E5%8F%B7"><span class="nav-number">6.</span> <span class="nav-text">阻塞信号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sigset-t"><span class="nav-number">6.1.</span> <span class="nav-text">sigset_t</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E9%9B%86%E6%93%8D%E4%BD%9C%E5%87%BD%E6%95%B0"><span class="nav-number">6.2.</span> <span class="nav-text">信号集操作函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#sigemptyset-%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BF%A1%E5%8F%B7%E9%9B%86"><span class="nav-number">6.2.1.</span> <span class="nav-text">sigemptyset (初始化信号集)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigfillset%EF%BC%88%E5%B0%86%E6%89%80%E6%9C%89%E4%BF%A1%E5%8F%B7%E5%8A%A0%E5%85%A5%E8%87%B3%E4%BF%A1%E5%8F%B7%E9%9B%86%EF%BC%89"><span class="nav-number">6.2.2.</span> <span class="nav-text">sigfillset（将所有信号加入至信号集）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigaddset%EF%BC%88%E5%A2%9E%E5%8A%A0%E4%B8%80%E4%B8%AA%E4%BF%A1%E5%8F%B7%E8%87%B3%E4%BF%A1%E5%8F%B7%E9%9B%86%EF%BC%89"><span class="nav-number">6.2.3.</span> <span class="nav-text">sigaddset（增加一个信号至信号集）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigdelset%EF%BC%88%E4%BB%8E%E4%BF%A1%E5%8F%B7%E9%9B%86%E9%87%8C%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E4%BF%A1%E5%8F%B7%EF%BC%89"><span class="nav-number">6.2.4.</span> <span class="nav-text">sigdelset（从信号集里删除一个信号）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigismember%EF%BC%88%E6%B5%8B%E8%AF%95%E6%9F%90%E4%B8%AA%E4%BF%A1%E5%8F%B7%E6%98%AF%E5%90%A6%E5%B7%B2%E5%8A%A0%E5%85%A5%E8%87%B3%E4%BF%A1%E5%8F%B7%E9%9B%86%E9%87%8C%EF%BC%89"><span class="nav-number">6.2.5.</span> <span class="nav-text">sigismember（测试某个信号是否已加入至信号集里）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigprocmask%EF%BC%88%E6%9F%A5%E8%AF%A2%E6%88%96%E8%AE%BE%E7%BD%AE%E4%BF%A1%E5%8F%B7%E9%81%AE%E7%BD%A9%EF%BC%89"><span class="nav-number">6.2.6.</span> <span class="nav-text">sigprocmask（查询或设置信号遮罩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigpending%EF%BC%88%E6%9F%A5%E8%AF%A2%E8%A2%AB%E6%90%81%E7%BD%AE%E7%9A%84%E4%BF%A1%E5%8F%B7%EF%BC%89"><span class="nav-number">6.2.7.</span> <span class="nav-text">sigpending（查询被搁置的信号）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B-%E6%89%93%E5%8D%B0%E5%BD%93%E5%89%8D%E6%9C%AA%E5%86%B3%E4%BF%A1%E5%8F%B7%E9%9B%86"><span class="nav-number">6.2.8.</span> <span class="nav-text">案例(打印当前未决信号集)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%95%E6%8D%89%E4%BF%A1%E5%8F%B7"><span class="nav-number">7.</span> <span class="nav-text">捕捉信号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%BF%A1%E5%8F%B7%E7%9A%84%E6%8D%95%E6%8D%89%E5%91%A2%EF%BC%9F"><span class="nav-number">7.1.</span> <span class="nav-text">内核如何实现信号的捕捉呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%95%E6%8D%89%E4%BF%A1%E5%8F%B7%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-number">7.2.</span> <span class="nav-text">捕捉信号的函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#sigaction%EF%BC%88%E6%9F%A5%E8%AF%A2%E6%88%96%E8%AE%BE%E7%BD%AE%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%EF%BC%89"><span class="nav-number">7.2.1.</span> <span class="nav-text">sigaction（查询或设置信号处理方式）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pause%EF%BC%88%E8%AE%A9%E8%BF%9B%E7%A8%8B%E6%9A%82%E5%81%9C%E7%9B%B4%E5%88%B0%E4%BF%A1%E5%8F%B7%E5%87%BA%E7%8E%B0%EF%BC%89"><span class="nav-number">7.2.2.</span> <span class="nav-text">pause（让进程暂停直到信号出现）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B-%E5%AE%8C%E6%88%90%E8%87%AA%E5%B7%B1%E7%9A%84sleep%E5%87%BD%E6%95%B0"><span class="nav-number">7.2.3.</span> <span class="nav-text">案例(完成自己的sleep函数)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AB%9E%E6%80%81%E6%9D%A1%E4%BB%B6%E4%B8%8Esigsuspend%E5%87%BD%E6%95%B0"><span class="nav-number">8.</span> <span class="nav-text">竞态条件与sigsuspend函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sigsuspend-%E5%B1%8F%E8%94%BD%E6%96%B0%E7%9A%84%E4%BF%A1%E5%8F%B7%EF%BC%8C%E5%8E%9F%E6%9D%A5%E5%B1%8F%E8%94%BD%E7%9A%84%E4%BF%A1%E5%8F%B7%E5%A4%B1%E6%95%88"><span class="nav-number">8.1.</span> <span class="nav-text">sigsuspend (屏蔽新的信号，原来屏蔽的信号失效)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SIGCHILD%E4%BF%A1%E5%8F%B7"><span class="nav-number">9.</span> <span class="nav-text">SIGCHILD信号</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/linux-signal/";
+    this.page.identifier = "linux-signal/";
+    this.page.title = "Linux系统编程-信号";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

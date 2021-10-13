@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Vector容器Vector容器简介 vector是将元素置于一个动态数组中加以管理的容器。 vector可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法）。 vector尾部添加或移除元素非常快速。但是在中部或头部插入元素或移除元素比较费时  vector对象的默认构造vector采用模板类实现，vector对象的默认构造形式  vector&lt;T&gt; vecT; ve">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STL Vector 容器详解">
+<meta property="og:url" content="http://blog.huixing.org/stl-vector-container-details/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="Vector容器Vector容器简介 vector是将元素置于一个动态数组中加以管理的容器。 vector可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法）。 vector尾部添加或移除元素非常快速。但是在中部或头部插入元素或移除元素比较费时  vector对象的默认构造vector采用模板类实现，vector对象的默认构造形式  vector&lt;T&gt; vecT; ve">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ww1.sinaimg.cn/large/007WG9bMly1g7yyb56cquj30n206k0th.jpg">
+<meta property="article:published_time" content="2019-10-15T08:07:00.000Z">
+<meta property="article:modified_time" content="2019-10-16T11:28:52.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ww1.sinaimg.cn/large/007WG9bMly1g7yyb56cquj30n206k0th.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/stl-vector-container-details/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>STL Vector 容器详解 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/stl-vector-container-details/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          STL Vector 容器详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-15 16:07:00" itemprop="dateCreated datePublished" datetime="2019-10-15T16:07:00+08:00">2019-10-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 19:28:52" itemprop="dateModified" datetime="2019-10-16T19:28:52+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/stl-vector-container-details/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="stl-vector-container-details/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Vector容器"><a href="#Vector容器" class="headerlink" title="Vector容器"></a>Vector容器</h1><h2 id="Vector容器简介"><a href="#Vector容器简介" class="headerlink" title="Vector容器简介"></a>Vector容器简介</h2><ul>
+<li>vector是将元素置于一个动态数组中加以管理的容器。</li>
+<li>vector可以随机存取元素（支持索引值直接存取， 用[]操作符或at()方法）。</li>
+<li>vector尾部添加或移除元素非常快速。但是在中部或头部插入元素或移除元素比较费时</li>
+</ul>
+<h2 id="vector对象的默认构造"><a href="#vector对象的默认构造" class="headerlink" title="vector对象的默认构造"></a>vector对象的默认构造</h2><p>vector采用模板类实现，vector对象的默认构造形式</p>
+<ul>
+<li><code>vector&lt;T&gt; vecT;</code></li>
+<li><code>vector&lt;int&gt; vecInt;            //一个存放int的vector容器。</code></li>
+<li><code>vector&lt;float&gt; vecFloat;         //一个存放float的vector容器。</code></li>
+<li><code>vector&lt;string&gt; vecString;       //一个存放string的vector容器。</code></li>
+<li><code>vector&lt;xxx&gt; vecXxx;            //尖括号内还可以设置指针类型或自定义类型。</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Class CA&#123;&#125;;</span><br><span class="line">vector&lt;CA*&gt; vecpCA;	  	<span class="comment">//用于存放CA对象的指针的vector容器。</span></span><br><span class="line">vector&lt;CA&gt; vecCA;     	<span class="comment">//用于存放CA对象的vector容器。由于容器元素的存放是按值复制的方式进行的，所以此时CA必须提供CA的拷贝构造函数，以保证CA对象间拷贝正常。</span></span><br></pre></td></tr></table></figure>
+<h2 id="vector对象的带参数构造"><a href="#vector对象的带参数构造" class="headerlink" title="vector对象的带参数构造"></a>vector对象的带参数构造</h2><h3 id="理论知识"><a href="#理论知识" class="headerlink" title="理论知识"></a>理论知识</h3><ul>
+<li><code>vector(beg,end);    //构造函数将[beg, end)区间中的元素拷贝给本身。注意该区间是左闭右开的区间。</code></li>
+<li><code>vector(n,elem);   //构造函数将n个elem拷贝给本身。</code></li>
+<li><code>vector(const vector &amp;vec);  //拷贝构造函数</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>  iArray[] = &#123;<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line"><span class="function">vector&lt;<span class="keyword">int</span>&gt;  <span class="title">vecIntA</span><span class="params">( iArray,  iArray+<span class="number">5</span> )</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">vector&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntB</span> <span class="params">(  vecIntA.begin() , vecIntA.end()  )</span></span>;   <span class="comment">//用构造函数初始化容器vecIntB </span></span><br><span class="line"><span class="function">vector&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntB</span> <span class="params">(  vecIntA.begin() , vecIntA.begin()+<span class="number">3</span>  )</span></span>;  </span><br><span class="line"><span class="function">vector&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntC</span><span class="params">(<span class="number">3</span>,<span class="number">9</span>)</span></span>; <span class="comment">//此代码运行后，容器vecIntB就存放3个元素，每个元素的值是9。</span></span><br><span class="line"></span><br><span class="line"><span class="function">vector&lt;<span class="keyword">int</span>&gt; <span class="title">vecIntD</span><span class="params">(vecIntA)</span></span>;</span><br></pre></td></tr></table></figure>
+<h2 id="vector的赋值"><a href="#vector的赋值" class="headerlink" title="vector的赋值"></a>vector的赋值</h2><h3 id="理论知识-1"><a href="#理论知识-1" class="headerlink" title="理论知识"></a>理论知识</h3><ul>
+<li><code>vector.assign(beg,end);    //将[beg, end)区间中的数据拷贝赋值给本身。注意该区间是左闭右开的区间。</code></li>
+<li><code>vector.assign(n,elem);  //将n个elem拷贝赋值给本身。</code></li>
+<li><code>vector&amp; operator=(const vector  &amp;vec);    //重载等号操作符</code></li>
+<li><code>vector.swap(vec);  // 将vec与本身的元素互换。</code></li>
+<li><code>vector&lt;int&gt; vecIntA, vecIntB, vecIntC, vecIntD;</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>  iArray[] = &#123;<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">vecIntA.<span class="built_in">assign</span>(iArray,iArray+<span class="number">5</span>);</span><br><span class="line">  </span><br><span class="line">vecIntB.<span class="built_in">assign</span>( vecIntA.<span class="built_in">begin</span>(),  vecIntA.<span class="built_in">end</span>() );    <span class="comment">//用其它容器的迭代器作参数。</span></span><br><span class="line"></span><br><span class="line">vecIntC.<span class="built_in">assign</span>(<span class="number">3</span>,<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line">vector&lt;<span class="keyword">int</span>&gt; vecIntD;</span><br><span class="line">vecIntD = vecIntA;</span><br><span class="line"></span><br><span class="line">vecIntA.<span class="built_in">swap</span>(vecIntD);</span><br></pre></td></tr></table></figure>
+<h2 id="vector的大小"><a href="#vector的大小" class="headerlink" title="vector的大小"></a>vector的大小</h2><h3 id="理论知识-2"><a href="#理论知识-2" class="headerlink" title="理论知识"></a>理论知识</h3><ul>
+<li><code>vector.size();       //返回容器中元素的个数</code></li>
+<li><code>vector.empty();       //判断容器是否为空</code></li>
+<li><code>vector.resize(num);   //重新指定容器的长度为num，若容器变长，则以默认值填充新位置。如果容器变短，则末尾超出容器长度的元素被删除。</code></li>
+<li><code>vector.resize(num, elem);  //重新指定容器的长度为num，若容器变长，则以elem值填充新位置。如果容器变短，则末尾超出容器长度的元素被删除。</code></li>
+</ul>
+<p>例如  <code>vecInt是vector&lt;int&gt;</code>  声明的容器，现已包含1,2,3元素。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> iSize = vecInt.<span class="built_in">size</span>();		<span class="comment">//iSize == 3;</span></span><br><span class="line"><span class="keyword">bool</span> bEmpty = vecInt.<span class="built_in">empty</span>();	<span class="comment">// bEmpty == false;</span></span><br><span class="line">执行vecInt.<span class="built_in">resize</span>(<span class="number">5</span>);  <span class="comment">//此时里面包含1,2,3,0,0元素。</span></span><br><span class="line">再执行vecInt.<span class="built_in">resize</span>(<span class="number">8</span>,<span class="number">3</span>);  <span class="comment">//此时里面包含1,2,3,0,0,3,3,3元素。</span></span><br><span class="line">再执行vecInt.<span class="built_in">resize</span>(<span class="number">2</span>);  <span class="comment">//此时里面包含1,2元素。</span></span><br></pre></td></tr></table></figure>
+<h2 id="vector末尾的添加移除操作"><a href="#vector末尾的添加移除操作" class="headerlink" title="vector末尾的添加移除操作"></a>vector末尾的添加移除操作</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;<span class="keyword">int</span>&gt; vecInt;</span><br><span class="line">vecInt.<span class="built_in">push_back</span>(<span class="number">1</span>);  <span class="comment">//在容器尾部加入一个元素</span></span><br><span class="line">vecInt.<span class="built_in">push_back</span>(<span class="number">3</span>);  <span class="comment">//移除容器中最后一个元素</span></span><br><span class="line">vecInt.<span class="built_in">push_back</span>(<span class="number">5</span>);  </span><br><span class="line">vecInt.<span class="built_in">push_back</span>(<span class="number">7</span>); </span><br><span class="line">vecInt.<span class="built_in">push_back</span>(<span class="number">9</span>); </span><br><span class="line">vecInt.<span class="built_in">pop_back</span>();    </span><br><span class="line">vecInt.<span class="built_in">pop_back</span>();</span><br><span class="line"><span class="comment">//&#123;5 ,7 ,9&#125;  </span></span><br></pre></td></tr></table></figure>
+<h2 id="vector的数据存取"><a href="#vector的数据存取" class="headerlink" title="vector的数据存取"></a>vector的数据存取</h2><h3 id="理论知识-3"><a href="#理论知识-3" class="headerlink" title="理论知识"></a>理论知识</h3><ul>
+<li><code>vec.at(idx);      //返回索引idx所指的数据，如果idx越界，抛出out_of_range异常。</code></li>
+<li><code>vec[idx];      //返回索引idx所指的数据，越界时，运行直接报错</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;<span class="keyword">int</span>&gt; vecInt;    <span class="comment">//假设包含1 ,3 ,5 ,7 ,9</span></span><br><span class="line">vecInt.<span class="built_in">at</span>(<span class="number">2</span>) == vecInt[<span class="number">2</span>]	;		<span class="comment">//5</span></span><br><span class="line">vecInt.<span class="built_in">at</span>(<span class="number">2</span>) = <span class="number">8</span>;  或  vecInt[<span class="number">2</span>] = <span class="number">8</span>;</span><br><span class="line">vecInt 就包含 <span class="number">1</span>, <span class="number">3</span>, <span class="number">8</span>, <span class="number">7</span>, <span class="number">9</span>值</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> iF = vector.<span class="built_in">front</span>();	<span class="comment">//iF==1</span></span><br><span class="line"><span class="keyword">int</span> iB = vector.<span class="built_in">back</span>();	<span class="comment">//iB==9</span></span><br><span class="line">vector.<span class="built_in">front</span>() = <span class="number">11</span>;	<span class="comment">//vecInt包含&#123;11,3,8,7,9&#125;</span></span><br><span class="line">vector.<span class="built_in">back</span>() = <span class="number">19</span>;	<span class="comment">//vecInt包含&#123;11,3,8,7,19&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="迭代器基本原理"><a href="#迭代器基本原理" class="headerlink" title="迭代器基本原理"></a>迭代器基本原理</h2><ul>
+<li>迭代器是一个“可遍历STL容器内全部或部分元素”的对象。</li>
+<li>迭代器指出容器中的一个特定位置。</li>
+<li>迭代器就如同一个指针。</li>
+<li>迭代器提供对一个容器中的对象的访问方法，并且可以定义了容器中对象的范围。</li>
+</ul>
+<p>这里大概介绍一下迭代器的类别。</p>
+<ul>
+<li><strong>输入迭代器：</strong> 也有叫法称之为“只读迭代器”，它从容器中读取元素，只能一次读入一个元素向前移动，只支持一遍算法，同一个输入迭代器不能两遍遍历一个序列。</li>
+<li><strong>输出迭代器：</strong> 也有叫法称之为“只写迭代器”，它往容器中写入元素，只能一次写入一个元素向前移动，只支持一遍算法，同一个输出迭代器不能两遍遍历一个序列。</li>
+<li><strong>正向迭代器：</strong> 组合输入迭代器和输出迭代器的功能，还可以多次解析一个迭代器指定的位置，可以对一个值进行多次读/写。</li>
+<li><strong>双向迭代器：</strong> 组合正向迭代器的功能，还可以通过–操作符向后移动位置。</li>
+<li><strong>随机访问迭代器：</strong> 组合双向迭代器的功能，还可以向前向后跳过任意个位置，可以直接访问容器中任何位置的元素。</li>
+</ul>
+<p>目前本系列教程所用到的容器，都支持双向迭代器或随机访问迭代器，下面将会详细介绍这两个类别的迭代器。</p>
+<h2 id="双向迭代器与随机访问迭代器"><a href="#双向迭代器与随机访问迭代器" class="headerlink" title="双向迭代器与随机访问迭代器"></a>双向迭代器与随机访问迭代器</h2><p>双向迭代器支持的操作：</p>
+<p><code>it++,  ++it,    it--,   --it，*it， itA = itB，
+itA == itB，itA != itB</code></p>
+<p>其中<code>list,set,multiset,map,multimap</code>支持双向迭代器。</p>
+<p>随机访问迭代器支持的操作：</p>
+<p>在双向迭代器的操作基础上添加 <code>it+=i， it-=i， it+i(或it=it+i)，it[i],
+itA&lt;itB,   itA&lt;=itB,  itA&gt;itB,  itA&gt;=itB</code>的功能。</p>
+<p>其中<code>vector，deque</code>支持随机访问迭代器。</p>
+<h2 id="vector与迭代器的配合使用"><a href="#vector与迭代器的配合使用" class="headerlink" title="vector与迭代器的配合使用"></a>vector与迭代器的配合使用</h2><p><img src="http://ww1.sinaimg.cn/large/007WG9bMly1g7yyb56cquj30n206k0th.jpg" alt="迭代器原理.png"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;<span class="keyword">int</span>&gt;  vecInt; <span class="comment">//假设包含1,3,5,7,9元素</span></span><br><span class="line">vector&lt;<span class="keyword">int</span>&gt;::iterator it;		<span class="comment">//声明容器vector&lt;int&gt;的迭代器。</span></span><br><span class="line">it = vecInt.<span class="built_in">begin</span>();    <span class="comment">// *it == 1</span></span><br><span class="line">++it;	<span class="comment">//或者it++; *it == 3  ，前++的效率比后++的效率高，前++返回引用，后++返回值。</span></span><br><span class="line">it += <span class="number">2</span>;	<span class="comment">//*it == 7</span></span><br><span class="line">it = it+<span class="number">1</span>;	<span class="comment">//*it == 9</span></span><br><span class="line">++it;		<span class="comment">// it == vecInt.end();  此时不能再执行*it,会出错!</span></span><br></pre></td></tr></table></figure>
+<p>正向遍历：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(vector&lt;<span class="keyword">int</span>&gt;::iterator it=vecInt.<span class="built_in">begin</span>(); it!=vecInt.<span class="built_in">end</span>(); ++it)</span><br><span class="line">&#123;</span><br><span class="line">      <span class="keyword">int</span> iItem = *it; </span><br><span class="line">      cout &lt;&lt; iItem;    <span class="comment">//或直接使用  cout &lt;&lt; *it;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这样子便打印出1 3 5 7 9</p>
+<p>逆向遍历：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(vector&lt;<span class="keyword">int</span>&gt;::reverse_iterator rit=vecInt.<span class="built_in">rbegin</span>(); rit!=vecInt.<span class="built_in">rend</span>(); ++rit)    <span class="comment">//注意，小括号内仍是++rit</span></span><br><span class="line">&#123;</span><br><span class="line">		<span class="keyword">int</span> iItem  = *rit;</span><br><span class="line">      cout &lt;&lt; iItem;	<span class="comment">//或直接使用cout &lt;&lt; *rit;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>此时将打印出9,7,5,3,1<br>注意，这里迭代器的声明采用<code>vector&lt;int&gt;::reverse_iterator</code>，而非<code>vector&lt;int&gt;::iterator。</code></p>
+<p>迭代器还有其它两种声明方法：<br><code>vector&lt;int&gt;::const_iterator</code> 与 <code>vector&lt;int&gt;::const_reverse_iterator</code> </p>
+<p>以上两种分别是<code>vector&lt;int&gt;::iterator</code> 与<code>vector&lt;int&gt;::reverse_iterator</code> 的只读形式，使用这两种迭代器时，不会修改到容器中的值。<br>备注：不过容器中的<code>insert</code>和<code>erase</code>方法仅接受这四种类型中的<code>iterator</code>，其它三种不支持。《Effective STL》建议我们尽量使用<code>iterator</code>取代<code>const_iterator</code>、<code>reverse_iterator</code>和<code>const_reverse_iterator</code>。 </p>
+<h2 id="vector的插入"><a href="#vector的插入" class="headerlink" title="vector的插入"></a>vector的插入</h2><p>理论知识</p>
+<ul>
+<li><code>vector.insert(pos,elem);   //在pos位置插入一个elem元素的拷贝，返回新数据的位置。</code></li>
+<li><code>vector.insert(pos,n,elem);   //在pos位置插入n个elem数据，无返回值。</code></li>
+<li><code>vector.insert(pos,beg,end);   //在pos位置插入[beg,end)区间的数据，无返回值</code></li>
+</ul>
+<p>简单案例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;<span class="keyword">int</span>&gt; vecA;</span><br><span class="line">	vector&lt;<span class="keyword">int</span>&gt; vecB;</span><br><span class="line"></span><br><span class="line">	vecA.<span class="built_in">push_back</span>(<span class="number">1</span>);</span><br><span class="line">	vecA.<span class="built_in">push_back</span>(<span class="number">3</span>);</span><br><span class="line">	vecA.<span class="built_in">push_back</span>(<span class="number">5</span>);</span><br><span class="line">	vecA.<span class="built_in">push_back</span>(<span class="number">7</span>);</span><br><span class="line">	vecA.<span class="built_in">push_back</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line">	vecB.<span class="built_in">push_back</span>(<span class="number">2</span>);</span><br><span class="line">	vecB.<span class="built_in">push_back</span>(<span class="number">4</span>);</span><br><span class="line">	vecB.<span class="built_in">push_back</span>(<span class="number">6</span>);</span><br><span class="line">	vecB.<span class="built_in">push_back</span>(<span class="number">8</span>);</span><br><span class="line">	</span><br><span class="line">	vecA.<span class="built_in">insert</span>(vecA.<span class="built_in">begin</span>(), <span class="number">11</span>);		<span class="comment">//&#123;11, 1, 3, 5, 7, 9&#125;</span></span><br><span class="line">	vecA.<span class="built_in">insert</span>(vecA.<span class="built_in">begin</span>()+<span class="number">1</span>,<span class="number">2</span>,<span class="number">33</span>);		<span class="comment">//&#123;11,33,33,1,3,5,7,9&#125;</span></span><br><span class="line">	vecA.<span class="built_in">insert</span>(vecA.<span class="built_in">begin</span>() , vecB.<span class="built_in">begin</span>() , vecB.<span class="built_in">end</span>() );	<span class="comment">//&#123;2,4,6,8,11,33,33,1,3,5,7,9&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="vector的删除"><a href="#vector的删除" class="headerlink" title="vector的删除"></a>vector的删除</h2><p>理论知识</p>
+<ul>
+<li><code>vector.clear();    //移除容器的所有数据</code></li>
+<li><code>vec.erase(beg,end);  //删除[beg,end)区间的数据，返回下一个数据的位置。</code></li>
+<li><code>vec.erase(pos);    //删除pos位置的数据，返回下一个数据的位置。</code></li>
+</ul>
+<p>简单案例:</p>
+<p>删除区间内的元素</p>
+<p>vecInt是用vector<int>声明的容器，现已包含按顺序的1,3,5,6,9元素。</p>
+<p><code>vector&lt;int&gt;::iterator itBegin=vecInt.begin()+1;</code></p>
+<p><code>vector&lt;int&gt;::iterator itEnd=vecInt.begin()+2;</code></p>
+<p><code>vecInt.erase(itBegin,itEnd);</code></p>
+<p>此时容器vecInt包含按顺序的1,6,9三个元素。</p>
+<p>假设 vecInt 包含1,3,2,3,3,3,4,3,5,3，删除容器中等于3的元素</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(vector&lt;<span class="keyword">int</span>&gt;::iterator it=vecInt.<span class="built_in">being</span>(); it!=vecInt.<span class="built_in">end</span>(); )    <span class="comment">//小括号里不需写  ++it</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="keyword">if</span>(*it == <span class="number">3</span>)</span><br><span class="line">   &#123;	</span><br><span class="line">   	 <span class="comment">//以迭代器为参数，删除元素3，并把数据删除后的下一个元素位置返回给迭代器。</span></span><br><span class="line">        it  =  vecInt.<span class="built_in">erase</span>(it);</span><br><span class="line">        <span class="comment">//此时，不执行  ++it；  </span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">else</span></span><br><span class="line">   &#123;</span><br><span class="line">       ++it;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//删除vecInt的所有元素</span></span><br><span class="line">vecInt.<span class="built_in">clear</span>();			<span class="comment">//容器为空</span></span><br></pre></td></tr></table></figure>
+<h2 id="vector小结"><a href="#vector小结" class="headerlink" title="vector小结"></a>vector小结</h2><p>这一讲，主要讲解如下要点：</p>
+<p>容器的简介，容器的分类，各个容器的数据结构<br>vector,deque,list,set,multiset,map,multimap</p>
+<p>容器vector的具体用法（包括迭代器的具体用法）。</p>
+<p>vertor简介，vector使用之前的准备，vector对象的默认构造，vector末尾的添加移除操作，vector的数据存取，迭代器的简介，双向迭代器与随机访问迭代器<br>vector与迭代器的配合使用，vector对象的带参数构造，vector的赋值，vector的大小，vector的插入，vector的删除。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/stl-string-string-class-details/" rel="prev" title="STL string字符串类详解">
+      <i class="fa fa-chevron-left"></i> STL string字符串类详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/stl-deque-container-details/" rel="next" title="STL Deque 容器详解">
+      STL Deque 容器详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Vector%E5%AE%B9%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">Vector容器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Vector%E5%AE%B9%E5%99%A8%E7%AE%80%E4%BB%8B"><span class="nav-number">1.1.</span> <span class="nav-text">Vector容器简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E5%AF%B9%E8%B1%A1%E7%9A%84%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0"><span class="nav-number">1.2.</span> <span class="nav-text">vector对象的默认构造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%B8%A6%E5%8F%82%E6%95%B0%E6%9E%84%E9%80%A0"><span class="nav-number">1.3.</span> <span class="nav-text">vector对象的带参数构造</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">理论知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E7%9A%84%E8%B5%8B%E5%80%BC"><span class="nav-number">1.4.</span> <span class="nav-text">vector的赋值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86-1"><span class="nav-number">1.4.1.</span> <span class="nav-text">理论知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.5.</span> <span class="nav-text">vector的大小</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86-2"><span class="nav-number">1.5.1.</span> <span class="nav-text">理论知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E6%9C%AB%E5%B0%BE%E7%9A%84%E6%B7%BB%E5%8A%A0%E7%A7%BB%E9%99%A4%E6%93%8D%E4%BD%9C"><span class="nav-number">1.6.</span> <span class="nav-text">vector末尾的添加移除操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E7%9A%84%E6%95%B0%E6%8D%AE%E5%AD%98%E5%8F%96"><span class="nav-number">1.7.</span> <span class="nav-text">vector的数据存取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E7%9F%A5%E8%AF%86-3"><span class="nav-number">1.7.1.</span> <span class="nav-text">理论知识</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.8.</span> <span class="nav-text">迭代器基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E5%90%91%E8%BF%AD%E4%BB%A3%E5%99%A8%E4%B8%8E%E9%9A%8F%E6%9C%BA%E8%AE%BF%E9%97%AE%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">1.9.</span> <span class="nav-text">双向迭代器与随机访问迭代器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%99%A8%E7%9A%84%E9%85%8D%E5%90%88%E4%BD%BF%E7%94%A8"><span class="nav-number">1.10.</span> <span class="nav-text">vector与迭代器的配合使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E7%9A%84%E6%8F%92%E5%85%A5"><span class="nav-number">1.11.</span> <span class="nav-text">vector的插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">1.12.</span> <span class="nav-text">vector的删除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vector%E5%B0%8F%E7%BB%93"><span class="nav-number">1.13.</span> <span class="nav-text">vector小结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/stl-vector-container-details/";
+    this.page.identifier = "stl-vector-container-details/";
+    this.page.title = "STL Vector 容器详解";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

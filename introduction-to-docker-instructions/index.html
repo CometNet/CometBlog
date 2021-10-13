@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前面几篇文章介绍了Docker如何构建一个镜像以及如何运行一个容器，其实这个是在大家有Docker基础的前提下进行的，对于没有基础的同学，本文简单介绍一下Dockerfile中各个命令的用法是怎样的。 1. FROM格式：FROM &lt;image&gt;或者FROM &lt;image&gt;:&lt;tag&gt;第一条指令必须是FROM，而且，在同一个Dockerfile中创建多个镜像的时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dockerfile常用命令介绍">
+<meta property="og:url" content="http://blog.huixing.org/introduction-to-docker-instructions/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="前面几篇文章介绍了Docker如何构建一个镜像以及如何运行一个容器，其实这个是在大家有Docker基础的前提下进行的，对于没有基础的同学，本文简单介绍一下Dockerfile中各个命令的用法是怎样的。 1. FROM格式：FROM &lt;image&gt;或者FROM &lt;image&gt;:&lt;tag&gt;第一条指令必须是FROM，而且，在同一个Dockerfile中创建多个镜像的时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.cnblogs.com/cnblogs_com/heyangyi/1172780/o_docker.jpg">
+<meta property="article:published_time" content="2018-07-13T02:24:00.000Z">
+<meta property="article:modified_time" content="2019-10-16T06:23:29.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.cnblogs.com/cnblogs_com/heyangyi/1172780/o_docker.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/introduction-to-docker-instructions/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Dockerfile常用命令介绍 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/introduction-to-docker-instructions/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Dockerfile常用命令介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-13 10:24:00" itemprop="dateCreated datePublished" datetime="2018-07-13T10:24:00+08:00">2018-07-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 14:23:29" itemprop="dateModified" datetime="2019-10-16T14:23:29+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>tanhao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/introduction-to-docker-instructions/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="introduction-to-docker-instructions/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://images.cnblogs.com/cnblogs_com/heyangyi/1172780/o_docker.jpg" alt="docker"><br>前面几篇文章介绍了Docker如何构建一个镜像以及如何运行一个容器，其实这个是在大家有Docker基础的前提下进行的，对于没有基础的同学，本文简单介绍一下Dockerfile中各个命令的用法是怎样的。</p>
+<h3 id="1-FROM"><a href="#1-FROM" class="headerlink" title="1. FROM"></a>1. FROM</h3><p>格式：<code>FROM &lt;image&gt;</code>或者<code>FROM &lt;image&gt;</code>:<code>&lt;tag&gt;</code><br>第一条指令必须是<code>FROM</code>，而且，在同一个Dockerfile中创建多个镜像的时候，可以使用多个<code>FROM</code>指令（每个指令一次）。</p>
+<h3 id="2-MAINTAINER"><a href="#2-MAINTAINER" class="headerlink" title="2. MAINTAINER"></a>2. MAINTAINER</h3><p>格式：<code>MAINTAINER &lt;name&gt;</code><br>指定维护者是谁。</p>
+<h3 id="3-RUN"><a href="#3-RUN" class="headerlink" title="3. RUN"></a>3. RUN</h3><p>格式：<code>RUN &lt;command&gt;</code>或者<code>RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code>。<br>前者将在shell终端中运行，即<code>/bin/sh -c</code>。后者使用<code>exec</code>执行。指定使用其它终端执行可以用后一种方式实现。比如<code>RUN [&quot;/bin/bash&quot;, &quot;-c&quot;, &quot;echo hello&quot;]</code>。<br>每一条RUN指令执行的时候都会在当前镜像的基础上创建新的镜像，如果你的命令实在是非常长的话可以使用<code>\</code>来分隔。</p>
+<h3 id="4-CMD"><a href="#4-CMD" class="headerlink" title="4. CMD"></a>4. CMD</h3><p>支持三种格式：</p>
+<ul>
+<li><code>CMD [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code>使用<code>exec</code>执行，推荐方式。</li>
+<li><code>CMD command param1 param2</code>在<code>/bin/sh</code>中执行，提供给需要交互的应用。</li>
+<li><code>CMD [&quot;param1&quot;, &quot;param2&quot;]</code>提供给<code>ENTRYPOINT</code>的默认参数。</li>
+</ul>
+<p>指定启动容器时执行的命令，每一个Dockerfile只能有一条<code>CMD</code>命令，如果有多条的话，只会执行最后一条。如果用户启动容器时指定了运行的命令，则<code>CMD</code>命令会被覆盖掉。</p>
+<h3 id="5-EXPOSE"><a href="#5-EXPOSE" class="headerlink" title="5. EXPOSE"></a>5. EXPOSE</h3><p>格式：<code>EXPOSE &lt;port&gt; [&lt;port&gt;...]</code><br>例如：<code>EXPOSE 80 443 22</code><br>这条命令告诉容器需要开放的端口号，以提供给互联系统使用，启动容器的时候需要通过<code>-p</code>或者<code>-P</code>来分配这些端口。使用<code>-P</code>的话，系统会随机指定一些端口映射过来，使用<code>-p</code>的话，需要自己具体指定端口与上述端口映射。比如：<code>docker run -d -p 1022:22 -p 1080:80 -p 1443:443 nginx</code>。</p>
+<h3 id="6-ENV"><a href="#6-ENV" class="headerlink" title="6. ENV"></a>6. ENV</h3><p>格式：<code>ENV &lt;key&gt; &lt;value&gt;</code><br>就是指定一个环境变量，会被后续的<code>RUN</code>命令使用，并在容器运行时保持。比如：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ENV MYSQL_MAJOR 5.6</span><br><span class="line">ENV MYSQL_VERSION 5.6.20</span><br><span class="line">RUN curl -SL &quot;http://dev.mysql.com/get/Downloads/MySQL-$MYSQL_MAJOR/mysql-$MYSQL_VERSION-linux-glibc2.5-x86_64.tar.gz&quot; -o mysql.tar.gz</span><br><span class="line">tar -zxvf mysql.tar.gz /usr/local/mysql</span><br></pre></td></tr></table></figure></p>
+<h3 id="7-ADD"><a href="#7-ADD" class="headerlink" title="7. ADD"></a>7. ADD</h3><p>格式：<code>ADD &lt;src&gt; &lt;dest&gt;</code><br>复制指定的<code>&lt;src&gt;</code>到容器的<code>&lt;dest&gt;</code>，其中<code>&lt;src&gt;</code>可以是Dockerfile所在目录的一个相对路径（文件或目录）；也可以是一个URL；还可以是一个tar文件（自动解压为目录）。</p>
+<h3 id="8-COPY"><a href="#8-COPY" class="headerlink" title="8. COPY"></a>8. COPY</h3><p>格式：<code>COPY &lt;src&gt; &lt;dest&gt;</code><br>复制本地主机的<code>&lt;src&gt;</code>为容器的<code>&lt;dest&gt;</code>，目标路径不存在的时候，会自动创建。如果我们使用本地源目录的时候，推荐使用<code>COPY</code>命令。</p>
+<h3 id="9-ENTRYPOINT"><a href="#9-ENTRYPOINT" class="headerlink" title="9. ENTRYPOINT"></a>9. ENTRYPOINT</h3><p>格式：<code>ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]</code>或<code>ENTRYPOINT command param1 param2</code>（shell中执行）。<br>配置容器启动以后执行的命令，并且不能被docker run命令提供的参数覆盖。每一个Dockerfile只能有一个<code>ENTRYPOINT</code>命令，当存在多个的时候就只有最后一个会生效。</p>
+<h3 id="10-VOLUME"><a href="#10-VOLUME" class="headerlink" title="10. VOLUME"></a>10. VOLUME</h3><p>格式：<code>VOLUME [&quot;/data&quot;]</code><br>创建一个本地主机或者其他容器挂载的挂载点，一般用来存储数据库和需要保持的数据等等。</p>
+<h3 id="11-USER"><a href="#11-USER" class="headerlink" title="11. USER"></a>11. USER</h3><p>格式：<code>USER daemon</code><br>指定运行容器时候的用户名或者UID，后续RUN也会使用指定的用户。</p>
+<h3 id="12-WORKDIR"><a href="#12-WORKDIR" class="headerlink" title="12. WORKDIR"></a>12. WORKDIR</h3><p>格式：<code>WORKDIR /path/to/workdir</code><br>由于Dockerfile中不能使用cd命令，所以我们想要在哪个目录下操作的时候就需要切换进来。为后续的RUN，CMD以及ENTRYPOINT指定工作的目录。可以使用多个WORKDIR命令，如果后面为相对路径，则是针对当前目录确定的。比如：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WORKDIR /a</span><br><span class="line">WORKDIR b</span><br><span class="line">WORKDIR c</span><br></pre></td></tr></table></figure><br>那么最后进入的目录就是<code>/a/b/c</code>，记住啦，别搞混了哦！</p>
+<p>参考书籍：《Docker技术入门与实战》</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/resetful-api-specification/" rel="next" title="RESETful API 设计规范">
+      RESETful API 设计规范 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-FROM"><span class="nav-number">1.</span> <span class="nav-text">1. FROM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MAINTAINER"><span class="nav-number">2.</span> <span class="nav-text">2. MAINTAINER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-RUN"><span class="nav-number">3.</span> <span class="nav-text">3. RUN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-CMD"><span class="nav-number">4.</span> <span class="nav-text">4. CMD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-EXPOSE"><span class="nav-number">5.</span> <span class="nav-text">5. EXPOSE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-ENV"><span class="nav-number">6.</span> <span class="nav-text">6. ENV</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ADD"><span class="nav-number">7.</span> <span class="nav-text">7. ADD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-COPY"><span class="nav-number">8.</span> <span class="nav-text">8. COPY</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-ENTRYPOINT"><span class="nav-number">9.</span> <span class="nav-text">9. ENTRYPOINT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-VOLUME"><span class="nav-number">10.</span> <span class="nav-text">10. VOLUME</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-USER"><span class="nav-number">11.</span> <span class="nav-text">11. USER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-WORKDIR"><span class="nav-number">12.</span> <span class="nav-text">12. WORKDIR</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/introduction-to-docker-instructions/";
+    this.page.identifier = "introduction-to-docker-instructions/";
+    this.page.title = "Dockerfile常用命令介绍";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

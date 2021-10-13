@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="用户账户管理Linux&#x2F;Unix是一个用户、多任务的操作系统；在讲Linux账号及账户组管理之前，先简单了解一下多用户、多任务操作系统的基本概念。 Linux的单用户多任务在Linux下，当你登录后，你也可以同时开启很多的服务任务和进程，而各自服务都会跑的很好却对其他任务没有任何影响，这种登录一个用户登录系统执行多个服务任务和进程的情况，就称为单用户多任务。 Linux的多用户多任务有时可能是很多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux系统文件用户和用户组详解">
+<meta property="og:url" content="http://blog.huixing.org/linux_system_file_users_and_user_groups/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="用户账户管理Linux&#x2F;Unix是一个用户、多任务的操作系统；在讲Linux账号及账户组管理之前，先简单了解一下多用户、多任务操作系统的基本概念。 Linux的单用户多任务在Linux下，当你登录后，你也可以同时开启很多的服务任务和进程，而各自服务都会跑的很好却对其他任务没有任何影响，这种登录一个用户登录系统执行多个服务任务和进程的情况，就称为单用户多任务。 Linux的多用户多任务有时可能是很多">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-30T07:28:00.000Z">
+<meta property="article:modified_time" content="2019-10-16T06:25:24.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://blog.huixing.org/linux_system_file_users_and_user_groups/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux系统文件用户和用户组详解 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/linux_system_file_users_and_user_groups/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux系统文件用户和用户组详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-05-30 15:28:00" itemprop="dateCreated datePublished" datetime="2019-05-30T15:28:00+08:00">2019-05-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-16 14:25:24" itemprop="dateModified" datetime="2019-10-16T14:25:24+08:00">2019-10-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/linux_system_file_users_and_user_groups/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="linux_system_file_users_and_user_groups/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="用户账户管理"><a href="#用户账户管理" class="headerlink" title="用户账户管理"></a>用户账户管理</h2><p>Linux/Unix是一个用户、多任务的操作系统；在讲Linux账号及账户组管理之前，先简单了解一下多用户、多任务操作系统的基本概念。</p>
+<h3 id="Linux的单用户多任务"><a href="#Linux的单用户多任务" class="headerlink" title="Linux的单用户多任务"></a>Linux的单用户多任务</h3><p>在Linux下，当你登录后，你也可以同时开启很多的服务任务和进程，而各自服务都会跑的很好却对其他任务没有任何影响，这种登录一个用户登录系统执行多个服务任务和进程的情况，就称为单用户多任务。</p>
+<h3 id="Linux的多用户多任务"><a href="#Linux的多用户多任务" class="headerlink" title="Linux的多用户多任务"></a>Linux的多用户多任务</h3><p>有时可能是很多用户同时用同一个系统，如公司几十个运维人员，每台机器都可以和被若干个运维人员登录部署或解决相关故障问题，但并不是所有的运维人员都要做同一件事，所以就有了多任务、多用户的情况。</p>
+<p>值得注意的是：多用户、多任务并不是大家同时挤到一起，在一台机器的键盘和显示器前来操作机器，多用户可能是通过SSH客户端工具等远程工具等远程登录服务器来进行，比如对服务器的运程控制，只要具有相关用户的权限，任何人都是可以上去操作访问服务器。</p>
+<h3 id="linux系统用户角色划分"><a href="#linux系统用户角色划分" class="headerlink" title="linux系统用户角色划分"></a>linux系统用户角色划分</h3><p>用户在系统中是分角色的，在Linux系统中，由于角色的不同，权限和所完成的任务也不同；值得注意的是用户的角色是通过UID和GID识别的；特别是UID，在运维工作中，一个UID是唯一标识一个系统用户的账号。</p>
+<table>
+<thead>
+<tr>
+<th>uid范围</th>
+<th>用户类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>超级用户</td>
+<td>默认是root用户，其UID和GID均为0。在每台unix/linux操作系统中都是唯一且真实存在的，通过它可以登录系统，可以操作系统中任何文件和命令，拥有最高的管理权限。在生产环境，一般禁止root账号远程登录SSH连接服务器，以加强系统安全。</td>
+</tr>
+<tr>
+<td>1~499</td>
+<td>程序用户</td>
+<td>与真实用户区分开来，这类用户的最大特点是安装系统后默认就会存在的，且默认情况不能登录系统，它们是系统正常运行必不可少的，他们的存在主要是方便系统管理，满足相应的系统进程都文件属主的要求。例如系统默认的bin、adm、nodoby、mail用户等。由于服务器角色的不同，有部分用不到的系统服务被禁止开机执行，因此，在做系统安全优化时，被禁止开机启动了的服务对应的虚拟用户也是可以处理掉的(删除或注释)。</td>
+</tr>
+<tr>
+<td>500~65535</td>
+<td>普通用户</td>
+<td>这类用户一般是由具备系统管理员root的权限的运维人员添加的。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="多用户操作系统的安全"><a href="#多用户操作系统的安全" class="headerlink" title="多用户操作系统的安全"></a>多用户操作系统的安全</h3><p>多用户系统从实际来说使得系统管理更为方便了。从安全角度来说，多用户也更为安全，比如普通用户<code>huixing</code>下的某个文件不想让其他用户看到，只是设置一下该文件的权限为普通用户<code>huixing</code>一个用户可读可写可执行的权限就行了，这样以来只有普通用户<code>huixing</code>一个用户可以对其私有文件进行操作，从而达到了保护每个用户的私有数据安全。</p>
+<h2 id="账户-user-和账户组（group）"><a href="#账户-user-和账户组（group）" class="headerlink" title="账户(user)和账户组（group）"></a>账户(user)和账户组（group）</h2><h3 id="用户-user-介绍"><a href="#用户-user-介绍" class="headerlink" title="用户(user)介绍"></a>用户(user)介绍</h3><p>如果要使用系统资源，就必须向系统管理员申请一个账号，然后通过这个账号进入系统。这个账号和用户是同一个账号，通过建立不同属性的用户，一方面，可以合理的利用和控制系统资源，另一方面也可以帮助用户组织文件，提供对用户文件的安全性保护。</p>
+<p>每一个用户都有一个唯一的用户名和用户口令，在登录系统后，只有正确输入了用户名和密码，才能登录系统和相应的目录。</p>
+<p>在生产环境中，一般会为每一个有权限管理服务器的运维人员分配一个独立的普通用户账号及8位以上(包含数字、字母)以上的密码。</p>
+<p>如<code>huixing</code>普通用户，该人员只能通过建立的这个账号登录到系统中进行维护，当需要超级用户权限时，可以通过”<code>sudo 命令名</code>“方式来执行仅有<code>root</code>权限才允许执行的权限。当然，<code>sudo</code>权限要尽量的小。还有，当运维人数不多时(如2-3个)，也可以直接<code>su -</code>切换到超级用户<code>root</code>下，再执行相应的维护工作。特别提醒，维护时，如果不需要<code>root</code>权限，就不要进入<code>root</code>用户下操作，以减少误操作对系统带来的损失。</p>
+<h3 id="用户组（group）介绍"><a href="#用户组（group）介绍" class="headerlink" title="用户组（group）介绍"></a>用户组（group）介绍</h3><p>简单的说，linux系统中的用户组(group)就是具有相同特性的用户(user)集合；</p>
+<p>有时我们需要让多个用户具有相同的权限，比如查看、修改某一个文件或目录，如果不用用户组，这种需求在授权时就很难实现。如果使用用户组就方便多了，只需要把授权的用户都加入到同一个用户组里，然后通过修改该文件或目录的对应的用户组的权限，让用户组具有符合需求的操作权限，这样用户组下的所有用户对该文件或目录就会具有相同的权限，这就是用户组的用途。</p>
+<p>将用户分组是linux系统中对用户进行管理及控制访问权限的一种手段，通过定义用户组，在很大程度上简化了运维管理工作。</p>
+<p>实际上，在日常生活中，对人类的分组也是无处不在的，达到国家，小到公司，家庭，学校，班级等等都类似linux中用户组的概念，而其中的成员就类似linux用户组中用户的概念。</p>
+<h3 id="用户和用户组的对应关系"><a href="#用户和用户组的对应关系" class="headerlink" title="用户和用户组的对应关系"></a>用户和用户组的对应关系</h3><p><strong>用户和用户组的对应关系有：一对一、一对多、多对一和多对多.</strong></p>
+<table>
+<thead>
+<tr>
+<th>关系</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一对一</td>
+<td>即一个用户可以存在一个组中，也可以是组中的唯一成员。比如，root。</td>
+</tr>
+<tr>
+<td>一对多</td>
+<td>即一个用户可以存在多个组中，这个用户就具有这些组。</td>
+</tr>
+<tr>
+<td>多对一</td>
+<td>即多个用户可以存在一个组中，这些用户这些组的共同权限。</td>
+</tr>
+<tr>
+<td>多对多</td>
+<td>即多用户可以存在于多个组中。并且几个用户可以归属相同的组；其实多对多的关系是前面三条的扩展。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>组类别</strong></p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基本组</td>
+<td>优先使用基本组，由系统分配给系统进程使用</td>
+</tr>
+<tr>
+<td>附加组</td>
+<td>基本组不能满足授权要求，创建附加组，用户可以属于多个附加组</td>
+</tr>
+<tr>
+<td>私有组</td>
+<td>创建用户时如果没有指定属组，系统会创建同名的组</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户及用户组配置文件介绍"><a href="#用户及用户组配置文件介绍" class="headerlink" title="用户及用户组配置文件介绍"></a>用户及用户组配置文件介绍</h3><p>Linux系统中下的账户文件主要有<code>/etc/passwd</code>、<code>/etc/shadow、/etc/group</code>、<code>/etc/gshadow</code>四个文件。</p>
+<p><strong>与用户相关的配置文件</strong></p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/passwd</td>
+<td>用户的配置文件， 保存用户账户的基本信息</td>
+</tr>
+<tr>
+<td>/etc/shadow</td>
+<td>用户影子口令文件</td>
+</tr>
+</tbody>
+</table>
+<p><strong>用户的配置文件/etc/passwd</strong></p>
+<p>/etc/passwd文件中每行定义一个用户账号，有多少行就表示多少个账号，在一行中可以清晰的看出，各内容之间又通过”:”号划分了7个字段，这7个字段分别定义了账号的不同属性，passwd文件实际内容如下:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">bin:x:1:1:bin:/bin:/sbin/nologin</span><br><span class="line">daemon:x:2:2:daemon:/sbin:/sbin/nologin</span><br><span class="line">adm:x:3:4:adm:/var/adm:/sbin/nologin</span><br><span class="line">lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin</span><br></pre></td></tr></table></figure><br>在passwd文件中，第一行内容就是超级用户root行，可以看到它的uid和gid都为0.为了方便理解，下面是各字段的描述：</p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>帐号名</td>
+<td>这是用户登陆时使用的账户名称，在系统中是唯一的，不能重名</td>
+</tr>
+<tr>
+<td>2</td>
+<td>密码占位符x</td>
+<td>早期的unix系统中，该字段是存放账户和密码的，由于安全原因，后来把这个密码字段内容移到/etc/shadow中了。这里可以看到一个字母x，表示该用户的密码是/etc/shadow文件中保护的。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>UID</td>
+<td>范围是0-65535</td>
+</tr>
+<tr>
+<td>4</td>
+<td>GID</td>
+<td>范围是0-65535；当添加用户时，默认情况下会同时建立一个与用户同名且UID和GID相同的组。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>用户说明</td>
+<td>这个字段是对这个账户的说明</td>
+</tr>
+<tr>
+<td>6</td>
+<td>宿主目录</td>
+<td>用户登陆后首先进入的目录，一般与”/home/用户名”这样的目录</td>
+</tr>
+<tr>
+<td>7</td>
+<td>登录Shell</td>
+<td>当前用户登陆后所使用的shell，在centos/rhel系统中，默认的shell是bash；如果不希望用户登陆系统，可以通过usermod或者手动修改passwd设置，将该字段设置为/sbin/nologin 即可。大多数内置系统账户都是/sbin/nologin,这表示禁止登陆系统。这是出于安全考虑的。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="passwd中有关UID的限制说明"><a href="#passwd中有关UID的限制说明" class="headerlink" title="passwd中有关UID的限制说明"></a>passwd中有关UID的限制说明</h3><ul>
+<li>0：当用户的UID为0时，表示这个账户为超级用户；如果要增加一个系统管理员账户的话，只需将该账户的UID改为0即可。不建议</li>
+<li>1~499：这个范围是保留给系统用户使用的UID</li>
+<li>500~65535：普通账户UID</li>
+</ul>
+<p>最后，来看一下/etc/passwd的权限：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/passwd</span><br><span class="line">-rw-r--r--. 1 root root 846 May 10 18:39 /etc/passwd</span><br></pre></td></tr></table></figure></p>
+<p>因为每个用户登录时都需要取得UID和GID来判断权限问题，所以/etc/passwd的权限为644，这样一来就会带来安全问题，即所有的用户都可以都/etc/passwd文件，即使文件内的密码是加密的，但还是存在一定的被攻击破解的安全隐患。因此，就有了/etc/shadow文件。</p>
+<h3 id="用户的影子口令文件-etc-shadow"><a href="#用户的影子口令文件-etc-shadow" class="headerlink" title="用户的影子口令文件/etc/shadow"></a>用户的影子口令文件/etc/shadow</h3><p>由于passwd文件必须要被所有的用户读，所以会带来安全隐患。而shadow文件就是为了解决这个安全隐患而增加的。</p>
+<p>来看一下/etc/shadow的权限：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/shadow</span><br><span class="line">----------. 1 root root 585 May 10 18:39 /etc/shadow</span><br></pre></td></tr></table></figure>
+<p>来看一下/etc/shadow前五条:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/shadow</span><br><span class="line">root:$6$KGag3mEJyVyHhgS6$GsDcutUX/ga8cE29NeRlthw8QtK/2JleUjYD93JxbvuIONiR8KLpmQhxjFJ1AMD5XAGkQasOAEU0ZQN7oSXes0::0:99999:7:::</span><br><span class="line">bin:*:17834:0:99999:7:::</span><br><span class="line">daemon:*:17834:0:99999:7:::</span><br><span class="line">adm:*:17834:0:99999:7:::</span><br><span class="line">lp:*:17834:0:99999:7:::</span><br></pre></td></tr></table></figure></p>
+<p>和/etc/passwd一样，shadow文件的每一行内容，也是以冒号(:)作为分隔符，共9个字段，其各个字段的意义如下表：</p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>登录名称</td>
+</tr>
+<tr>
+<td>2</td>
+<td>加密的密码</td>
+</tr>
+<tr>
+<td>3</td>
+<td>最近更改密码的时间；从1970/1/1到上次修改密码的天数</td>
+</tr>
+<tr>
+<td>4</td>
+<td>禁止修改密码的天数；从1970/1/1开始，多少天之内不能修改密码，默认值为0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>用户必须更改口令的天数；密码的最长有效天数，默认值为99999</td>
+</tr>
+<tr>
+<td>6</td>
+<td>警告更改密码的期限；密码过期之前警告天数，默认值为7；在用户密码过期前多少天提醒用户更改密码</td>
+</tr>
+<tr>
+<td>7</td>
+<td>不活动时间；密码过期之后账户宽限时间 3+5；在用户密码过期之后到禁用账户的天数</td>
+</tr>
+<tr>
+<td>8</td>
+<td>帐号失效时间，默认值为空；从1970/1/1日起，到用户被禁用的天数</td>
+</tr>
+<tr>
+<td>9</td>
+<td>保留字段（未使用），标志</td>
+</tr>
+</tbody>
+</table>
+<p>与用户组相关的配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/etc/group  #用户组配置文件</span><br><span class="line">/etc/gshadow  #用户组的影子文件</span><br></pre></td></tr></table></figure>
+<h3 id="用户组配置文件-etc-group"><a href="#用户组配置文件-etc-group" class="headerlink" title="用户组配置文件/etc/group"></a>用户组配置文件/etc/group</h3><p>/etc/group 文件是用户组的配置文件，内容包括用户与用户组，并且能显示用户归属哪个用户组，因为一个用户可以归属一个或多个不同的用户组；同一用户组的用户之间具有相似的特性。如果某个用户下有对系统管理有最重要的内容，最好让用户拥有独立的用户组，或者是把用户下的文件的权限设置为完全私有；另外root用户组一般不要轻易把普通用户加入进入。</p>
+<p>/etc/group文件就是记录GID与用户组的文件。/etc/group文件同/etc/passwd类似，其文件权限也是644：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/group</span><br><span class="line">-rw-r--r--. 1 root root 476 May 14 20:12 /etc/group</span><br></pre></td></tr></table></figure>
+<p>/etc/group的文件内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# head -5 /etc/group</span><br><span class="line">root:x:0:</span><br><span class="line">bin:x:1:</span><br><span class="line">daemon:x:2:</span><br><span class="line">sys:x:3:</span><br><span class="line">adm:x:4:</span><br></pre></td></tr></table></figure>
+<p>group文件各个字段的详细说明：</p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>组账户名称</td>
+</tr>
+<tr>
+<td>2</td>
+<td>密码占位符x；通常不需要设置该密码，由于安全原因，该密码被记录在/etc/gshadow中，因此显示为’x’。这类似/etc/shadow</td>
+</tr>
+<tr>
+<td>3</td>
+<td>组账户GID号,用户组ID</td>
+</tr>
+<tr>
+<td>4</td>
+<td>本组的成员用户列表；加入这个组的所有用户账号</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户组的影子文件-etc-gshadow"><a href="#用户组的影子文件-etc-gshadow" class="headerlink" title="用户组的影子文件/etc/gshadow"></a>用户组的影子文件/etc/gshadow</h3><p>/etc/gshaow是/etc/group的加密文件，比如用户组的管理密码就是存放在这个文件。/etc/group和/etc/gshadow是互补的两个文件；比如大型服务器，针对很多用户和用户组，定制一些关系结构比较复杂的额权限模型，设置用户组密码是极有必要的。比如不想让一些非用户组成员永久拥有用户组的权限和特性，这时就可以通过密码验证的方式来让某些用户临时拥有一些用户组特性，这时就要用到用户组密码；/etc/gshadow格式如下，每个用户组独占一行；<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux ~]# ls -l /etc/gshadow</span><br><span class="line">----------. 1 root root 378 May 14 20:12 /etc/gshadow</span><br><span class="line">[root@base-centos-linux ~]# head -5 /etc/gshadow</span><br><span class="line">root:::</span><br><span class="line">bin:::</span><br><span class="line">daemon:::</span><br><span class="line">sys:::</span><br><span class="line">adm:::</span><br></pre></td></tr></table></figure><br>gshadow文件中各个字段详细说明：</p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>组账号的名称</td>
+</tr>
+<tr>
+<td>2</td>
+<td>加密后的密码字符串，这个字段可以空的或者!；如果是空的或有！，表示没有密码</td>
+</tr>
+<tr>
+<td>3</td>
+<td>本组的管理员列表；这个字段也可为空；如果有多个用户组管理员，用,号分隔</td>
+</tr>
+<tr>
+<td>4</td>
+<td>本组的成员列表；加入这个组的所有用户账户；列表中多个用户通过”,”分隔</td>
+</tr>
+</tbody>
+</table>
+<h2 id="账号管理"><a href="#账号管理" class="headerlink" title="账号管理"></a>账号管理</h2><h3 id="与账户相关的文件和目录"><a href="#与账户相关的文件和目录" class="headerlink" title="与账户相关的文件和目录"></a>与账户相关的文件和目录</h3><ul>
+<li>/etc/default/useradd    </li>
+<li>/etc/login.defs</li>
+<li>/etc/skel/<h4 id="etc-skel目录"><a href="#etc-skel目录" class="headerlink" title="/etc/skel目录"></a>/etc/skel目录</h4></li>
+</ul>
+<p>/etc/skel目录是用来存放新用户配置文件的目录，当我们添加新用户时，这个目录下的所有文件都会自动被复制到新添加的用户的家目录下；默认情况下，/etc/skel目录下的所有文件都是隐藏文件(以.点开头)；通过修改、添加、删除/etc/skel目录下的文件，我们可为新创建的用户提供统一、标准的、初始化用户环境。</p>
+<p>下面我们就看下/etc/skel目录的内容：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# ls -al</span><br><span class="line">total 24</span><br><span class="line">drwxr-xr-x.  2 root root   62 Apr 11  2018 .</span><br><span class="line">drwxr-xr-x. 74 root root 8192 May 30 09:20 ..</span><br><span class="line">-rw-r--r--.  1 root root   18 Oct 31  2018 .bash_logout</span><br><span class="line">-rw-r--r--.  1 root root  193 Oct 31  2018 .bash_profile</span><br><span class="line">-rw-r--r--.  1 root root  231 Oct 31  2018 .bashrc</span><br></pre></td></tr></table></figure></p>
+<p>当我们用useradd 或adduser命令添加新用户时，linux系统会自动复制/etc/skel下的所有文件(包括隐藏文件)到新添加用户的家目录</p>
+<h4 id="etc-login-defs配置文件"><a href="#etc-login-defs配置文件" class="headerlink" title="/etc/login.defs配置文件"></a>/etc/login.defs配置文件</h4><p>/etc/login.defs文件是用来定义创建用户时需要的一些用户的配置文件。如创建用户时，是否需要家目录，UID和GID的范围，用户及密码的有效期限等等。</p>
+<p>下面是Centos 7的/etc/login.defs文件内容:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# cat /etc/login.defs</span><br><span class="line">#</span><br><span class="line"># Please note that the parameters in this configuration file control the</span><br><span class="line"># behavior of the tools from the shadow-utils component. None of these</span><br><span class="line"># tools uses the PAM mechanism, and the utilities that use PAM (such as the</span><br><span class="line"># passwd command) should therefore be configured elsewhere. Refer to</span><br><span class="line"># /etc/pam.d/system-auth for more information.</span><br><span class="line">#</span><br><span class="line"></span><br><span class="line"># *REQUIRED*</span><br><span class="line">#   Directory where mailboxes reside, _or_ name of file, relative to the</span><br><span class="line">#   home directory.  If you _do_ define both, MAIL_DIR takes precedence.</span><br><span class="line">#   QMAIL_DIR is for Qmail</span><br><span class="line">#</span><br><span class="line">#QMAIL_DIR      Maildir</span><br><span class="line">MAIL_DIR        /var/spool/mail	#创建用户时，要在目录/var/spool/mail中创建一个用户mail文件；</span><br><span class="line">#MAIL_FILE      .mail</span><br><span class="line"></span><br><span class="line"># Password aging controls:</span><br><span class="line">#</span><br><span class="line">#       PASS_MAX_DAYS   Maximum number of days a password may be used.</span><br><span class="line">#       PASS_MIN_DAYS   Minimum number of days allowed between password changes.</span><br><span class="line">#       PASS_MIN_LEN    Minimum acceptable password length.</span><br><span class="line">#       PASS_WARN_AGE   Number of days warning given before a password expires.</span><br><span class="line">#</span><br><span class="line">PASS_MAX_DAYS   99999	#一个密码最长可以使用的天数</span><br><span class="line">PASS_MIN_DAYS   0		#更改密码的最小天数</span><br><span class="line">PASS_MIN_LEN    5		#密码的最小长度；</span><br><span class="line">PASS_WARN_AGE   7		#密码失效提前多少天开始警告</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Min/max values for automatic uid selection in useradd</span><br><span class="line">#</span><br><span class="line">UID_MIN                  1000	#最小UID为500，也就是说添加用户时，UID是从500开始的；</span><br><span class="line">UID_MAX                 60000	#最大UID为60000；</span><br><span class="line"># System accounts</span><br><span class="line">SYS_UID_MIN               201</span><br><span class="line">SYS_UID_MAX               999</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># Min/max values for automatic gid selection in groupadd</span><br><span class="line">#</span><br><span class="line">GID_MIN                  1000	#GID依然是从1000开始；同上面用户的情况；</span><br><span class="line">GID_MAX                 60000	#最大GID为60000；</span><br><span class="line"># System accounts</span><br><span class="line">SYS_GID_MIN               201</span><br><span class="line">SYS_GID_MAX               999</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># If defined, this command is run when removing a user.</span><br><span class="line"># It should remove any at/cron/print jobs etc. owned by</span><br><span class="line"># the user to be removed (passed as the first argument).</span><br><span class="line">#</span><br><span class="line">#USERDEL_CMD    /usr/sbin/userdel_local</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line"># If useradd should create home directories for users by default</span><br><span class="line"># On RH systems, we do. This option is overridden with the -m flag on</span><br><span class="line"># useradd command line.</span><br><span class="line">#</span><br><span class="line">CREATE_HOME     yes		#是否创建用户家目录，默认要求创建；可用-m参数来控制；</span><br><span class="line"></span><br><span class="line"># The permission mask is initialized to this value. If not specified, </span><br><span class="line"># the permission mask will be initialized to 022.</span><br><span class="line">UMASK           077</span><br><span class="line"></span><br><span class="line"># This enables userdel to remove user groups if no members exist.</span><br><span class="line">#</span><br><span class="line">USERGROUPS_ENAB yes		#删除用户同时删除用户组</span><br><span class="line"></span><br><span class="line"># Use SHA512 to encrypt password.</span><br><span class="line">ENCRYPT_METHOD SHA512 	#密码加密方式</span><br><span class="line"></span><br></pre></td></tr></table></figure></p>
+<h4 id="etc-default-useradd文件"><a href="#etc-default-useradd文件" class="headerlink" title="/etc/default/useradd文件"></a>/etc/default/useradd文件</h4><p>/etc/default/useradd文件是在使用useradd添加用户时需要调用的一个默认的配置文件，可以使用useradd -D参数，这样的命令格式来修改文件里面的内容，当然也可以直接编辑修改。我们先来看看它的内容<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@base-centos-linux skel]# cat /etc/default/useradd </span><br><span class="line"># useradd defaults file</span><br><span class="line">GROUP=100</span><br><span class="line">HOME=/home		#把用户的家目录建在/home中</span><br><span class="line">INACTIVE=-1		#是否启动账号过期停权，-1表示不启用</span><br><span class="line">EXPIRE=			#账号终止日期，不设置表示不启用</span><br><span class="line">SHELL=/bin/bash	#新用户默认所用的shell类型</span><br><span class="line">SKEL=/etc/skel	#配置新用户家目录的默认文件存放路径。前文提到的/etc/skell，就是配在这里生效的，即当我们用useradd添加时，用户家目录的文件，都是从这里配置的目录中复制过去的。</span><br><span class="line">CREATE_MAIL_SPOOL=yes	#创建mail文件</span><br></pre></td></tr></table></figure></p>
+<h2 id="Linux用户管理命令"><a href="#Linux用户管理命令" class="headerlink" title="Linux用户管理命令"></a>Linux用户管理命令</h2><p>Linux是一个多用户多任务的操作系统，有着很丰富的用户管理工具，这些工具包括用户的查询。添加、修改、以及不同用户之间相互切换等；通过这些工具，我们可以简单、方便、安全的进行用户管理工作。</p>
+<p>添加用户的命令useradd和adduser，这两个命令所能达到的效果是一样的。当然除了useradd和adduser命令意外，我们还能通过修改用户配置文件/etc/passwd和/etc/group及手动创建的办法来直接添加用户，不过不推荐这个方法。这里推荐大家统一使用useradd命令。</p>
+<h3 id="useradd-添加账户"><a href="#useradd-添加账户" class="headerlink" title="useradd  添加账户"></a>useradd  添加账户</h3><p>当使用useradd命令不加参数选项，后面直接跟所添加的用户名时，系统首先会读取配置文件/etc/login.defs和/etc/default/useradd文件中所配置的信息建立用户的家目录，并复制/etc/skel中的所有文件（包括隐藏的环境配置文件）到新用户的家目录中。</p>
+<p>新建用户加入组：<br><code>useradd –g sales jack –G company,employees    //-g：加入主要组、-G：加入次要组</code></p>
+<p>建立一个新用户账户，并设置ID：<code>useradd caojh -u 544</code></p>
+<p>其他参数:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">-c&lt;备注&gt;：加上备注文字。备注文字会保存在passwd的备注栏位中；</span><br><span class="line">-d&lt;登入目录&gt;：指定用户登入时的启始目录；</span><br><span class="line">-D：变更预设值；</span><br><span class="line">-e&lt;有效期限&gt;：指定帐号的有效期限；</span><br><span class="line">-f&lt;缓冲天数&gt;：指定在密码过期后多少天即关闭该帐号；</span><br><span class="line">-g&lt;群组&gt;：指定用户所属的群组；</span><br><span class="line">-G&lt;群组&gt;：指定用户所属的附加群组；</span><br><span class="line">-m：自动建立用户的登入目录；</span><br><span class="line">-M：不要自动建立用户的登入目录；</span><br><span class="line">-n：取消建立以用户名称为名的群组；</span><br><span class="line">-r：建立系统帐号；</span><br><span class="line">-s&lt;shell&gt;：指定用户登入后所使用的shell；</span><br><span class="line">-u&lt;uid&gt;：指定用户id。</span><br></pre></td></tr></table></figure>
+<p><strong>需要说明的是，设定ID值时尽量要大于500，以免冲突。因为Linux安装后会建立一些特殊用户，一般0到499之间的值留给bin、mail这样的系统账号。</strong></p>
+<p>新账号建立当不加-D参数时，useradd指令使用命令列来指定新账号的设定值和使用系统上的预设值（指前文提到的/etc/login.defs和/etc/default/useradd等配置文件）。新用户账号将产生一些系统档案，如用户目录的建立，拷贝起始档案等，这些均可以利用命令列选项指定。</p>
+<p>当使用useradd命令不加参数选项，后面直接跟所添加的用户名时，系统首先会读取配置文件/etc/login.defs和/etc/default/useradd中所定义的参数或规则，根据设置的规则添加用户，同时会向/etc/passwd和/etc/group文件内添加新建用户和用户组记录。</p>
+<p>当然/etc/passwd和/etc/group的加密资讯文件/etc/shadows和/etc/gshadow也会同步生成记录，同时系统还会根据/etc/default/useradd文件中所配置的信息建立用户的家目录，并复制/etc/skel中的所有文件（包括隐藏的环境配置文件）到新用户的家目录中。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/linux_system_hard_link_and_soft_link/" rel="prev" title="Linux系统硬链接与软链接详解">
+      <i class="fa fa-chevron-left"></i> Linux系统硬链接与软链接详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/warning-iso-c-11-does-not-allow-conversion-from-string-literal-to-char/" rel="next" title="warning: ISO C++11 does not allow conversion from string literal to 'char *'">
+      warning: ISO C++11 does not allow conversion from string literal to 'char *' <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E8%B4%A6%E6%88%B7%E7%AE%A1%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">用户账户管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E7%9A%84%E5%8D%95%E7%94%A8%E6%88%B7%E5%A4%9A%E4%BB%BB%E5%8A%A1"><span class="nav-number">1.1.</span> <span class="nav-text">Linux的单用户多任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E7%9A%84%E5%A4%9A%E7%94%A8%E6%88%B7%E5%A4%9A%E4%BB%BB%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">Linux的多用户多任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linux%E7%B3%BB%E7%BB%9F%E7%94%A8%E6%88%B7%E8%A7%92%E8%89%B2%E5%88%92%E5%88%86"><span class="nav-number">1.3.</span> <span class="nav-text">linux系统用户角色划分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%89%E5%85%A8"><span class="nav-number">1.4.</span> <span class="nav-text">多用户操作系统的安全</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A6%E6%88%B7-user-%E5%92%8C%E8%B4%A6%E6%88%B7%E7%BB%84%EF%BC%88group%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">账户(user)和账户组（group）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7-user-%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.1.</span> <span class="nav-text">用户(user)介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%BB%84%EF%BC%88group%EF%BC%89%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.2.</span> <span class="nav-text">用户组（group）介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%94%A8%E6%88%B7%E7%BB%84%E7%9A%84%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="nav-number">2.3.</span> <span class="nav-text">用户和用户组的对应关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%8F%8A%E7%94%A8%E6%88%B7%E7%BB%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.4.</span> <span class="nav-text">用户及用户组配置文件介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#passwd%E4%B8%AD%E6%9C%89%E5%85%B3UID%E7%9A%84%E9%99%90%E5%88%B6%E8%AF%B4%E6%98%8E"><span class="nav-number">2.5.</span> <span class="nav-text">passwd中有关UID的限制说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%9A%84%E5%BD%B1%E5%AD%90%E5%8F%A3%E4%BB%A4%E6%96%87%E4%BB%B6-etc-shadow"><span class="nav-number">2.6.</span> <span class="nav-text">用户的影子口令文件&#x2F;etc&#x2F;shadow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%BB%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-etc-group"><span class="nav-number">2.7.</span> <span class="nav-text">用户组配置文件&#x2F;etc&#x2F;group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%BB%84%E7%9A%84%E5%BD%B1%E5%AD%90%E6%96%87%E4%BB%B6-etc-gshadow"><span class="nav-number">2.8.</span> <span class="nav-text">用户组的影子文件&#x2F;etc&#x2F;gshadow</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A6%E5%8F%B7%E7%AE%A1%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">账号管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E8%B4%A6%E6%88%B7%E7%9B%B8%E5%85%B3%E7%9A%84%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95"><span class="nav-number">3.1.</span> <span class="nav-text">与账户相关的文件和目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-skel%E7%9B%AE%E5%BD%95"><span class="nav-number">3.1.1.</span> <span class="nav-text">&#x2F;etc&#x2F;skel目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-login-defs%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.2.</span> <span class="nav-text">&#x2F;etc&#x2F;login.defs配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#etc-default-useradd%E6%96%87%E4%BB%B6"><span class="nav-number">3.1.3.</span> <span class="nav-text">&#x2F;etc&#x2F;default&#x2F;useradd文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">Linux用户管理命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#useradd-%E6%B7%BB%E5%8A%A0%E8%B4%A6%E6%88%B7"><span class="nav-number">4.1.</span> <span class="nav-text">useradd  添加账户</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/linux_system_file_users_and_user_groups/";
+    this.page.identifier = "linux_system_file_users_and_user_groups/";
+    this.page.title = "Linux系统文件用户和用户组详解";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

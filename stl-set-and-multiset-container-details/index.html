@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="set&#x2F;multiset的简介 set是一个集合容器，其中所包含的元素是唯一的，集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。set采用红黑树变体的数据结构实现，红黑树属于平衡二叉树。在插入操作和删除操作上比vector快。 set不可以直接存取元素。（不可以使用at.(pos)与[]操作符）。 multiset与set的区别：set支持唯一键值，每个元素值只能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STL Set和multiset容器详解">
+<meta property="og:url" content="http://blog.huixing.org/stl-set-and-multiset-container-details/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="set&#x2F;multiset的简介 set是一个集合容器，其中所包含的元素是唯一的，集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。set采用红黑树变体的数据结构实现，红黑树属于平衡二叉树。在插入操作和删除操作上比vector快。 set不可以直接存取元素。（不可以使用at.(pos)与[]操作符）。 multiset与set的区别：set支持唯一键值，每个元素值只能">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tva1.sinaimg.cn/large/007X8olVly1g8fhq4ih5wj31hw0u04j5.jpg">
+<meta property="article:published_time" content="2019-10-24T10:33:00.000Z">
+<meta property="article:modified_time" content="2019-10-29T15:52:36.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tva1.sinaimg.cn/large/007X8olVly1g8fhq4ih5wj31hw0u04j5.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/stl-set-and-multiset-container-details/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>STL Set和multiset容器详解 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/stl-set-and-multiset-container-details/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          STL Set和multiset容器详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-10-24 18:33:00" itemprop="dateCreated datePublished" datetime="2019-10-24T18:33:00+08:00">2019-10-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-10-29 23:52:36" itemprop="dateModified" datetime="2019-10-29T23:52:36+08:00">2019-10-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">程序设计</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/c-c/" itemprop="url" rel="index"><span itemprop="name">c/c++</span></a>
+                </span>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/stl-set-and-multiset-container-details/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="stl-set-and-multiset-container-details/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="set-multiset的简介"><a href="#set-multiset的简介" class="headerlink" title="set/multiset的简介"></a>set/multiset的简介</h2><ul>
+<li>set是一个集合容器，其中所包含的元素是唯一的，集合中的元素按一定的顺序排列。元素插入过程是按排序规则插入，所以不能指定插入位置。<br>set采用红黑树变体的数据结构实现，红黑树属于平衡二叉树。在插入操作和删除操作上比vector快。</li>
+<li>set不可以直接存取元素。（不可以使用at.(pos)与[]操作符）。</li>
+<li>multiset与set的区别：set支持唯一键值，每个元素值只能出现一次；而multiset中同一值可以出现多次。</li>
+<li>不可以直接修改set或multiset容器中的元素值，因为该类容器是自动排序的。如果希望修改一个元素值，必须先删除原有的元素，再插入新的元素。</li>
+</ul>
+<p>头文件 <code>#include &lt;set&gt;</code> </p>
+<p><img src="http://tva1.sinaimg.cn/large/007X8olVly1g8fhq4ih5wj31hw0u04j5.jpg" alt="图解"></p>
+<h2 id="set-multiset对象的默认构造"><a href="#set-multiset对象的默认构造" class="headerlink" title="set/multiset对象的默认构造"></a>set/multiset对象的默认构造</h2><ul>
+<li><code>set&lt;int&gt; setInt;            //一个存放int的set容器。</code></li>
+<li><code>set&lt;float&gt; setFloat;     //一个存放float的set容器。</code></li>
+<li><code>set&lt;string&gt; setString;     //一个存放string的set容器。</code></li>
+<li><code>multiset&lt;int&gt; mulsetInt;            //一个存放int的multi set容器。</code></li>
+<li><code>multi set&lt;float&gt; multisetFloat;     //一个存放float的multi set容器。</code></li>
+<li><code>multi set&lt;string&gt; multisetString;     //一个存放string的multi set容器。</code></li>
+</ul>
+<h2 id="set的插入与迭代器"><a href="#set的插入与迭代器" class="headerlink" title="set的插入与迭代器"></a>set的插入与迭代器</h2><ul>
+<li><code>set.insert(elem);     //在容器中插入元素。</code></li>
+<li><code>set.begin();  //返回容器中第一个数据的迭代器。</code></li>
+<li><code>set.end();  //返回容器中最后一个数据之后的迭代器。</code></li>
+<li><code>set.rbegin();  //返回容器中倒数第一个元素的迭代器。</code></li>
+<li><code>set.rend();   //返回容器中倒数最后一个元素的后面的迭代器。</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt; setInt;</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">3</span>); setInt.<span class="built_in">insert</span>(<span class="number">1</span>);setInt.<span class="built_in">insert</span>(<span class="number">5</span>);setInt.<span class="built_in">insert</span>(<span class="number">2</span>);</span><br><span class="line"><span class="keyword">for</span>(set&lt;<span class="keyword">int</span>&gt;::iterator it=setInt.<span class="built_in">begin</span>(); it!=setInt.<span class="built_in">end</span>(); ++it)</span><br><span class="line">&#123;</span><br><span class="line">      <span class="keyword">int</span> iItem = *it;</span><br><span class="line">      cout &lt;&lt; iItem;    <span class="comment">//或直接使用cout &lt;&lt; *it</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//这样子便顺序输出  1 2 3 5。</span></span><br></pre></td></tr></table></figure>
+<p><code>set.rbegin()</code>与<code>set.rend()</code>略。</p>
+<h2 id="Set集合的元素排序"><a href="#Set集合的元素排序" class="headerlink" title="Set集合的元素排序"></a>Set集合的元素排序</h2><ul>
+<li><code>set&lt;int,less&lt;int&gt; &gt;  setIntA;  //该容器是按升序方式排列元素。</code></li>
+<li><code>set&lt;int,greater&lt;int&gt;&gt; setIntB;   //该容器是按降序方式排列元素。</code></li>
+<li><code>set&lt;int&gt; 相当于 set&lt;int,less&lt;int&gt;&gt;。</code></li>
+<li><code>less&lt;int&gt;</code>与<code>greater&lt;int&gt;</code>中的int可以改成其它类型，该类型主要要跟set容纳的数据类型一致。</li>
+</ul>
+<ul>
+<li>疑问1：<code>less&lt;&gt;</code>与<code>greater&lt;&gt;</code>是什么？</li>
+<li>疑问2：如果<code>set&lt;&gt;</code>不包含int类型，而是包含自定义类型，set容器如何排序？<br>要解决如上两个问题，需要了解容器的函数对象，也叫伪函数，英文名叫<code>functor</code>。<br>下面将讲解什么是<code>functor</code>，<code>functor</code>的用法。</li>
+</ul>
+<p>使用stl提供的函数对象<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>,greater&lt;<span class="keyword">int</span>&gt;&gt; setIntB;   </span><br><span class="line">setIntB.<span class="built_in">insert</span>(<span class="number">3</span>);</span><br><span class="line">setIntB.<span class="built_in">insert</span>(<span class="number">1</span>);</span><br><span class="line">setIntB.<span class="built_in">insert</span>(<span class="number">5</span>);</span><br><span class="line">setIntB.<span class="built_in">insert</span>(<span class="number">2</span>);</span><br></pre></td></tr></table></figure><br>此时容器setIntB就包含了按顺序的5,3,2,1元素</p>
+<ul>
+<li><code>functor</code>，翻译成函数对象，伪函数，算符，是重载了“()”操作符的普通类对象。从语法上讲，它与普通函数行为类似。<ul>
+<li><code>greater&lt;&gt;</code>与<code>less&lt;&gt;</code>就是函数对象。</li>
+</ul>
+</li>
+</ul>
+<p>下面举出<code>greater&lt;int&gt;</code>的简易实现原理。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">greater</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span> <span class="params">(<span class="keyword">const</span> <span class="keyword">int</span>&amp; iLeft, <span class="keyword">const</span> <span class="keyword">int</span>&amp; iRight)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">       <span class="keyword">return</span> (iLeft&gt;iRight);    <span class="comment">//如果是实现less&lt;int&gt;的话，这边是写return (iLeft&lt;iRight);</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>容器就是调用函数对象的operator()方法去比较两个值的大小。</p>
+<h2 id="例题"><a href="#例题" class="headerlink" title="例题:"></a>例题:</h2><p>题目：学生包含学号，姓名属性，现要求任意插入几个学生对象到set容器中，使得容器中的学生按学号的升序排序。</p>
+<p>解：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//学生类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CStudent</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="built_in">CStudent</span>(<span class="keyword">int</span> iID, string strName)</span><br><span class="line">		&#123;</span><br><span class="line">			m_iID = iID;</span><br><span class="line">			m_strName = strName;</span><br><span class="line">		&#125;</span><br><span class="line">     <span class="keyword">int</span> m_iID;		<span class="comment">//学号</span></span><br><span class="line">     string m_strName; 	<span class="comment">//姓名</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//为保持主题鲜明，本类不写拷贝构造函数，不类也不需要写拷贝构造函数。但大家仍要有考虑拷贝构造函数的习惯。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//函数对象</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">StuFunctor</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">		<span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span>  <span class="params">(<span class="keyword">const</span> CStudent &amp;stu1, <span class="keyword">const</span> CStudent &amp;stu2)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="keyword">return</span> (stu1.m_iID&lt;stu2.m_iID);</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//main函数</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">		set&lt;CStudent, StuFunctor&gt; setStu;</span><br><span class="line">		setStu.<span class="built_in">insert</span>(<span class="built_in">CStudent</span>(<span class="number">3</span>,<span class="string">&quot;小张&quot;</span>));</span><br><span class="line">		setStu.<span class="built_in">insert</span>(<span class="built_in">CStudent</span>(<span class="number">1</span>,<span class="string">&quot;小李&quot;</span>));</span><br><span class="line">		setStu.<span class="built_in">insert</span>(<span class="built_in">CStudent</span>(<span class="number">5</span>,<span class="string">&quot;小王&quot;</span>));</span><br><span class="line">		setStu.<span class="built_in">insert</span>(<span class="built_in">CStudent</span>(<span class="number">2</span>,<span class="string">&quot;小刘&quot;</span>));</span><br><span class="line">		<span class="comment">//此时容器setStu包含了四个学生对象，分别是按姓名顺序的“小李”，“小刘”，“小张”，“小王” </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="set对象的拷贝构造与赋值"><a href="#set对象的拷贝构造与赋值" class="headerlink" title="set对象的拷贝构造与赋值"></a>set对象的拷贝构造与赋值</h2><p>set(const set &amp;st);             //拷贝构造函数<br>set&amp; operator=(const set &amp;st);    //重载等号操作符<br>set.swap(st);                //交换两个集合容器</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt; setIntA;</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">3</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">1</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">7</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">5</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="function">set&lt;<span class="keyword">int</span>&gt; <span class="title">setIntB</span><span class="params">(setIntA)</span></span>;  <span class="comment">//1 3 5 7 9</span></span><br><span class="line">	</span><br><span class="line">set&lt;<span class="keyword">int</span>&gt; setIntC;</span><br><span class="line">setIntC = setIntA;		<span class="comment">//1 3 5 7 9</span></span><br><span class="line"></span><br><span class="line">setIntC.<span class="built_in">insert</span>(<span class="number">6</span>);</span><br><span class="line">setIntC.<span class="built_in">swap</span>(setIntA);	  <span class="comment">//交换</span></span><br></pre></td></tr></table></figure>
+<h2 id="set的大小"><a href="#set的大小" class="headerlink" title="set的大小"></a>set的大小</h2><ul>
+<li><code>set.size();    //返回容器中元素的数目</code></li>
+<li><code>set.empty();//判断容器是否为空</code></li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt; setIntA;</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">3</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">1</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">7</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">5</span>);</span><br><span class="line">setIntA.<span class="built_in">insert</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!setIntA.<span class="built_in">empty</span>())</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> iSize = setIntA.<span class="built_in">size</span>();		<span class="comment">//5</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="set的删除"><a href="#set的删除" class="headerlink" title="set的删除"></a>set的删除</h2><ul>
+<li><code>set.clear();        //清除所有元素</code></li>
+<li><code>set.erase(pos);    //删除pos迭代器所指的元素，返回下一个元素的迭代器。</code></li>
+<li><code>set.erase(beg,end);        //删除区间[beg,end)的所有元素    ，返回下一个元素的迭代器。</code></li>
+<li><code>set.erase(elem);     //删除容器中值为elem的元素。</code></li>
+</ul>
+<h3 id="删除区间内的元素"><a href="#删除区间内的元素" class="headerlink" title="删除区间内的元素"></a>删除区间内的元素</h3><p>setInt是用set<int>声明的容器，现已包含按顺序的1,3,5,6,9,11元素。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itBegin=setInt.<span class="built_in">begin</span>();</span><br><span class="line">++ itBegin;</span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itEnd=setInt.<span class="built_in">begin</span>();</span><br><span class="line">++ itEnd;</span><br><span class="line">++ itEnd;</span><br><span class="line">++ itEnd;</span><br><span class="line">setInt.<span class="built_in">erase</span>(itBegin,itEnd);</span><br><span class="line"><span class="comment">//此时容器setInt包含按顺序的1,6,9,11四个元素。</span></span><br></pre></td></tr></table></figure>
+<h3 id="删除容器中第一个元素"><a href="#删除容器中第一个元素" class="headerlink" title="删除容器中第一个元素"></a>删除容器中第一个元素</h3><ul>
+<li><code>setInt.erase(setInt.begin());        //6,9,11</code></li>
+</ul>
+<h3 id="删除容器中值为9的元素"><a href="#删除容器中值为9的元素" class="headerlink" title="删除容器中值为9的元素"></a>删除容器中值为9的元素</h3><ul>
+<li><code>set.erase(9);</code></li>
+</ul>
+<h3 id="删除setInt的所有元素"><a href="#删除setInt的所有元素" class="headerlink" title="删除setInt的所有元素"></a>删除setInt的所有元素</h3><ul>
+<li><code>setInt.clear();            //容器为空</code></li>
+</ul>
+<h2 id="set的查找"><a href="#set的查找" class="headerlink" title="set的查找"></a>set的查找</h2><ul>
+<li><code>set.find(elem);   //查找elem元素，返回指向elem元素的迭代器。</code></li>
+<li><code>set.count(elem);   //返回容器中值为elem的元素个数。对set来说，要么是0，要么是1。对multiset来说，值可能大于1。</code></li>
+<li><code>set.lower_bound(elem);  //返回第一个&gt;=elem元素的迭代器。</code></li>
+<li><code>set.upper_bound(elem);       //  返回第一个&gt;elem元素的迭代器。</code></li>
+<li><code>set.equal_range(elem);        //返回容器中与elem相等的上下限的两个迭代器。上限是闭区间，下限是开区间，如[beg,end)。</code></li>
+</ul>
+<p><strong>以上函数返回两个迭代器，而这两个迭代器被封装在pair中。</strong></p>
+<h2 id="pair的含义与使用方法"><a href="#pair的含义与使用方法" class="headerlink" title="pair的含义与使用方法"></a>pair的含义与使用方法</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt; setInt;</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">3</span>);</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">1</span>);</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">7</span>);</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">5</span>);</span><br><span class="line">setInt.<span class="built_in">insert</span>(<span class="number">9</span>);</span><br><span class="line"></span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itA = setInt.<span class="built_in">find</span>(<span class="number">5</span>);</span><br><span class="line"><span class="keyword">int</span> iA = *itA;		<span class="comment">//iA == 5</span></span><br><span class="line"><span class="keyword">int</span> iCount = setInt.<span class="built_in">count</span>(<span class="number">5</span>);	<span class="comment">//iCount == 1</span></span><br><span class="line"></span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itB = setInt.<span class="built_in">lower_bound</span>(<span class="number">5</span>);</span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itC = setInt.<span class="built_in">upper_bound</span>(<span class="number">5</span>);</span><br><span class="line"><span class="keyword">int</span> iB = *itB;	<span class="comment">//iB == 5</span></span><br><span class="line"><span class="keyword">int</span> iC = *itC; <span class="comment">//iC == 7</span></span><br><span class="line"></span><br><span class="line">pair&lt; set&lt;<span class="keyword">int</span>&gt;::iterator, set&lt;<span class="keyword">int</span>&gt;::iterator &gt; pairIt = setInt.<span class="built_in">equal_range</span>(<span class="number">5</span>);  <span class="comment">//pair是什么？</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="pair的使用"><a href="#pair的使用" class="headerlink" title="pair的使用"></a>pair的使用</h3><ul>
+<li>pair译为对组，可以将两个值视为一个单元。</li>
+<li><code>pair&lt;T1,T2&gt;</code>存放的两个值的类型，可以不一样，如T1为int，T2为float。T1,T2也可以是自定义类型。</li>
+<li>pair.first是pair里面的第一个值，是T1类型。</li>
+<li>pair.second是pair里面的第二个值，是T2类型。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">set&lt;<span class="keyword">int</span>&gt; setInt;</span><br><span class="line">...  <span class="comment">//往setInt容器插入元素1,3,5,7,9</span></span><br><span class="line">pair&lt; set&lt;<span class="keyword">int</span>&gt;::iterator , set&lt;<span class="keyword">int</span>&gt;::iterator &gt; pairIt = setInt.<span class="built_in">equal_range</span>(<span class="number">5</span>);</span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itBeg = pairIt.first;</span><br><span class="line">set&lt;<span class="keyword">int</span>&gt;::iterator itEnd = pairIt.second;</span><br><span class="line"><span class="comment">//此时 *itBeg==5  而  *itEnd == 7</span></span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>一、容器set/multiset的使用方法；红黑树的变体，查找效率高，插入不能指定位置，插入时自动排序。</li>
+<li>二、functor的使用方法；类似于函数的功能，可用来自定义一些规则，如元素比较规则。</li>
+<li>三、pair的使用方法。对组，一个整体的单元，存放两个类型(T1,T2，T1可与T2一样)的两个元素。</li>
+</ul>
+<p>案例:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> x;</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%ld&quot;</span>,&amp;x);</span><br><span class="line"><span class="comment">//建立一个multiset类型，变量名是h，h序列里面存的是int类型,初始h为空</span></span><br><span class="line">multiset&lt;<span class="keyword">int</span>&gt; h;</span><br><span class="line"><span class="keyword">while</span>(x!=<span class="number">0</span>)&#123;</span><br><span class="line">    <span class="comment">//将x插入h中</span></span><br><span class="line">    h.<span class="built_in">insert</span>(x);</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%ld&quot;</span>,&amp;x);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">pair&lt; multiset&lt;<span class="keyword">int</span>&gt;::iterator , multiset&lt;<span class="keyword">int</span>&gt;::iterator &gt; pairIt = h.<span class="built_in">equal_range</span>(<span class="number">22</span>);</span><br><span class="line">multiset&lt;<span class="keyword">int</span>&gt;::iterator itBeg = pairIt.first;</span><br><span class="line">multiset&lt;<span class="keyword">int</span>&gt;::iterator itEnd = pairIt.second;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> nBeg = *itBeg;</span><br><span class="line"><span class="keyword">int</span> nEnd = *itEnd;</span><br><span class="line"><span class="comment">// 序列非空h.empty()==true时表示h已经空了</span></span><br><span class="line"><span class="keyword">while</span>(!h.<span class="built_in">empty</span>())&#123;</span><br><span class="line">    <span class="comment">//c指向h序列中第一个元素的地址，第一个元素是最小的元素</span></span><br><span class="line">    multiset&lt;<span class="keyword">int</span>&gt;::iterator c = h.<span class="built_in">begin</span>();</span><br><span class="line">    <span class="comment">//将地址c存的数据输出</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%ld &quot;</span>,*c);</span><br><span class="line">    <span class="comment">//从h序列中将c指向的元素删除</span></span><br><span class="line">    h.<span class="built_in">erase</span>(c);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/stl-list-container-details/" rel="prev" title="STL List 容器详解">
+      <i class="fa fa-chevron-left"></i> STL List 容器详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/stl-map-and-multimap-container-details/" rel="next" title="STL Map和multimap容器详解">
+      STL Map和multimap容器详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#set-multiset%E7%9A%84%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">set&#x2F;multiset的简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set-multiset%E5%AF%B9%E8%B1%A1%E7%9A%84%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0"><span class="nav-number">2.</span> <span class="nav-text">set&#x2F;multiset对象的默认构造</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set%E7%9A%84%E6%8F%92%E5%85%A5%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">set的插入与迭代器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Set%E9%9B%86%E5%90%88%E7%9A%84%E5%85%83%E7%B4%A0%E6%8E%92%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">Set集合的元素排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">例题:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0%E4%B8%8E%E8%B5%8B%E5%80%BC"><span class="nav-number">6.</span> <span class="nav-text">set对象的拷贝构造与赋值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="nav-number">7.</span> <span class="nav-text">set的大小</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">8.</span> <span class="nav-text">set的删除</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%8C%BA%E9%97%B4%E5%86%85%E7%9A%84%E5%85%83%E7%B4%A0"><span class="nav-number">8.1.</span> <span class="nav-text">删除区间内的元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%AE%B9%E5%99%A8%E4%B8%AD%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%85%83%E7%B4%A0"><span class="nav-number">8.2.</span> <span class="nav-text">删除容器中第一个元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E5%AE%B9%E5%99%A8%E4%B8%AD%E5%80%BC%E4%B8%BA9%E7%9A%84%E5%85%83%E7%B4%A0"><span class="nav-number">8.3.</span> <span class="nav-text">删除容器中值为9的元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4setInt%E7%9A%84%E6%89%80%E6%9C%89%E5%85%83%E7%B4%A0"><span class="nav-number">8.4.</span> <span class="nav-text">删除setInt的所有元素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#set%E7%9A%84%E6%9F%A5%E6%89%BE"><span class="nav-number">9.</span> <span class="nav-text">set的查找</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pair%E7%9A%84%E5%90%AB%E4%B9%89%E4%B8%8E%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">10.</span> <span class="nav-text">pair的含义与使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pair%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">10.1.</span> <span class="nav-text">pair的使用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/stl-set-and-multiset-container-details/";
+    this.page.identifier = "stl-set-and-multiset-container-details/";
+    this.page.title = "STL Set和multiset容器详解";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

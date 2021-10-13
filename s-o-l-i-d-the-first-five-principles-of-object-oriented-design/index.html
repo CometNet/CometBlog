@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+<meta name="referrer" content="no-referrer" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.huixing.org","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="S.O.L.I.D 是面向对象设计（OOD）的头五大基本原则的首字母缩写，由俗称「鲍勃大叔」的 Robert C. Martin 提出。 这些原则，结合在一起能够方便程序员开发易于维护和扩展的软件，也让开发人员轻松避免代码异味，易于重构代码，也是敏捷或自适应软件开发的一部分。 注意：这只是一篇“欢迎来到S.O.L.I.D”的简单介绍文章，它只是揭示了S.O.L.I.D是什么。 S.O.L.I.D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="S.O.L.I.D：面向对象设计的头 5 大原则">
+<meta property="og:url" content="http://blog.huixing.org/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/index.html">
+<meta property="og:site_name" content="Haohao Notes">
+<meta property="og:description" content="S.O.L.I.D 是面向对象设计（OOD）的头五大基本原则的首字母缩写，由俗称「鲍勃大叔」的 Robert C. Martin 提出。 这些原则，结合在一起能够方便程序员开发易于维护和扩展的软件，也让开发人员轻松避免代码异味，易于重构代码，也是敏捷或自适应软件开发的一部分。 注意：这只是一篇“欢迎来到S.O.L.I.D”的简单介绍文章，它只是揭示了S.O.L.I.D是什么。 S.O.L.I.D">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wx4.sinaimg.cn/mw690/0060lm7Tly1ftt4ostkv2j30xc0dwna0.jpg">
+<meta property="article:published_time" content="2018-07-31T00:31:46.000Z">
+<meta property="article:modified_time" content="2018-07-31T10:28:04.000Z">
+<meta property="article:author" content="Tan Hao">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wx4.sinaimg.cn/mw690/0060lm7Tly1ftt4ostkv2j30xc0dwna0.jpg">
+
+<link rel="canonical" href="http://blog.huixing.org/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>S.O.L.I.D：面向对象设计的头 5 大原则 | Haohao Notes</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?5202a7e94920d0c374589510b87a35e0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Haohao Notes</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">DREAM OF TECHNICAL ACHIEVEMENT</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.huixing.org/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="作者">
+      <meta itemprop="description" content="谈浩的个人博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Haohao Notes">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          S.O.L.I.D：面向对象设计的头 5 大原则
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2018-07-31 08:31:46 / 修改时间：18:28:04" itemprop="dateCreated datePublished" datetime="2018-07-31T08:31:46+08:00">2018-07-31</time>
+            </span>
+
+          
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-copyright"></i>
+    </span>
+    <span class="post-meta-item-text">作者：</span><span>Tan Hao</span>
+  </span>
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="s-o-l-i-d-the-first-five-principles-of-object-oriented-design/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://wx4.sinaimg.cn/mw690/0060lm7Tly1ftt4ostkv2j30xc0dwna0.jpg" alt="图片来源:scotch.io"></p>
+<p>S.O.L.I.D 是面向对象设计（OOD）的头五大基本原则的首字母缩写，由俗称「鲍勃大叔」的 Robert C. Martin 提出。</p>
+<p>这些原则，结合在一起能够方便程序员开发易于维护和扩展的软件，也让开发人员轻松避免代码异味，易于重构代码，也是敏捷或自适应软件开发的一部分。</p>
+<p>注意：这只是一篇“欢迎来到S.O.L.I.D”的简单介绍文章，它只是揭示了S.O.L.I.D是什么。</p>
+<h2 id="S-O-L-I-D-代表什么"><a href="#S-O-L-I-D-代表什么" class="headerlink" title="S.O.L.I.D 代表什么"></a>S.O.L.I.D 代表什么</h2><p>虽然缩略词展开后看似复杂，但其实非常容易掌握。</p>
+<ul>
+<li>S – 单一职责原则</li>
+<li>O – 开放封闭原则</li>
+<li>L – 里氏替换原则</li>
+<li>I – 接口隔离原则</li>
+<li>D – 依赖倒置原则<br>让我们来单独看看每个原则，来理解为什么 S.O.L.I.D 能帮助我们成为更优秀的开发人员。</li>
+</ul>
+<h2 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h2><p>S.R.P（简称）原则指出：</p>
+<blockquote>
+<p>一个类应该有且只有一个去改变它的理由，这意味着一个类应该只有一项工作。</p>
+</blockquote>
+<p>例如，假设我们有一些shape（形状），并且我们想求所有shape的面积的和。这很简单对吗?<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">class Circle &#123;</span><br><span class="line">    public $radius;</span><br><span class="line"> </span><br><span class="line">    public function __construct($radius) &#123;</span><br><span class="line">        $this-&gt;radius = $radius;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Square &#123;</span><br><span class="line">    public $length;</span><br><span class="line"> </span><br><span class="line">    public function __construct($length) &#123;</span><br><span class="line">        $this-&gt;length = $length;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>首先，我们创建shape类，让构造函数设置需要的参数。接下来，我们继续通过创建AreaCalculator类，然后编写求取所提供的shape面积之和的逻辑。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">class AreaCalculator &#123;</span><br><span class="line"></span><br><span class="line">    protected $shapes;</span><br><span class="line"></span><br><span class="line">    public function __construct($shapes = array()) &#123;</span><br><span class="line">        $this-&gt;shapes = $shapes;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function sum() &#123;</span><br><span class="line">        // logic to sum the areas</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function output() &#123;</span><br><span class="line">        return implode(&#x27;&#x27;, array(</span><br><span class="line">            &quot;&quot;,</span><br><span class="line">                &quot;Sum of the areas of provided shapes: &quot;,</span><br><span class="line">                $this-&gt;sum(),</span><br><span class="line">            &quot;&quot;</span><br><span class="line">        ));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>使用AreaCalculator类，我们简单地实例化类，同时传入一个shape数组，并在页面的底部显示输出。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$shapes = array(</span><br><span class="line">    new Circle(2),</span><br><span class="line">    new Square(5),</span><br><span class="line">    new Square(6)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line"></span><br><span class="line">echo $areas-&gt;output();</span><br></pre></td></tr></table></figure><br>输出方法的问题在于，AreaCalculator处理了输出数据的逻辑。因此，如果用户想要以json或其他方式输出数据该怎么办?</p>
+<p>所有的逻辑将由AreaCalculator类处理，这是违反单一职责原则（SRP）的；AreaCalculator类应该只对提供的shape进行面积求和，它不应该关心用户是需要json还是HTML。</p>
+<p>因此，为了解决这个问题，你可以创建一个SumCalculatorOutputter类，使用这个来处理你所需要的逻辑，即对所提供的shape进行面积求和后如何显示。</p>
+<p>SumCalculatorOutputter类按如下方式工作:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$shapes = array(</span><br><span class="line">    new Circle(2),</span><br><span class="line">    new Square(5),</span><br><span class="line">    new Square(6)</span><br><span class="line">);</span><br><span class="line"> </span><br><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line">$output = new SumCalculatorOutputter($areas);</span><br><span class="line"> </span><br><span class="line">echo $output-&gt;JSON();</span><br><span class="line">echo $output-&gt;HAML();</span><br><span class="line">echo $output-&gt;HTML();</span><br><span class="line">echo $output-&gt;JADE();</span><br></pre></td></tr></table></figure><br>现在，不管你需要何种逻辑来输出数据给用户，皆由SumCalculatorOutputter类处理。</p>
+<h2 id="开放封闭原则"><a href="#开放封闭原则" class="headerlink" title="开放封闭原则"></a>开放封闭原则</h2><blockquote>
+<p>对象或实体应该对扩展开放，对修改封闭。</p>
+</blockquote>
+<p>这就意味着一个类应该无需修改类本身但却容易扩展。让我们看看AreaCalculator类，尤其是它的sum方法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        if(is_a($shape, &#x27;Square&#x27;)) &#123;</span><br><span class="line">            $area[] = pow($shape-&gt;length, 2);</span><br><span class="line">        &#125; else if(is_a($shape, &#x27;Circle&#x27;)) &#123;</span><br><span class="line">            $area[] = pi() * pow($shape-&gt;radius, 2);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们希望sum方法能够对更多的shape进行面积求和，我们会添加更多的If / else块，这违背了开放封闭原则。</p>
+<p>能让这个sum方法做的更好的一种方式是，将计算每个shape面积的逻辑从sum方法中移出，将它附加到shape类上。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">class Square &#123;</span><br><span class="line">    public $length;</span><br><span class="line"> </span><br><span class="line">    public function __construct($length) &#123;</span><br><span class="line">        $this-&gt;length = $length;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function area() &#123;</span><br><span class="line">        return pow($this-&gt;length, 2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>对Circle类应该做同样的事情，area方法应该添加。现在，计算任何所提的shape的面积的和的方法应该和如下简单：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        $area[] = $shape-&gt;area;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>现在我们可以创建另一个shape类，并在计算和时将其传递进来，这不会破坏我们的代码。然而，现在另一个问题出现了，我们怎么知道传递到AreaCalculator上的对象确实是一个shape，或者这个shape具有一个叫做area的方法?</p>
+<p>对接口编程是S.O.L.I.D不可或缺的一部分，一个快速的例子是我们创建一个接口，让每个shape实现它:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Circle implements ShapeInterface &#123;</span><br><span class="line">    public $radius;</span><br><span class="line"> </span><br><span class="line">    public function __construct($radius) &#123;</span><br><span class="line">        $this-&gt;radius = $radius;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function area() &#123;</span><br><span class="line">        return pi() * pow($this-&gt;radius, 2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在我们AreaCalculator的求和中，我们可以检查所提供的shape确实是ShapeInterface的实例，否则我们抛出一个异常:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    foreach($this-&gt;shapes as $shape) &#123;</span><br><span class="line">        if(is_a($shape, &#x27;ShapeInterface&#x27;)) &#123;</span><br><span class="line">            $area[] = $shape-&gt;area();</span><br><span class="line">            continue;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        throw new AreaCalculatorInvalidShapeException;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    return array_sum($area);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h2><blockquote>
+<p>在对象 x 为类型 T 时 q(x) 成立，那么当 S 是 T 的子类时，对象 y 为类型 S 时 q(y) 也应成立。（即对父类的调用同样适用于子类）</p>
+</blockquote>
+<p>这一切说明的是，每一个子类或派生类应该可以替换它们基类或父类。</p>
+<p>还利用AreaCalculator类，我们有一个VolumeCalculator类，它扩展了AreaCalculator类:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class VolumeCalculator extends AreaCalulator &#123;</span><br><span class="line">    public function __construct($shapes = array()) &#123;</span><br><span class="line">        parent::__construct($shapes);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function sum() &#123;</span><br><span class="line">        // logic to calculate the volumes and then return and array of output</span><br><span class="line">        return array($summedData);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>In the SumCalculatorOutputter class:</p>
+<p>在SumCalculatorOutputter类中:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">class SumCalculatorOutputter &#123;</span><br><span class="line">    protected $calculator;</span><br><span class="line"> </span><br><span class="line">    public function __constructor(AreaCalculator $calculator) &#123;</span><br><span class="line">        $this-&gt;calculator = $calculator;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function JSON() &#123;</span><br><span class="line">        $data = array(</span><br><span class="line">            &#x27;sum&#x27; =&gt; $this-&gt;calculator-&gt;sum();</span><br><span class="line">        );</span><br><span class="line"> </span><br><span class="line">        return json_encode($data);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function HTML() &#123;</span><br><span class="line">        return implode(&#x27;&#x27;, array(</span><br><span class="line">            &#x27;&lt;h1&gt;&#x27;,</span><br><span class="line">                &#x27;Sum of the areas of provided shapes: &#x27;,</span><br><span class="line">                $this-&gt;calculator-&gt;sum(),</span><br><span class="line">            &#x27;&lt;/h1&gt;&#x27;</span><br><span class="line">        ));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果我们试图这样来运行一个例子:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$areas = new AreaCalculator($shapes);</span><br><span class="line">$volumes = new AreaCalculator($solidShapes);</span><br><span class="line"> </span><br><span class="line">$output = new SumCalculatorOutputter($areas);</span><br><span class="line">$output2 = new SumCalculatorOutputter($volumes);</span><br></pre></td></tr></table></figure><br>程序可以运行，但是当我们在$output2对象调用HTML方法，我们得到一个E_NOTICE错误，提示数组到字符串的转换。</p>
+<p>为了解决这个问题，不要从VolumeCalculator类的sum方法返回一个数组，你应该:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public function sum() &#123;</span><br><span class="line">    // logic to calculate the volumes and then return and array of output</span><br><span class="line">    return $summedData;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>求和的结果作为一个浮点数，双精度或整数。</p>
+<h2 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h2><blockquote>
+<p>不应强迫客户端实现一个它用不上的接口，或是说客户端不应该被迫依赖它们不使用的方法。</p>
+</blockquote>
+<p>仍然以shape为例，我们知道也有立体shape，如果我们也想计算shape的体积，我们可以添加另一个合约到ShapeInterface:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">    public function volume();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>任何我们创建的shape必须实现volume的方法，但是我们知道正方形是平面形状没有体积，所以这个接口将迫使正方形类实现一个它没有使用的方法。</p>
+<p>接口隔离原则（ISP）不允许这样，你可以创建另一个名为SolidShapeInterface的接口，它有一个volume合约，对于立体形状比如立方体等等，可以实现这个接口:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">interface ShapeInterface &#123;</span><br><span class="line">    public function area();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">interface SolidShapeInterface &#123;</span><br><span class="line">    public function volume();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Cuboid implements ShapeInterface, SolidShapeInterface &#123;</span><br><span class="line">    public function area() &#123;</span><br><span class="line">        // calculate the surface area of the cuboid</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    public function volume() &#123;</span><br><span class="line">        // calculate the volume of the cuboid</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这是一个更好的方法，但小心一个陷阱，当这些接口做类型提示时，不要使用ShapeInterface或SolidShapeInterface。</p>
+<p>你可以创建另一个接口，可以是ManageShapeInterface，平面和立体shape都可用，这样你可以很容易地看到它有一个管理shape的单一API。例如:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">interface ManageShapeInterface &#123;</span><br><span class="line">    public function calculate();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Square implements ShapeInterface, ManageShapeInterface &#123;</span><br><span class="line">    public function area() &#123; /*Do stuff here*/ &#125;</span><br><span class="line"> </span><br><span class="line">    public function calculate() &#123;</span><br><span class="line">        return $this-&gt;area();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class Cuboid implements ShapeInterface, SolidShapeInterface, ManageShapeInterface &#123;</span><br><span class="line">    public function area() &#123; /*Do stuff here*/ &#125;</span><br><span class="line">    public function volume() &#123; /*Do stuff here*/ &#125;</span><br><span class="line"> </span><br><span class="line">    public function calculate() &#123;</span><br><span class="line">        return $this-&gt;area() + $this-&gt;volume();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>现在AreaCalculator类中，我们可以轻易用calculate替代area调用，同时可以检查一个对象是ManageShapeInterface而不是ShapeInterface的实例。</p>
+<h2 id="依赖反转原则"><a href="#依赖反转原则" class="headerlink" title="依赖反转原则"></a>依赖反转原则</h2><p>最后一条，但肯定不是最无足轻重的一条：</p>
+<blockquote>
+<p>实体必须依靠抽象而不是具体实现。它表示高层次的模块不应该依赖于低层次的模块，它们都应该依赖于抽象。</p>
+</blockquote>
+<p>这听起来可能有点绕，但它很容易理解。这一原则允许解耦，这似乎是用来解释这一原则最好的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">class PasswordReminder &#123;</span><br><span class="line">    private $dbConnection;</span><br><span class="line"> </span><br><span class="line">    public function __construct(MySQLConnection $dbConnection) &#123;</span><br><span class="line">        $this-&gt;dbConnection = $dbConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先MySQLConnection是低层次模块，而PasswordReminder处于高层次，但根据S.O.L.I.D.中D的定义，即依赖抽象而不是具体实现，上面这段代码违反这一原则，PasswordReminder类被迫依赖于MySQLConnection类。</p>
+<p>以后如果你改变数据库引擎，你还必须编辑PasswordReminder类，因此违反了开闭原则。</p>
+<p>PasswordReminder类不应该关心你的应用程序使用什么数据库，为了解决这个问题我们又一次“对接口编程”，因为高层次和低层次模块应该依赖于抽象，我们可以创建一个接口:<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interface DBConnectionInterface &#123;</span><br><span class="line">    public function connect();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>接口有一个connect方法，MySQLConnection类实现该接口，在PasswordReminder类的构造函数不使用MySQLConnection类，而是使用接口替换，不用管你的应用程序使用的是什么类型的数据库，PasswordReminder类可以很容易地连接到数据库，没有任何问题，且不违反OCP。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">class MySQLConnection implements DBConnectionInterface &#123;</span><br><span class="line">    public function connect() &#123;</span><br><span class="line">        return &quot;Database connection&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">class PasswordReminder &#123;</span><br><span class="line">    private $dbConnection;</span><br><span class="line"> </span><br><span class="line">    public function __construct(DBConnectionInterface $dbConnection) &#123;</span><br><span class="line">        $this-&gt;dbConnection = $dbConnection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据上面的代码片段，你现在可以看到，高层次和低层次模块依赖于抽象。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>老实说，S.O.L.I.D初看起来可能棘手，但只要通过连续使用并遵守其指导方针，它就会变成你和你的代码的一部分，可以让你的代码很容易地扩展、修改、测试和重构，不出任何问题。</p>
+<p>原文：<a target="_blank" rel="noopener" href="https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design">https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/thorough-understand-http-protocol/" rel="prev" title="深入理解HTTP协议">
+      <i class="fa fa-chevron-left"></i> 深入理解HTTP协议
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/linux-planned-task-crontab/" rel="next" title="Linux 计划任务 — crontab">
+      Linux 计划任务 — crontab <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#S-O-L-I-D-%E4%BB%A3%E8%A1%A8%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">S.O.L.I.D 代表什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%B8%80%E8%81%8C%E8%B4%A3%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">单一职责原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E6%94%BE%E5%B0%81%E9%97%AD%E5%8E%9F%E5%88%99"><span class="nav-number">3.</span> <span class="nav-text">开放封闭原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99"><span class="nav-number">4.</span> <span class="nav-text">里氏替换原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E9%9A%94%E7%A6%BB%E5%8E%9F%E5%88%99"><span class="nav-number">5.</span> <span class="nav-text">接口隔离原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E5%8F%8D%E8%BD%AC%E5%8E%9F%E5%88%99"><span class="nav-number">6.</span> <span class="nav-text">依赖反转原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">7.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">作者</p>
+  <div class="site-description" itemprop="description">谈浩的个人博客</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://huixing.org" title="http://huixing.org" rel="noopener" target="_blank">彗星网</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">tanhao</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://huixing-org.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://blog.huixing.org/s-o-l-i-d-the-first-five-principles-of-object-oriented-design/";
+    this.page.identifier = "s-o-l-i-d-the-first-five-principles-of-object-oriented-design/";
+    this.page.title = "S.O.L.I.D：面向对象设计的头 5 大原则";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://huixing-org.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
